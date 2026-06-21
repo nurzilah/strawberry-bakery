@@ -29,6 +29,14 @@ class LoginRequest extends FormRequest
         return [
             'email' => ['required', 'string', 'email'],
             'password' => ['required', 'string'],
+            'remember' => ['accepted'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'remember.accepted' => 'Checkbox harus dicentang sebelum login.',
         ];
     }
 

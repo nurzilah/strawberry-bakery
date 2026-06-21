@@ -10,6 +10,7 @@ use App\Http\Controllers\{
     PageController,
     ProfileController
 };
+use App\Http\Controllers\Auth\GoogleController;
 use Illuminate\Support\Facades\Route;
 
 // ============================================
@@ -30,6 +31,11 @@ Route::get('/products/{slug}', [ProductController::class, 'show'])->name('produc
 
 //Search
 // Route::get('/search/global', [SearchController::class, 'index'])->name('search.global');
+
+Route::middleware('guest')->group(function () {
+    Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
+    Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+});
 
 
 // ============================================

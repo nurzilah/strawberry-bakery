@@ -33,7 +33,13 @@ class RegisteredUserController extends Controller
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'password' => ['required', 'confirmed', Rules\Password::min(8)->mixedCase()->numbers()->symbols()],
+            'terms' => ['accepted'],
+        ], [
+            'password.mixed' => 'Password harus memakai huruf besar dan huruf kecil.',
+            'password.numbers' => 'Password harus memakai angka.',
+            'password.symbols' => 'Password harus memakai simbol.',
+            'terms.accepted' => 'Syarat & Ketentuan harus dicentang sebelum mendaftar.',
         ]);
 
         $user = User::create([
