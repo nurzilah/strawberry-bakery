@@ -101,13 +101,8 @@
         <div class="container mx-auto px-4 py-4">
             <div class="flex items-center justify-between">
                 <!-- Logo -->
-                <a href="{{ route('home') }}" class="flex items-center space-x-3">
-                    <div class="w-12 h-12 bg-gradient-to-br from-pink-400 to-red-400 rounded-full flex items-center justify-center">
-                        <svg class="w-7 h-7 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6z"/>
-                        </svg>
-                    </div>
-                    <span class="text-2xl font-bold text-gray-800" style="font-family: 'Playfair Display', serif;">Strawberry Bakery</span>
+                <a href="{{ route('home') }}" class="flex items-center">
+                    <img src="{{ asset('images/logo.png') }}" alt="Strawberry Bakery" class="h-16 w-auto object-contain">
                 </a>
 
                 <!-- Navigation Menu -->
@@ -197,14 +192,7 @@
             <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
                 <!-- About -->
                 <div>
-                    <div class="flex items-center space-x-3 mb-4">
-                        <div class="w-10 h-10 bg-gradient-to-br from-pink-400 to-red-400 rounded-full flex items-center justify-center">
-                            <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6z"/>
-                            </svg>
-                        </div>
-                        <span class="text-xl font-bold">Strawberry Bakery</span>
-                    </div>
+                    <img src="{{ asset('images/logo.png') }}" alt="Strawberry Bakery" class="h-16 w-auto object-contain mb-4">
                     <p class="text-gray-400 text-sm">Nikmati roti segar berkualitas premium dengan sistem pre-order yang mudah dan praktis</p>
                 </div>
 

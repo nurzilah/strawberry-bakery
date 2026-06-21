@@ -18,6 +18,7 @@ class User extends Authenticatable
         'password',
         'phone',
         'address',
+        'role',
     ];
 
     protected $hidden = [
@@ -32,5 +33,26 @@ class User extends Authenticatable
     public function carts()
     {
         return $this->hasMany(Cart::class);
+    }
+
+    public function isSuperadmin()
+    {
+        return $this->role === 'superadmin';
+    }
+
+    public function isAdmin()
+    {
+        // Admin dashboard access for admin, superadmin, and kasir
+        return in_array($this->role, ['admin', 'superadmin', 'kasir']);
+    }
+
+    public function isKasir()
+    {
+        return $this->role === 'kasir';
+    }
+
+    public function isCustomer()
+    {
+        return $this->role === 'customer' || empty($this->role);
     }
 }

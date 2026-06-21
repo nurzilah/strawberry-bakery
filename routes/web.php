@@ -29,7 +29,7 @@ Route::get('/products', [ProductController::class, 'index'])->name('products.ind
 Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
 
 //Search
-Route::get('/search/global', [SearchController::class, 'index'])->name('search.global');
+// Route::get('/search/global', [SearchController::class, 'index'])->name('search.global');
 
 
 // ============================================
@@ -59,6 +59,27 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{order}', [OrderController::class, 'show'])->name('show');
     });
 
+});
+
+// ============================================
+// ADMIN ROUTES
+// ============================================
+Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/dashboard', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
+    Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class)->only(['index', 'show', 'update']);
+    Route::post('orders/{order}/status', [\App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('orders.status');
+    
+    // Only Admin and Superadmin can manage products and categories
+    Route::middleware([\App\Http\Middleware\ManagerMiddleware::class])->group(function() {
+        Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class)->except(['show']);
+        Route::resource('products', \App\Http\Controllers\Admin\ProductController::class)->except(['show']);
+    });
+    
+    // Only Superadmin can manage users
+    Route::middleware([\App\Http\Middleware\SuperadminMiddleware::class])->group(function() {
+        Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->only(['index', 'update']);
+        Route::post('users/{user}/role', [\App\Http\Controllers\Admin\UserController::class, 'updateRole'])->name('users.role');
+    });
 });
 
 // ============================================
