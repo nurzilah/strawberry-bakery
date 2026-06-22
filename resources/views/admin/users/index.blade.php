@@ -26,7 +26,7 @@
                             <td class="py-3 text-gray-700">{{ $user->email }}</td>
                             <td class="py-3 text-gray-700">{{ $user->role ?? 'customer' }}</td>
                             <td class="py-3">
-                                <form action="{{ route('admin.users.role', $user) }}" method="POST" class="flex items-center space-x-2">
+                                <form action="{{ route('owner.users.role', $user) }}" method="POST" class="flex items-center space-x-2">
                                     @csrf
                                     @method('PATCH')
                                     <select name="role" class="border border-gray-300 rounded-lg px-3 py-2">

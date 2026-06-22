@@ -71,38 +71,45 @@ Route::middleware(['auth'])->group(function () {
 });
 
 // ============================================
-// ADMIN ROUTES
+// ADMIN / INTERNAL ROUTES
 // ============================================
-Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix('admin')->name('admin.')->group(function () {
+Route::get('/dashboard-redirect', function () {
+    $role = auth()->user()->role;
+    if (in_array($role, ['owner', 'admin', 'superadmin'])) {
+        return redirect()->route('admin.dashboard');
+    } elseif ($role === 'kasir') {
+        return redirect()->route('kasir.pos');
+    }
+    return redirect()->route('dashboard');
+})->middleware('auth')->name('dashboard-redirect');
+
+// ['role:owner,admin,superadmin']
+Route::middleware(['auth', 'role:owner,admin,superadmin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', fn () => redirect()->route('admin.dashboard'));
     Route::get('/dashboard', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
+    
+    Route::resource('products', \App\Http\Controllers\Admin\ProductController::class)->except(['show']);
+    Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class)->except(['show']);
+    
+    // Legacy orders for online checkout
     Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class)->only(['index', 'show', 'update']);
     Route::patch('orders/{order}/confirm', [\App\Http\Controllers\Admin\OrderController::class, 'confirm'])->name('orders.confirm');
     Route::patch('orders/{order}/status', [\App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('orders.status');
-    
-    // Only Admin and Superadmin can manage products and categories
-    Route::middleware([\App\Http\Middleware\ManagerMiddleware::class])->group(function() {
-        Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class)->except(['show']);
-        Route::resource('products', \App\Http\Controllers\Admin\ProductController::class)->except(['show']);
-    });
-    
-    // Only Superadmin can manage users
-    Route::middleware([\App\Http\Middleware\SuperadminMiddleware::class])->group(function() {
-        Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->only(['index', 'update']);
-        Route::post('users/{user}/role', [\App\Http\Controllers\Admin\UserController::class, 'updateRole'])->name('users.role');
-    });
 });
 
-// ============================================
-// KASIR ROUTES
-// ============================================
-Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix('kasir')->name('kasir.')->group(function () {
-    Route::get('/', fn () => redirect()->route('kasir.orders.index'))->name('dashboard');
-    Route::get('/orders', [\App\Http\Controllers\Admin\OrderController::class, 'index'])->name('orders.index');
-    Route::patch('/orders/{order}/confirm', [\App\Http\Controllers\Admin\OrderController::class, 'confirm'])->name('orders.confirm');
-    Route::patch('/orders/{order}/status', [\App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('orders.status');
-    Route::get('/orders/{order}/receipt', [KasirTransactionController::class, 'receipt'])->name('orders.receipt');
-    Route::get('/transactions/create', [KasirTransactionController::class, 'create'])->name('transactions.create');
-    Route::post('/transactions', [KasirTransactionController::class, 'store'])->name('transactions.store');
+// ['role:owner,kasir,superadmin']
+Route::middleware(['auth', 'role:owner,kasir,superadmin'])->prefix('admin/kasir')->name('kasir.')->group(function () {
+    Route::get('/', fn () => redirect()->route('kasir.pos'));
+    Route::get('/pos', [\App\Http\Controllers\Kasir\KasirController::class, 'index'])->name('pos');
+    Route::post('/pos/store', [\App\Http\Controllers\Kasir\KasirController::class, 'store'])->name('store');
+    Route::get('/pos/receipt/{id}', [\App\Http\Controllers\Kasir\KasirController::class, 'printReceipt'])->name('receipt');
+});
+
+// ['role:owner,superadmin']
+Route::middleware(['auth', 'role:owner,superadmin'])->prefix('admin/owner')->name('owner.')->group(function () {
+    Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->only(['index', 'update']);
+    Route::post('users/{user}/role', [\App\Http\Controllers\Admin\UserController::class, 'updateRole'])->name('users.role');
+    // Financial reports can go here
 });
 
 // ============================================

@@ -6,12 +6,12 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ config('app.name', 'Strawberry Bakery') }} - @yield('title', 'Admin')</title>
     <link rel="icon" type="image/png" href="{{ asset('images/favicon.png') }}">
-    
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         :root {
             --pink-pastel: #ffb6c1;
@@ -37,27 +37,35 @@
             border-color: #495057;
             color: #f8f9fa;
         }
-        
+
         .dark-mode .table {
             color: #f8f9fa;
         }
-        
+
         .dark-mode .text-muted {
             color: #adb5bd !important;
         }
 
+        .wrapper {
+            display: flex;
+            width: 100%;
+            align-items: stretch;
+            min-height: 100vh;
+        }
+
         #sidebar {
-            width: var(--sidebar-width);
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            z-index: 999;
-            background: #fff;
+            min-width: var(--sidebar-width);
+            max-width: var(--sidebar-width);
+            background: #ffffff;
             border-right: 1px solid #dee2e6;
             transition: all 0.3s;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 1000;
         }
-        
+
         .dark-mode #sidebar {
             background: #343a40;
             border-right: 1px solid #495057;
@@ -76,7 +84,7 @@
             height: auto;
             object-fit: contain;
         }
-        
+
         .dark-mode #sidebar .sidebar-header {
             border-bottom: 1px solid #495057;
         }
@@ -115,18 +123,19 @@
         }
 
         #content {
-            width: calc(100% - var(--sidebar-width));
+            width: 100%;
+            min-width: 0;
             min-height: 100vh;
             transition: all 0.3s;
-            position: absolute;
-            top: 0;
-            right: 0;
+            display: flex;
+            flex-direction: column;
         }
 
         .navbar-custom {
             background: #fff;
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
             padding: 15px 25px;
+            z-index: 1010;
         }
 
         .dark-mode .navbar-custom {
@@ -134,19 +143,14 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.2);
             border-bottom: 1px solid #495057;
         }
-        
+
         @media (max-width: 768px) {
             #sidebar {
                 margin-left: calc(-1 * var(--sidebar-width));
+                position: fixed;
             }
             #sidebar.active {
                 margin-left: 0;
-            }
-            #content {
-                width: 100%;
-            }
-            #content.active {
-                width: 100%;
             }
         }
 
@@ -174,27 +178,83 @@
                 <img src="{{ asset('images/logo.png') }}" alt="Strawberry Bakery" class="sidebar-logo">
             </div>
 
-            <ul class="list-unstyled components">
-                <li class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                    <a href="{{ route('admin.dashboard') }}"><i class="fas fa-home me-2"></i> Dashboard</a>
-                </li>
-                @if(auth()->user()->isSuperadmin() || auth()->user()->role === 'admin')
-                <li class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.products.index') }}"><i class="fas fa-box-open me-2"></i> Produk</a>
-                </li>
-                <li class="{{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.categories.index') }}"><i class="fas fa-tags me-2"></i> Kategori</a>
-                </li>
-                @endif
-                <li class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.orders.index') }}"><i class="fas fa-shopping-cart me-2"></i> Pesanan</a>
-                </li>
-                @if(optional(auth()->user())->isSuperadmin())
-                <li class="{{ request()->routeIs('admin.users.*') ? 'active' : '' }}">
-                    <a href="{{ route('admin.users.index') }}"><i class="fas fa-users me-2"></i> Pengguna</a>
-                </li>
-                @endif
-            </ul>
+<ul class="list-unstyled components">
+
+    {{-- ===== OWNER: akses semua ===== --}}
+    @if(in_array(auth()->user()->role, ['owner', 'superadmin']))
+
+        <li class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+            <a href="{{ route('admin.dashboard') }}">
+                <i class="fas fa-chart-pie me-2"></i> Dashboard
+            </a>
+        </li>
+        <li class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.products.index') }}">
+                <i class="fas fa-box-open me-2"></i> Kelola Produk
+            </a>
+        </li>
+        <li class="{{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.categories.index') }}">
+                <i class="fas fa-tags me-2"></i> Kelola Kategori
+            </a>
+        </li>
+        <li class="{{ request()->routeIs('kasir.pos') ? 'active' : '' }}">
+            <a href="{{ route('kasir.pos') }}">
+                <i class="fas fa-cash-register me-2"></i> Mesin POS / Kasir
+            </a>
+        </li>
+        <li class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.orders.index') }}">
+                <i class="fas fa-history me-2"></i> Riwayat Transaksi
+            </a>
+        </li>
+        <li class="{{ request()->routeIs('owner.users.*') ? 'active' : '' }}">
+            <a href="{{ route('owner.users.index') }}">
+                <i class="fas fa-users me-2"></i> Manajemen Akun
+            </a>
+        </li>
+
+    {{-- ===== ADMIN / IT DEVELOPER ===== --}}
+    @elseif(auth()->user()->role === 'admin')
+
+        <li class="{{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+            <a href="{{ route('admin.dashboard') }}">
+                <i class="fas fa-chart-pie me-2"></i> Dashboard
+            </a>
+        </li>
+        <li class="{{ request()->routeIs('admin.products.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.products.index') }}">
+                <i class="fas fa-box-open me-2"></i> Kelola Produk
+            </a>
+        </li>
+        <li class="{{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.categories.index') }}">
+                <i class="fas fa-tags me-2"></i> Kelola Kategori
+            </a>
+        </li>
+        <li class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.orders.index') }}">
+                <i class="fas fa-shopping-cart me-2"></i> Pesanan Online
+            </a>
+        </li>
+
+    {{-- ===== KASIR ===== --}}
+    @elseif(auth()->user()->role === 'kasir')
+
+        <li class="{{ request()->routeIs('kasir.pos') ? 'active' : '' }}">
+            <a href="{{ route('kasir.pos') }}">
+                <i class="fas fa-cash-register me-2"></i> Mesin POS / Kasir
+            </a>
+        </li>
+        <li class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.orders.index') }}">
+                <i class="fas fa-history me-2"></i> Riwayat Transaksi
+            </a>
+        </li>
+
+    @endif
+
+</ul>
         </nav>
 
         <!-- Page Content -->
@@ -204,14 +264,14 @@
                     <button type="button" id="sidebarCollapse" class="btn btn-light shadow-sm">
                         <i class="fas fa-align-left"></i>
                     </button>
-                    
+
                     <div class="d-flex align-items-center ms-auto gap-3">
                         <button class="btn btn-outline-secondary rounded-circle" id="themeToggle">
                             <i class="fas fa-moon"></i>
                         </button>
-                        
+
                         <a href="{{ route('home') }}" class="btn btn-outline-primary btn-sm">Lihat Web</a>
-                        
+
                         <form action="{{ route('logout') }}" method="POST" class="m-0">
                             @csrf
                             <button type="submit" class="btn btn-danger btn-sm">Logout</button>
@@ -246,26 +306,26 @@
 
     <!-- Bootstrap 5 JS Bundle -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
+
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             // Sidebar toggle
             document.getElementById('sidebarCollapse').addEventListener('click', function() {
                 document.getElementById('sidebar').classList.toggle('active');
             });
-            
+
             // Theme toggle
             const themeToggle = document.getElementById('themeToggle');
             const body = document.body;
             const icon = themeToggle.querySelector('i');
-            
+
             // Check local storage
             if(localStorage.getItem('theme') === 'dark') {
                 body.classList.add('dark-mode');
                 icon.classList.remove('fa-moon');
                 icon.classList.add('fa-sun');
             }
-            
+
             themeToggle.addEventListener('click', function() {
                 body.classList.toggle('dark-mode');
                 if(body.classList.contains('dark-mode')) {
