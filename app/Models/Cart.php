@@ -4,16 +4,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Schema;
 
 class Cart extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'product_id', 'quantity'];
+    protected $fillable = ['user_id', 'product_id', 'quantity', 'detail_cart_id'];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function detailCart()
+    {
+        return $this->belongsTo(DetailCart::class);
     }
 
     public function product()
@@ -23,16 +29,27 @@ class Cart extends Model
 
     public function getSubtotalAttribute()
     {
-        return $this->product->price * $this->quantity;
+        $product = $this->detailCart?->product ?? $this->product;
+        $quantity = $this->detailCart?->quantity ?? ($this->quantity ?? 0);
+
+        return ($product?->price ?? 0) * $quantity;
     }
-public function carts()
-{
-    return $this->hasMany(Cart::class);
-}
 
-public function orders()
-{
-    return $this->hasMany(Order::class);
-}
+    public static function countItemsForUser(int $userId): int
+    {
+        if (Schema::hasColumn('carts', 'quantity')) {
+            return (int) static::query()
+                ->where('user_id', $userId)
+                ->sum('quantity');
+        }
 
+        if (Schema::hasColumn('carts', 'detail_cart_id') && Schema::hasTable('detail_carts')) {
+            return (int) static::query()
+                ->where('user_id', $userId)
+                ->join('detail_carts', 'detail_carts.id', '=', 'carts.detail_cart_id')
+                ->sum('detail_carts.quantity');
+        }
+
+        return 0;
+    }
 }

@@ -2,8 +2,33 @@
 
 @section('title', 'Checkout - Pembayaran')
 
+@push('styles')
+    <style>
+        .checkout-shell {
+            background-color: var(--sb-primary-soft);
+        }
+
+        .checkout-panel {
+            background-color: var(--sb-surface);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            border-radius: 1rem;
+            box-shadow: var(--sb-shadow);
+        }
+
+        .checkout-soft-box {
+            background-color: var(--sb-primary-soft);
+            border: 1px solid rgba(233, 79, 112, 0.22);
+            border-radius: 0.9rem;
+        }
+
+        .checkout-radio {
+            accent-color: var(--sb-primary);
+        }
+    </style>
+@endpush
+
 @section('content')
-<div class="bg-pink-50 py-10">
+<div class="checkout-shell py-5">
     <div class="container mx-auto px-4">
         <div class="flex items-center space-x-3 mb-8">
             <svg class="w-10 h-10 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -14,7 +39,7 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-6">
-                <div class="bg-white rounded-xl p-6 shadow-sm">
+                <div class="checkout-panel p-4 p-md-5">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">Tanggal Pengambilan (H-2)</h2>
                     <div class="mb-2">
                         @php
@@ -26,7 +51,7 @@
                                data-min="{{ $minPickup }}"
                                onkeydown="return false"
                                onpaste="return false"
-                               class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white">
+                               class="form-control">
                         @error('pickup_date')
                             <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
                         @enderror
@@ -37,32 +62,32 @@
                     <p class="text-sm text-gray-500">Minimal pengambilan H-2 dari hari ini (contoh: hari ini tgl 1, paling cepat tgl 3).</p>
                 </div>
 
-                <div class="bg-white rounded-xl p-6 shadow-sm">
+                <div class="checkout-panel p-4 p-md-5">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">Metode Pembayaran</h2>
                     <div class="space-y-3 mb-4">
                         <label class="flex items-center space-x-2 text-gray-700">
                             <input type="radio" name="payment_method" value="bca" checked form="paymentForm"
-                                   class="w-4 h-4 text-pink-500 border-gray-300 focus:ring-pink-500">
+                                   class="form-check-input checkout-radio">
                             <span>Transfer Bank BCA</span>
                         </label>
                         <label class="flex items-center space-x-2 text-gray-700">
                             <input type="radio" name="payment_method" value="dana" form="paymentForm"
-                                   class="w-4 h-4 text-pink-500 border-gray-300 focus:ring-pink-500">
+                                   class="form-check-input checkout-radio">
                             <span>DANA</span>
                         </label>
                         <label class="flex items-center space-x-2 text-gray-700">
                             <input type="radio" name="payment_method" value="shopeepay" form="paymentForm"
-                                   class="w-4 h-4 text-pink-500 border-gray-300 focus:ring-pink-500">
+                                   class="form-check-input checkout-radio">
                             <span>ShopeePay</span>
                         </label>
                         <label class="flex items-center space-x-2 text-gray-700">
                             <input type="radio" name="payment_method" value="gopay" form="paymentForm"
-                                   class="w-4 h-4 text-pink-500 border-gray-300 focus:ring-pink-500">
+                                   class="form-check-input checkout-radio">
                             <span>GoPay</span>
                         </label>
                     </div>
 
-                    <div class="bg-pink-50 rounded-lg p-4 border border-pink-200">
+                    <div class="checkout-soft-box p-4">
                         <div class="text-sm text-gray-600 mb-2">Nomor Pembayaran</div>
                         <div class="text-lg font-bold text-gray-800 mb-3">085712799296</div>
                         <div class="text-sm text-gray-600 mt-2">Atas Nama</div>
@@ -70,20 +95,20 @@
                     </div>
                 </div>
 
-                <div class="bg-white rounded-xl p-6 shadow-sm">
+                <div class="checkout-panel p-4 p-md-5">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">Upload Bukti Pembayaran</h2>
                     <form id="paymentForm" action="{{ route('checkout.process') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         <div class="mb-4">
                             <label class="block text-sm font-medium text-gray-700 mb-2">Bukti Pembayaran (JPG/PNG)</label>
                             <input type="file" name="payment_proof" accept="image/png,image/jpeg" required
-                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg bg-white">
+                                   class="form-control">
                             @error('payment_proof')
                                 <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
                             @enderror
                         </div>
                         <button type="submit"
-                                class="w-full text-center bg-gradient-to-r from-pink-400 to-red-400 text-white py-3 rounded-lg font-bold text-lg hover:shadow-xl transition">
+                                class="btn btn-strawberry w-100 rounded-pill py-3">
                             Konfirmasi Pembayaran
                         </button>
                         <p class="text-sm text-gray-500 mt-3">
@@ -94,7 +119,7 @@
             </div>
 
             <div class="lg:col-span-1">
-                <div class="bg-white rounded-xl p-6 shadow-sm sticky top-24">
+                <div class="checkout-panel p-4 p-md-5 sticky top-24">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">Ringkasan Pesanan</h2>
                     <div class="space-y-4 mb-4">
                         @forelse($carts ?? [] as $cart)

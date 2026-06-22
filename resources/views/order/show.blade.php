@@ -23,14 +23,14 @@
             </div>
             <div>
                 <p class="text-gray-600">Status</p>
-                @if($order->status === 'dikonfirmasi')
-                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Dikonfirmasi</span>
-                @elseif($order->status === 'processing')
+                @if($order->status === 'processing')
                     <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">Siap Diambil</span>
                 @elseif($order->status === 'completed')
                     <span class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">Selesai</span>
                 @elseif($order->status === 'cancelled')
                     <span class="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">Dibatalkan</span>
+                @elseif($order->status === 'pending')
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">Pending</span>
                 @else
                     <span class="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">Menunggu Konfirmasi</span>
                 @endif
@@ -41,11 +41,7 @@
             </div>
         </div>
 
-        @if($order->status === 'dikonfirmasi')
-            <div class="mb-6 bg-green-100 border border-green-300 text-green-700 px-4 py-3 rounded-lg shadow-sm">
-                Pembayaran sudah dikonfirmasi oleh admin. Pesanan Anda sedang diproses.
-            </div>
-        @elseif($order->status === 'processing')
+        @if($order->status === 'processing')
             <div class="mb-6 bg-blue-100 border border-blue-300 text-blue-700 px-4 py-3 rounded-lg shadow-sm">
                 Pesanan siap diambil.
             </div>

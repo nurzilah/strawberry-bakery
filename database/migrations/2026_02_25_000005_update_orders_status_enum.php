@@ -7,7 +7,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-        DB::statement("ALTER TABLE orders MODIFY status ENUM('pending','menunggu_konfirmasi','dikonfirmasi','processing','completed','cancelled') NOT NULL DEFAULT 'menunggu_konfirmasi'");
+        DB::statement("ALTER TABLE orders MODIFY status ENUM('pending','waiting_verification','processing','completed','cancelled') NOT NULL DEFAULT 'waiting_verification'");
     }
 
     public function down(): void

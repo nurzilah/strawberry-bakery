@@ -149,6 +149,19 @@
                 width: 100%;
             }
         }
+
+        .w-5 {
+            width: 1.25rem !important;
+        }
+
+        .h-5 {
+            height: 1.25rem !important;
+        }
+
+        nav[role="navigation"] svg {
+            max-width: 16px;
+            display: inline-block;
+        }
     </style>
     @stack('styles')
 </head>

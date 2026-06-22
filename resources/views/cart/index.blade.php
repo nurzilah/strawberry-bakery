@@ -2,8 +2,59 @@
 
 @section('title', 'Keranjang Belanja')
 
+@push('styles')
+    <style>
+        .cart-shell {
+            background-color: var(--sb-primary-soft);
+        }
+
+        .cart-panel {
+            background-color: var(--sb-surface);
+            border: 1px solid rgba(226, 232, 240, 0.9);
+            border-radius: 1rem;
+            box-shadow: var(--sb-shadow);
+        }
+
+        .cart-row {
+            transition: transform 0.22s ease, box-shadow 0.22s ease;
+        }
+
+        .cart-row:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+        }
+
+        .cart-image-wrap {
+            width: 8rem;
+            aspect-ratio: 1 / 1;
+            flex: 0 0 auto;
+            overflow: hidden;
+            border-radius: 0.9rem;
+            background-color: var(--sb-primary-soft);
+        }
+
+        .cart-image-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            padding: 0.3rem;
+        }
+
+        .cart-icon-button {
+            width: 2.5rem;
+            height: 2.5rem;
+            min-height: 2.5rem;
+            padding: 0;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+@endpush
+
 @section('content')
-<div class="bg-pink-50 py-8">
+<div class="cart-shell py-5">
     <div class="container mx-auto px-4">
         <!-- Breadcrumb -->
         <div class="flex items-center space-x-2 text-sm text-gray-600 mb-6">
@@ -32,28 +83,35 @@
             <!-- Cart Items -->
             <div class="lg:col-span-2 space-y-4">
                 @forelse($carts ?? [] as $cart)
-                    <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-md transition">
+                    @php
+                        $product = $cart->detailCart?->product ?? $cart->product;
+                        $quantity = $cart->detailCart?->quantity ?? ($cart->quantity ?? 0);
+                    @endphp
+
+                    @continue(! $product)
+
+                    <div class="cart-panel cart-row p-4 p-md-5">
                         <div class="flex items-start space-x-6">
                             <!-- Product Image -->
-                            <div class="flex-shrink-0">
-                                <img src="{{ asset('storage/' . $cart->product->image) }}"
-                                     alt="{{ $cart->product->name }}"
-                                     class="w-32 h-32 object-cover rounded-lg">
+                            <div class="cart-image-wrap">
+                                <img src="{{ $product->image ? asset('storage/' . $product->image) : asset('images/logo.png') }}"
+                                     alt="{{ $product->name }}"
+                                     class="d-block">
                             </div>
 
                             <!-- Product Info -->
                             <div class="flex-grow">
                                 <div class="flex justify-between items-start mb-2">
                                     <div>
-                                        <h3 class="text-xl font-bold text-gray-800 mb-1">{{ $cart->product->name }}</h3>
+                                        <h3 class="text-xl font-bold text-gray-800 mb-1">{{ $product->name }}</h3>
                                         <span class="inline-block px-3 py-1 bg-pink-100 text-pink-600 rounded-full text-xs font-semibold">
-                                            {{ $cart->product->category->name }}
+                                            {{ $product->category->name ?? 'Produk Bakery' }}
                                         </span>
                                     </div>
                                     <form action="{{ route('cart.destroy', $cart->id) }}" method="POST">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="text-red-500 hover:text-red-700 p-2">
+                                        <button type="submit" class="btn btn-outline-danger cart-icon-button" aria-label="Hapus {{ $product->name }}">
                                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                             </svg>
@@ -65,12 +123,12 @@
                                     <svg class="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
                                     </svg>
-                                    Pickup: {{ $cart->product->pickup_date ? \Carbon\Carbon::parse($cart->product->pickup_date)->format('d F Y') : '11 November 2025' }}
+                                    Pickup: {{ $product->pickup_date ? \Carbon\Carbon::parse($product->pickup_date)->format('d F Y') : '11 November 2025' }}
                                 </div>
 
                                 <div class="flex items-center justify-between">
                                     <div class="text-2xl font-bold text-pink-500">
-                                        Rp {{ number_format($cart->product->price, 0, ',', '.') }}
+                                        Rp {{ number_format($product->price, 0, ',', '.') }}
                                     </div>
 
                                     <!-- Quantity Controls -->
@@ -78,24 +136,24 @@
                                         <form action="{{ route('cart.update', $cart->id) }}" method="POST" class="inline">
                                             @csrf
                                             @method('PATCH')
-                                            <input type="hidden" name="quantity" value="{{ $cart->quantity - 1 }}">
+                                            <input type="hidden" name="quantity" value="{{ $quantity - 1 }}">
                                             <button type="submit"
-                                                    class="w-10 h-10 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition"
-                                                    {{ $cart->quantity <= 1 ? 'disabled' : '' }}>
+                                                    class="btn btn-outline-secondary cart-icon-button"
+                                                    {{ $quantity <= 1 ? 'disabled' : '' }}>
                                                 <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 12H4"/>
                                                 </svg>
                                             </button>
                                         </form>
 
-                                        <span class="text-xl font-semibold text-gray-800 w-12 text-center">{{ $cart->quantity }}</span>
+                                        <span class="text-xl font-semibold text-gray-800 w-12 text-center">{{ $quantity }}</span>
 
                                         <form action="{{ route('cart.update', $cart->id) }}" method="POST" class="inline">
                                             @csrf
                                             @method('PATCH')
-                                            <input type="hidden" name="quantity" value="{{ $cart->quantity + 1 }}">
-                                            <button type="submit" class="w-10 h-10 bg-pink-100 hover:bg-pink-200 rounded-full flex items-center justify-center transition">
-                                                <svg class="w-5 h-5 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <input type="hidden" name="quantity" value="{{ $quantity + 1 }}">
+                                            <button type="submit" class="btn btn-strawberry cart-icon-button">
+                                                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                                                 </svg>
                                             </button>
@@ -106,7 +164,7 @@
                         </div>
                     </div>
                 @empty
-                    <div class="bg-white rounded-xl p-12 text-center">
+                    <div class="cart-panel p-5 text-center">
                         <svg class="w-24 h-24 mx-auto text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
                         </svg>
@@ -120,7 +178,7 @@
 
                 <!-- Recommendations -->
                 @if(count($carts ?? []) > 0)
-                <div class="bg-white rounded-xl p-6 mt-8">
+                <div class="cart-panel p-4 p-md-5 mt-8">
                     <h3 class="text-xl font-bold text-gray-800 mb-4">Pelanggan Lain Juga Membeli</h3>
                     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                         @for($i = 0; $i < 4; $i++)
@@ -140,13 +198,13 @@
             <!-- Order Summary -->
             @if(count($carts ?? []) > 0)
             <div class="lg:col-span-1">
-                <div class="bg-white rounded-xl p-6 shadow-sm sticky top-24">
+                <div class="cart-panel p-4 p-md-5 sticky top-24">
                     <h2 class="text-2xl font-bold text-gray-800 mb-6">Ringkasan Pesanan</h2>
 
                     <div class="space-y-4 mb-6">
                         <div class="flex justify-between text-gray-600">
-                            <span>Subtotal ({{ collect($carts)->sum('quantity') }} items)</span>
-                            <span class="font-semibold">Rp {{ number_format(collect($carts)->sum(function($cart) { return $cart->product->price * $cart->quantity; }), 0, ',', '.') }}</span>
+                            <span>Subtotal ({{ collect($carts)->sum(fn ($cart) => $cart->detailCart?->quantity ?? ($cart->quantity ?? 0)) }} items)</span>
+                            <span class="font-semibold">Rp {{ number_format(collect($carts)->sum(fn ($cart) => $cart->subtotal), 0, ',', '.') }}</span>
                         </div>
                         <div class="flex justify-between text-gray-600">
                             <span>Diskon</span>
@@ -161,8 +219,8 @@
                         <div class="flex space-x-2">
                             <input type="text"
                                    placeholder="Masukkan kode"
-                                   class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent">
-                            <button class="px-6 py-2 bg-gradient-to-r from-pink-400 to-red-400 text-white rounded-lg font-semibold hover:shadow-lg transition">
+                                   class="form-control flex-1">
+                            <button class="btn btn-strawberry rounded-pill px-4">
                                 Terapkan
                             </button>
                         </div>
@@ -170,11 +228,11 @@
 
                     <div class="flex justify-between text-xl font-bold text-gray-800 mb-6 pt-4 border-t">
                         <span>Total</span>
-                        <span class="text-pink-500">Rp {{ number_format(collect($carts)->sum(function($cart) { return $cart->product->price * $cart->quantity; }), 0, ',', '.') }}</span>
+                        <span class="text-pink-500">Rp {{ number_format(collect($carts)->sum(fn ($cart) => $cart->subtotal), 0, ',', '.') }}</span>
                     </div>
 
-                    <a href="{{ route('checkout.index') }}" class="block w-full text-center bg-gradient-to-r from-pink-400 to-red-400 text-white py-4 rounded-lg font-bold text-lg hover:shadow-xl transform hover:-translate-y-1 transition duration-300">
-                        → Lanjutkan ke Pembayaran
+                    <a href="{{ route('checkout.index') }}" class="btn btn-strawberry w-100 rounded-pill py-3">
+                        Lanjutkan ke Pembayaran
                     </a>
 
                     <div class="mt-4 flex items-center justify-center text-sm text-gray-600">

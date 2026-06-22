@@ -1,89 +1,179 @@
 @extends('layouts.admin')
 
-@section('title','Kelola Produk')
+@section('title', 'Kelola Produk')
+
+@push('styles')
+<style>
+    .admin-table-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+        overflow: hidden;
+    }
+
+    .admin-table-card .table > :not(caption) > * > * {
+        padding: 1rem;
+        border-bottom-color: #e2e8f0;
+        vertical-align: middle;
+    }
+
+    .admin-table-card thead th {
+        background: #fff1f4;
+        color: #475569;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .product-thumb-frame {
+        width: 48px;
+        height: 48px;
+        min-width: 48px;
+        border-radius: 8px;
+        background-color: #fff1f4;
+        overflow: hidden;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #ffe0e8;
+    }
+
+    .product-thumb-frame img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+
+    .product-thumb-empty {
+        color: #e094a0;
+        font-size: 1rem;
+        font-weight: 700;
+    }
+
+    .products-table {
+        min-width: 860px;
+    }
+
+    .products-table .actions-cell {
+        min-width: 170px;
+    }
+
+    .btn-soft-danger {
+        color: #dc3545;
+        background-color: #fff5f5;
+        border-color: #fecaca;
+    }
+
+    .btn-soft-danger:hover {
+        color: #ffffff;
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+</style>
+@endpush
 
 @section('content')
-<div class="max-w-7xl mx-auto px-4 py-10">
-    <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-bold text-gray-800">Kelola Produk</h1>
-        <a href="{{ route('admin.products.create') }}"
-           class="bg-pink-500 text-black px-4 py-2 rounded-lg text-sm font-semibold hover:bg-pink-600">
-            + Tambah Produk
+<div class="container-fluid py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-1">Kelola Produk</h1>
+            <p class="text-muted mb-0">Atur daftar roti, harga, stok, dan kategori produk.</p>
+        </div>
+
+        <a href="{{ route('admin.products.create') }}" class="btn btn-primary rounded-pill px-4">
+            <i class="fas fa-plus me-2"></i>Tambah Produk
         </a>
     </div>
 
-    @if(session('success'))
-        <div class="mb-4 bg-green-100 text-green-700 px-4 py-2 rounded-lg text-sm">
-            {{ session('success') }}
-        </div>
-    @endif
-
-    <div class="bg-white rounded-2xl shadow p-4 overflow-x-auto">
-        <table class="min-w-full text-sm">
-            <thead>
-                <tr class="border-b bg-pink-50">
-                    <th class="py-3 px-2 text-left text-xs font-semibold text-gray-700 uppercase">Foto</th>
-                    <th class="py-3 px-2 text-left text-xs font-semibold text-gray-700 uppercase">Nama</th>
-                    <th class="py-3 px-2 text-left text-xs font-semibold text-gray-700 uppercase">Kategori</th>
-                    <th class="py-3 px-2 text-left text-xs font-semibold text-gray-700 uppercase">Harga</th>
-                    <th class="py-3 px-2 text-left text-xs font-semibold text-gray-700 uppercase">Stok</th>
-                    <th class="py-3 px-2 text-left text-xs font-semibold text-gray-700 uppercase">Aksi</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($products as $product)
-                    <tr class="border-b hover:bg-pink-50/40 odd:bg-white even:bg-gray-50">
-                        <td class="py-2 px-2">
-                            @if($product->image)
-                                <img src="{{ asset('storage/'.$product->image) }}" alt="Foto"
-                                     class="h-10 w-10 rounded object-cover">
-                            @else
-                                <div class="h-10 w-10 rounded bg-gray-100 text-gray-400 flex items-center justify-center text-xs">
-                                    -
-                                </div>
-                            @endif
-                        </td>
-                        <td class="py-2 px-2 text-gray-800 font-medium">
-                            {{ $product->name }}
-                        </td>
-                        <td class="py-2 px-2 text-gray-700">
-                            {{ $product->category->name ?? '-' }}
-                        </td>
-                        <td class="py-2 px-2 text-pink-600 font-semibold">
-                            Rp {{ number_format($product->price,0,',','.') }}
-                        </td>
-                        <td class="py-2 px-2 text-gray-800">
-                            {{ $product->stock }}
-                        </td>
-                        <td class="py-2 px-2 space-x-2">
-                            <a href="{{ route('admin.products.edit',$product) }}"
-                               class="inline-block text-xs px-3 py-1 bg-blue-500 text-black rounded hover:bg-blue-600">
-                                Edit
-                            </a>
-                            <form action="{{ route('admin.products.destroy',$product) }}"
-                                  method="POST" class="inline-block"
-                                  onsubmit="return confirm('Hapus produk ini?')">
-                                @csrf
-                                @method('DELETE')
-                                <button class="text-xs px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
-                                    Hapus
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                @empty
+    <div class="admin-table-card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 products-table">
+                <thead>
                     <tr>
-                        <td colspan="6" class="py-4 text-center text-gray-500">
-                            Belum ada produk.
-                        </td>
+                        <th scope="col">Foto</th>
+                        <th scope="col">Nama Roti</th>
+                        <th scope="col">Kategori</th>
+                        <th scope="col" class="text-end">Harga</th>
+                        <th scope="col" class="text-center">Stok</th>
+                        <th scope="col" class="text-end">Aksi</th>
                     </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @forelse($products as $product)
+                        @php
+                            $imageUrl = null;
 
-        <div class="mt-4">
-            {{ $products->links() }}
+                            if ($product->image) {
+                                if (\Illuminate\Support\Str::startsWith($product->image, ['http://', 'https://'])) {
+                                    $imageUrl = $product->image;
+                                } elseif (\Illuminate\Support\Facades\Storage::disk('public')->exists($product->image)) {
+                                    $imageUrl = asset('storage/' . $product->image);
+                                } elseif (\Illuminate\Support\Facades\Storage::disk('public')->exists('products/' . $product->image)) {
+                                    $imageUrl = asset('storage/products/' . $product->image);
+                                }
+                            }
+                        @endphp
+                        <tr>
+                            <td style="width: 80px;">
+                                <div class="product-thumb-frame">
+                                    @if($imageUrl)
+                                        <img src="{{ $imageUrl }}" alt="{{ $product->name }}" loading="lazy">
+                                    @else
+                                        <span class="product-thumb-empty">
+                                            <i class="fas fa-image"></i>
+                                        </span>
+                                    @endif
+                                </div>
+                            </td>
+                            <td>
+                                <div class="fw-semibold text-dark">{{ $product->name }}</div>
+                                @if($product->slug)
+                                    <div class="small text-muted">{{ $product->slug }}</div>
+                                @endif
+                            </td>
+                            <td class="text-muted">
+                                {{ $product->category->name ?? '-' }}
+                            </td>
+                            <td class="text-end fw-semibold text-dark text-nowrap">
+                                Rp {{ number_format((float) $product->price, 0, ',', '.') }}
+                            </td>
+                            <td class="text-center">
+                                <span class="badge rounded-pill {{ $product->stock > 0 ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger' }}">
+                                    {{ $product->stock }}
+                                </span>
+                            </td>
+                            <td class="actions-cell">
+                                <div class="d-flex align-items-center justify-content-end gap-2">
+                                    <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                        Edit
+                                    </a>
+
+                                    <form action="{{ route('admin.products.destroy', $product) }}" method="POST" class="m-0" onsubmit="return confirm('Hapus produk ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-soft-danger rounded-pill px-3">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">Belum ada data produk.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
         </div>
+    </div>
+
+    <div class="mt-4">
+        {{ $products->links('pagination::bootstrap-5') }}
     </div>
 </div>
 @endsection

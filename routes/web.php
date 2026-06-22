@@ -8,9 +8,11 @@ use App\Http\Controllers\{
     OrderController,
     DashboardController,
     PageController,
-    ProfileController
+    ProfileController,
+    RecommendationController
 };
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\Kasir\TransactionController as KasirTransactionController;
 use Illuminate\Support\Facades\Route;
 
 // ============================================
@@ -44,6 +46,7 @@ Route::middleware('guest')->group(function () {
 Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/recommendations', [RecommendationController::class, 'index'])->name('recommendations.index');
 
     // Profile Routes
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
@@ -73,7 +76,8 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
     Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class)->only(['index', 'show', 'update']);
-    Route::post('orders/{order}/status', [\App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('orders.status');
+    Route::patch('orders/{order}/confirm', [\App\Http\Controllers\Admin\OrderController::class, 'confirm'])->name('orders.confirm');
+    Route::patch('orders/{order}/status', [\App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('orders.status');
     
     // Only Admin and Superadmin can manage products and categories
     Route::middleware([\App\Http\Middleware\ManagerMiddleware::class])->group(function() {
@@ -86,6 +90,19 @@ Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix
         Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->only(['index', 'update']);
         Route::post('users/{user}/role', [\App\Http\Controllers\Admin\UserController::class, 'updateRole'])->name('users.role');
     });
+});
+
+// ============================================
+// KASIR ROUTES
+// ============================================
+Route::middleware(['auth', \App\Http\Middleware\AdminMiddleware::class])->prefix('kasir')->name('kasir.')->group(function () {
+    Route::get('/', fn () => redirect()->route('kasir.orders.index'))->name('dashboard');
+    Route::get('/orders', [\App\Http\Controllers\Admin\OrderController::class, 'index'])->name('orders.index');
+    Route::patch('/orders/{order}/confirm', [\App\Http\Controllers\Admin\OrderController::class, 'confirm'])->name('orders.confirm');
+    Route::patch('/orders/{order}/status', [\App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('orders.status');
+    Route::get('/orders/{order}/receipt', [KasirTransactionController::class, 'receipt'])->name('orders.receipt');
+    Route::get('/transactions/create', [KasirTransactionController::class, 'create'])->name('transactions.create');
+    Route::post('/transactions', [KasirTransactionController::class, 'store'])->name('transactions.store');
 });
 
 // ============================================

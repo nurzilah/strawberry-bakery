@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Services\RecommendationService;
 use Illuminate\Http\Request;
 
 class ProductController extends Controller
@@ -79,11 +80,16 @@ class ProductController extends Controller
             ['stars' => 3, 'count' => Product::where('rating', '>=', 3)->count()],
         ];
 
-        return view('katalog.katalog', compact(
+        $recommendations = auth()->check()
+            ? app(RecommendationService::class)->forUser(auth()->id(), 6)
+            : [];
+
+        return view('products.index', compact(
             'paginatedProducts',
             'categories',
             'ratings',
-            'totalAvailableProducts'
+            'totalAvailableProducts',
+            'recommendations'
         ));
     }
 

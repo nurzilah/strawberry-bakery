@@ -6,7 +6,7 @@
 <div class="container mx-auto px-4 py-10">
     <h1 class="text-3xl font-bold text-gray-800 mb-6">Pesanan Saya</h1>
 
-    @if($orders->where('status', 'dikonfirmasi')->count() > 0)
+    @if($orders->where('status', 'processing')->count() > 0)
         <div class="mb-6 bg-green-100 border border-green-300 text-green-700 px-4 py-3 rounded-lg shadow-sm">
             Ada pesanan yang sudah dikonfirmasi. Silakan cek detailnya.
         </div>
@@ -54,8 +54,14 @@
                                 {{ $order->pickup_date ? \Carbon\Carbon::parse($order->pickup_date)->format('d M Y') : '-' }}
                             </td>
                             <td class="py-3">
-                                @if($order->status === 'dikonfirmasi')
-                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Dikonfirmasi</span>
+                                @if($order->status === 'processing')
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">Siap Diambil</span>
+                                @elseif($order->status === 'completed')
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">Selesai</span>
+                                @elseif($order->status === 'cancelled')
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">Dibatalkan</span>
+                                @elseif($order->status === 'pending')
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">Pending</span>
                                 @else
                                     <span class="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">Menunggu Konfirmasi</span>
                                 @endif

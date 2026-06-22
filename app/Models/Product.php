@@ -12,12 +12,14 @@ class Product extends Model
     protected $fillable = [
         'category_id', 'name', 'slug', 'description', 'price',
         'image', 'stock', 'rating', 'reviews_count', 'is_featured',
-        'is_new', 'is_promo', 'is_available', 'pickup_date'
+        'is_new', 'is_promo', 'is_available', 'pickup_date',
+        'purchase_count'
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'rating' => 'float',
+        'purchase_count' => 'integer',
         'is_featured' => 'boolean',
         'is_new' => 'boolean',
         'is_promo' => 'boolean',
@@ -38,5 +40,15 @@ class Product extends Model
     public function carts()
     {
         return $this->hasMany(Cart::class);
+    }
+
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
+    }
+
+    public function recommendations()
+    {
+        return $this->hasMany(Recommendation::class);
     }
 }

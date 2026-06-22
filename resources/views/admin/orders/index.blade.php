@@ -2,112 +2,170 @@
 
 @section('title', 'Konfirmasi Pembayaran')
 
+@push('styles')
+<style>
+    .admin-table-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 16px;
+        box-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+        overflow: hidden;
+    }
+
+    .admin-table-card .table > :not(caption) > * > * {
+        padding: 1rem;
+        border-bottom-color: #e2e8f0;
+        vertical-align: middle;
+    }
+
+    .admin-table-card thead th {
+        background: #fff1f4;
+        color: #475569;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .btn-soft-danger {
+        color: #dc3545;
+        background-color: #fff5f5;
+        border-color: #fecaca;
+    }
+
+    .btn-soft-danger:hover {
+        color: #ffffff;
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .proof-link {
+        color: #d63384;
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .proof-link:hover {
+        color: #b02a6f;
+        text-decoration: underline;
+    }
+</style>
+@endpush
+
 @section('content')
-<div class="max-w-7xl mx-auto px-4 py-10">
-    <div class="flex items-center justify-between mb-6">
-        <h1 class="text-3xl font-bold text-gray-800">Konfirmasi Pembayaran</h1>
+<div class="container-fluid py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="h3 fw-bold text-dark mb-1">Konfirmasi Pembayaran</h1>
+            <p class="text-muted mb-0">Verifikasi bukti pembayaran dan kelola status pesanan pelanggan.</p>
+        </div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow p-6">
-        <div class="overflow-x-auto">
-            <table class="w-full text-left text-sm">
+    <div class="admin-table-card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
                 <thead>
-                    <tr class="text-gray-600">
-                        <th class="py-3">Tanggal</th>
-                        <th class="py-3">Pelanggan</th>
-                        <th class="py-3">Total</th>
-                        <th class="py-3">Status</th>
-                        <th class="py-3">Bukti</th>
-                        <th class="py-3">Aksi</th>
+                    <tr>
+                        <th scope="col">ID Invoice</th>
+                        <th scope="col">Tanggal</th>
+                        <th scope="col">Nama Pelanggan</th>
+                        <th scope="col" class="text-end">Total Uang</th>
+                        <th scope="col" class="text-center">Status Pesanan</th>
+                        <th scope="col" class="text-center">Bukti Bayar</th>
+                        <th scope="col" class="text-end">Tindakan</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($orders as $order)
-                        <tr class="border-t">
-                            <td class="py-3 text-gray-700">{{ $order->created_at->format('d M Y') }}</td>
-                            <td class="py-3 text-gray-700">{{ $order->user->name ?? '-' }}</td>
-                            <td class="py-3 text-gray-700">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</td>
-                            <td class="py-3">
-                                @if($order->status === 'dikonfirmasi')
-                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Dikonfirmasi</span>
-                                @elseif($order->status === 'processing')
-                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">Siap Diambil</span>
-                                @elseif($order->status === 'completed')
-                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">Selesai Diambil</span>
-                                @elseif($order->status === 'cancelled')
-                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">Dibatalkan</span>
-                                @else
-                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">Menunggu Konfirmasi</span>
-                                @endif
-                            </td>
-                            <td class="py-3">
-                                @if($order->payment_proof_path)
-                                    <a href="{{ asset('storage/' . $order->payment_proof_path) }}" target="_blank" class="text-pink-500 hover:underline">
-                                        Lihat
-                                    </a>
-                                @else
-                                    <span class="text-gray-400">-</span>
-                                @endif
-                            </td>
-                            <td class="py-3">
-                                <div class="flex items-center space-x-2">
-                                    @if($order->status === 'menunggu_konfirmasi')
-                                        <form action="{{ route($confirmRoute, $order) }}" method="POST">
-                                            @csrf
-                                            @method('PATCH')
-                                            <button type="submit" class="px-4 py-2 bg-white text-black border border-black rounded-lg text-sm font-semibold hover:bg-gray-100 transition">
-                                                Konfirmasi
-                                            </button>
-                                        </form>
-                                    @endif
-
-                                    @if($order->status === 'dikonfirmasi')
-                                        <form action="{{ route('admin.orders.status', $order) }}" method="POST">
-                                            @csrf
-                                            @method('PATCH')
-                                            <input type="hidden" name="status" value="processing">
-                                            <button type="submit" class="px-4 py-2 bg-black text-white rounded-lg text-sm font-semibold hover:bg-gray-900 transition">
-                                                Siap Diambil
-                                            </button>
-                                        </form>
-                                    @endif
-
-                                    @if($order->status === 'processing')
-                                        <form action="{{ route('admin.orders.status', $order) }}" method="POST">
-                                            @csrf
-                                            @method('PATCH')
-                                            <input type="hidden" name="status" value="completed">
-                                            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-semibold hover:bg-green-700 transition">
-                                                Selesai Diambil
-                                            </button>
-                                        </form>
-                                    @endif
-
-                                    @if(!in_array($order->status, ['completed','cancelled'], true))
-                                        <form action="{{ route('admin.orders.status', $order) }}" method="POST" onsubmit="return confirm('Batalkan pesanan ini?');">
-                                            @csrf
-                                            @method('PATCH')
-                                            <input type="hidden" name="status" value="cancelled">
-                                            <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg text-sm font-semibold hover:bg-red-700 transition">
-                                                Batalkan
-                                            </button>
-                                        </form>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
+                    @if($orders->isEmpty())
                         <tr>
-                            <td colspan="6" class="py-6 text-center text-gray-500">Belum ada pembayaran.</td>
+                            <td colspan="7" class="text-center py-5 text-muted">Belum ada data pembayaran masuk.</td>
                         </tr>
-                    @endforelse
+                    @else
+                        @foreach($orders as $order)
+                            <tr>
+                                <td class="fw-semibold text-dark text-nowrap">
+                                    {{ $order->order_number ?? 'INV-' . str_pad((string) $order->id, 5, '0', STR_PAD_LEFT) }}
+                                </td>
+                                <td class="text-muted text-nowrap">
+                                    {{ $order->created_at->format('d M Y') }}
+                                </td>
+                                <td>
+                                    <div class="fw-semibold text-dark">{{ $order->user->name ?? '-' }}</div>
+                                    @if(optional($order->user)->email)
+                                        <div class="small text-muted">{{ $order->user->email }}</div>
+                                    @endif
+                                </td>
+                                <td class="text-end fw-semibold text-dark text-nowrap">
+                                    Rp {{ number_format((float) $order->total_amount, 0, ',', '.') }}
+                                </td>
+                                <td class="text-center">
+                                    @if($order->status === 'waiting_verification')
+                                        <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis">Menunggu Konfirmasi</span>
+                                    @elseif($order->status === 'processing')
+                                        <span class="badge rounded-pill bg-primary-subtle text-primary">Siap Diambil</span>
+                                    @elseif($order->status === 'completed')
+                                        <span class="badge rounded-pill bg-success-subtle text-success">Selesai Diambil</span>
+                                    @elseif($order->status === 'cancelled')
+                                        <span class="badge rounded-pill bg-danger-subtle text-danger">Dibatalkan</span>
+                                    @else
+                                        <span class="badge rounded-pill bg-secondary-subtle text-secondary">Pending</span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    @if($order->payment_proof_path)
+                                        <a href="{{ asset('storage/' . $order->payment_proof_path) }}" target="_blank" class="proof-link">
+                                            Lihat Bukti
+                                        </a>
+                                    @else
+                                        <span class="text-muted">-</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <div class="d-flex align-items-center justify-content-end gap-2">
+                                        @if($order->status === 'waiting_verification')
+                                            <form action="{{ route($confirmRoute, $order) }}" method="POST" class="m-0">
+                                                @csrf
+                                                @method('PATCH')
+                                                <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill px-3">
+                                                    Konfirmasi
+                                                </button>
+                                            </form>
+                                        @endif
+
+                                        @if($order->status === 'processing')
+                                            <form action="{{ route('admin.orders.status', $order) }}" method="POST" class="m-0">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="status" value="completed">
+                                                <button type="submit" class="btn btn-sm btn-outline-success rounded-pill px-3">
+                                                    Selesai
+                                                </button>
+                                            </form>
+                                        @endif
+
+                                        @if(!in_array($order->status, ['completed', 'cancelled'], true))
+                                            <form action="{{ route('admin.orders.status', $order) }}" method="POST" class="m-0" onsubmit="return confirm('Batalkan pesanan ini?');">
+                                                @csrf
+                                                @method('PATCH')
+                                                <input type="hidden" name="status" value="cancelled">
+                                                <button type="submit" class="btn btn-sm btn-soft-danger rounded-pill px-3">
+                                                    Batalkan
+                                                </button>
+                                            </form>
+                                        @endif
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    @endif
                 </tbody>
             </table>
         </div>
+    </div>
 
-        <div class="mt-6">
-            {{ $orders->links() }}
-        </div>
+    <div class="mt-4">
+        {{ $orders->links() }}
     </div>
 </div>
 @endsection
