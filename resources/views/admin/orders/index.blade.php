@@ -62,6 +62,32 @@
         </div>
     </div>
 
+    <div class="card mb-4 border-0 shadow-sm rounded-4">
+        <div class="card-body">
+            <form action="{{ route('admin.orders.index') }}" method="GET" class="row g-3 align-items-end">
+                <div class="col-auto">
+                    <label for="status" class="form-label mb-1 fw-semibold text-muted small">Status Pesanan</label>
+                    <select name="status" id="status" class="form-select">
+                        <option value="">Semua Status</option>
+                        <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                        <option value="waiting_verification" {{ request('status') == 'waiting_verification' ? 'selected' : '' }}>Menunggu Konfirmasi</option>
+                        <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>Siap Diambil</option>
+                        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Selesai</option>
+                        <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <label for="date" class="form-label mb-1 fw-semibold text-muted small">Tanggal</label>
+                    <input type="date" name="date" id="date" class="form-control" value="{{ request('date') }}">
+                </div>
+                <div class="col-auto">
+                    <button type="submit" class="btn btn-primary px-4"><i class="fas fa-filter me-1"></i> Filter</button>
+                    <a href="{{ route('admin.orders.index') }}" class="btn btn-light px-4">Reset</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="admin-table-card">
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
@@ -122,9 +148,12 @@
                                     @endif
                                 </td>
                                 <td>
-                                    <div class="d-flex align-items-center justify-content-end gap-2">
+                                        <a href="{{ route('admin.orders.show', $order) }}" class="btn btn-sm btn-outline-info rounded-pill px-3">
+                                            Detail
+                                        </a>
+
                                         @if($order->status === 'waiting_verification')
-                                            <form action="{{ route($confirmRoute, $order) }}" method="POST" class="m-0">
+                                            <form action="{{ route($confirmRoute ?? 'admin.orders.confirm', $order) }}" method="POST" class="m-0">
                                                 @csrf
                                                 @method('PATCH')
                                                 <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill px-3">

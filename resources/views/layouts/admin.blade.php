@@ -213,6 +213,11 @@
                 <i class="fas fa-users me-2"></i> Manajemen Akun
             </a>
         </li>
+        <li class="{{ request()->routeIs('owner.reports.*') ? 'active' : '' }}">
+            <a href="{{ route('owner.reports.index') }}">
+                <i class="fas fa-file-invoice-dollar me-2"></i> Laporan Penjualan
+            </a>
+        </li>
 
     {{-- ===== ADMIN / IT DEVELOPER ===== --}}
     @elseif(auth()->user()->role === 'admin')

@@ -109,7 +109,11 @@ Route::middleware(['auth', 'role:owner,kasir,superadmin'])->prefix('admin/kasir'
 Route::middleware(['auth', 'role:owner,superadmin'])->prefix('admin/owner')->name('owner.')->group(function () {
     Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->only(['index', 'update']);
     Route::post('users/{user}/role', [\App\Http\Controllers\Admin\UserController::class, 'updateRole'])->name('users.role');
-    // Financial reports can go here
+    
+    // Financial reports
+    Route::get('reports', [\App\Http\Controllers\Owner\ReportController::class, 'index'])->name('reports.index');
+    Route::get('reports/export-pdf', [\App\Http\Controllers\Owner\ReportController::class, 'exportPdf'])->name('reports.pdf');
+    Route::get('reports/export-excel', [\App\Http\Controllers\Owner\ReportController::class, 'exportExcel'])->name('reports.excel');
 });
 
 // ============================================

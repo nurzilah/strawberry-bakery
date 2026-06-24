@@ -12,11 +12,19 @@ use Illuminate\Support\Facades\Schema;
 
 class OrderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $orders = Order::with(['user', 'items.product'])
-            ->latest()
-            ->paginate(15);
+        $query = Order::with(['user', 'items.product'])->latest();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('date')) {
+            $query->whereDate('created_at', $request->date);
+        }
+
+        $orders = $query->paginate(15)->withQueryString();
 
         if (request()->routeIs('kasir.*')) {
             return view('kasir.orders.index', compact('orders'));
@@ -26,6 +34,12 @@ class OrderController extends Controller
             'orders' => $orders,
             'confirmRoute' => 'admin.orders.confirm',
         ]);
+    }
+
+    public function show(Order $order)
+    {
+        $order->load(['user', 'items.product']);
+        return view('admin.orders.show', compact('order'));
     }
 
     public function confirm(Order $order)
