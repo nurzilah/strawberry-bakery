@@ -81,7 +81,7 @@ class ProductController extends Controller
         ];
 
         $recommendations = auth()->check()
-            ? app(RecommendationService::class)->forUser(auth()->id(), 6)
+            ? app(RecommendationService::class)->getRecommendations(auth()->id(), 6)
             : [];
 
         return view('products.index', compact(
@@ -95,7 +95,24 @@ class ProductController extends Controller
 
     public function show($slug)
     {
-        $product = Product::with('category')->where('slug', $slug)->firstOrFail();
-        return view('katalog.detail', compact('product'));
+        $product = Product::with(['category', 'reviews' => function($q) {
+            $q->where('is_approved', true)->with('user')->latest();
+        }])->where('slug', $slug)->firstOrFail();
+
+        $hasOrdered = false;
+        $userReview = null;
+
+        if (auth()->check()) {
+            $userId = auth()->id();
+            $hasOrdered = \App\Models\OrderItem::whereHas('order', function ($query) use ($userId) {
+                    $query->where('user_id', $userId)->where('status', 'completed');
+                })
+                ->where('product_id', $product->id)
+                ->exists();
+                
+            $userReview = $product->reviews->where('user_id', $userId)->first();
+        }
+
+        return view('katalog.detail', compact('product', 'hasOrdered', 'userReview'));
     }
 }

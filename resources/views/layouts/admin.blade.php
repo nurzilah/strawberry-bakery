@@ -203,8 +203,8 @@
                 <i class="fas fa-cash-register me-2"></i> Mesin POS / Kasir
             </a>
         </li>
-        <li class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
-            <a href="{{ route('admin.orders.index') }}">
+        <li class="{{ request()->routeIs('kasir.transactions.*') ? 'active' : '' }}">
+            <a href="{{ route('kasir.transactions.index') }}">
                 <i class="fas fa-history me-2"></i> Riwayat Transaksi
             </a>
         </li>
@@ -251,8 +251,8 @@
                 <i class="fas fa-cash-register me-2"></i> Mesin POS / Kasir
             </a>
         </li>
-        <li class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
-            <a href="{{ route('admin.orders.index') }}">
+        <li class="{{ request()->routeIs('kasir.transactions.*') ? 'active' : '' }}">
+            <a href="{{ route('kasir.transactions.index') }}">
                 <i class="fas fa-history me-2"></i> Riwayat Transaksi
             </a>
         </li>
@@ -274,6 +274,21 @@
                         <button class="btn btn-outline-secondary rounded-circle" id="themeToggle">
                             <i class="fas fa-moon"></i>
                         </button>
+
+                        <!-- Notification Dropdown -->
+                        @if(in_array(auth()->user()->role, ['admin', 'owner', 'superadmin']))
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary rounded-circle position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-bell"></i>
+                                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notificationBadge">
+                                    0
+                                </span>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="notificationDropdown" id="notificationList" style="width: 320px; max-height: 400px; overflow-y: auto;">
+                                <li><span class="dropdown-item text-center text-muted py-2">Memuat notifikasi...</span></li>
+                            </ul>
+                        </div>
+                        @endif
 
                         <a href="{{ route('home') }}" class="btn btn-outline-primary btn-sm">Lihat Web</a>
 
@@ -343,6 +358,83 @@
                     icon.classList.add('fa-moon');
                 }
             });
+
+            @if(in_array(auth()->user()->role, ['admin', 'owner', 'superadmin']))
+            // Notifications Polling
+            function fetchNotifications() {
+                fetch('/admin/notifications/unread')
+                    .then(response => response.json())
+                    .then(data => {
+                        const badge = document.getElementById('notificationBadge');
+                        const list = document.getElementById('notificationList');
+                        
+                        if (!badge || !list) return;
+
+                        if (data.count > 0) {
+                            badge.textContent = data.count;
+                            badge.classList.remove('d-none');
+                        } else {
+                            badge.classList.add('d-none');
+                        }
+
+                        let html = '';
+                        if (data.notifications.length > 0) {
+                            data.notifications.forEach(notif => {
+                                const date = new Date(notif.created_at).toLocaleString('id-ID', {day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit'});
+                                html += `
+                                    <li>
+                                        <a class="dropdown-item py-2 border-bottom text-wrap" href="#" onclick="markAsRead(${notif.id}, event)">
+                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                <small class="fw-bold text-primary">${notif.title}</small>
+                                                <small class="text-muted" style="font-size: 0.7rem">${date}</small>
+                                            </div>
+                                            <div class="small text-muted" style="white-space: normal;">${notif.message}</div>
+                                        </a>
+                                    </li>
+                                `;
+                            });
+                            html += `
+                                <li>
+                                    <a class="dropdown-item text-center fw-bold text-primary py-2 bg-light" href="#" onclick="markAllAsRead(event)">
+                                        Tandai semua dibaca
+                                    </a>
+                                </li>
+                            `;
+                        } else {
+                            html = '<li><span class="dropdown-item text-center text-muted py-3">Tidak ada notifikasi baru</span></li>';
+                        }
+                        list.innerHTML = html;
+                    })
+                    .catch(error => console.error('Error fetching notifications:', error));
+            }
+
+            window.markAsRead = function(id, event) {
+                event.preventDefault();
+                event.stopPropagation();
+                fetch(`/admin/notifications/${id}/read`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    }
+                }).then(() => fetchNotifications());
+            };
+
+            window.markAllAsRead = function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+                fetch('/admin/notifications/read-all', {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    }
+                }).then(() => fetchNotifications());
+            };
+
+            fetchNotifications();
+            setInterval(fetchNotifications, 30000); // 30 seconds
+            @endif
         });
     </script>
     @stack('scripts')

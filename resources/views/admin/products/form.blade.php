@@ -3,110 +3,126 @@
 @section('title', $title)
 
 @section('content')
-<div class="max-w-3xl mx-auto px-4 py-10">
-    <h1 class="text-2xl font-bold mb-6">{{ $title }}</h1>
-
-    <form action="{{ $route }}" method="POST" class="space-y-4" enctype="multipart/form-data">
-        @csrf
-        @if($method === 'PUT')
-            @method('PUT')
-        @endif
-
+<div class="container-fluid py-4">
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>
-            <label class="block text-sm font-medium mb-1">Nama Produk</label>
-            <input type="text" name="name" class="w-full border rounded px-3 py-2"
-                   value="{{ old('name',$product->name) }}" required>
+            <h1 class="h3 fw-bold text-dark mb-1">{{ $title }}</h1>
         </div>
+        <a href="{{ route('admin.products.index') }}" class="btn btn-outline-secondary rounded-pill px-4">
+            <i class="fas fa-arrow-left me-2"></i>Kembali
+        </a>
+    </div>
 
-        <div>
-            <label class="block text-sm font-medium mb-1">Slug</label>
-            <input type="text" name="slug" class="w-full border rounded px-3 py-2"
-                   value="{{ old('slug',$product->slug) }}" placeholder="Otomatis dari nama jika kosong">
-        </div>
+    <div class="card shadow-sm border-0 rounded-4">
+        <div class="card-body p-4 p-md-5">
+            <form action="{{ $route }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                @if($method === 'PUT')
+                    @method('PUT')
+                @endif
 
-        <div>
-            <label class="block text-sm font-medium mb-1">Kategori</label>
-            <select name="category_id" class="w-full border rounded px-3 py-2" required>
-                <option value="">-- Pilih Kategori --</option>
-                @foreach($categories as $cat)
-                    <option value="{{ $cat->id }}"
-                        {{ old('category_id',$product->category_id) == $cat->id ? 'selected' : '' }}>
-                        {{ $cat->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-dark">Nama Produk <span class="text-danger">*</span></label>
+                        <input type="text" name="name" class="form-control" value="{{ old('name',$product->name) }}" required>
+                        @error('name')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                    </div>
 
-        <div>
-            <label class="block text-sm font-medium mb-1">Harga</label>
-            <input type="number" name="price" class="w-full border rounded px-3 py-2"
-                   value="{{ old('price',$product->price) }}" required>
-        </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-dark">Kategori <span class="text-danger">*</span></label>
+                        <select name="category_id" class="form-select" required>
+                            <option value="">-- Pilih Kategori --</option>
+                            @foreach($categories as $cat)
+                                <option value="{{ $cat->id }}" {{ old('category_id',$product->category_id) == $cat->id ? 'selected' : '' }}>
+                                    {{ $cat->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('category_id')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                    </div>
 
-        <div>
-            <label class="block text-sm font-medium mb-1">Stok</label>
-            <input type="number" name="stock" class="w-full border rounded px-3 py-2"
-                   value="{{ old('stock',$product->stock) }}" required>
-        </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-dark">Slug</label>
+                        <input type="text" name="slug" class="form-control" value="{{ old('slug',$product->slug) }}" placeholder="Otomatis dari nama jika kosong">
+                        @error('slug')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                    </div>
 
-        <div>
-            <label class="block text-sm font-medium mb-1">Deskripsi</label>
-            <textarea name="description" rows="4" class="w-full border rounded px-3 py-2" required>{{ old('description',$product->description) }}</textarea>
-        </div>
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold text-dark">Harga (Rp) <span class="text-danger">*</span></label>
+                        <input type="number" name="price" class="form-control" value="{{ old('price',$product->price) }}" min="0" required>
+                        @error('price')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                    </div>
 
-        <div>
-            <label class="block text-sm font-medium mb-1">Foto Produk</label>
-            <input type="file" name="image" accept="image/*,.heic,.heif" class="w-full border rounded px-3 py-2" {{ $method === 'POST' ? 'required' : '' }}>
-            <p class="mt-1 text-xs text-gray-500">Format: JPG, PNG, WEBP, HEIC/HEIF. Maksimal 5MB.</p>
-            <div class="mt-3 rounded-lg border border-pink-100 bg-pink-50/60 p-3">
-                <label class="flex items-center gap-2 text-sm font-medium text-gray-800">
-                    <input type="checkbox" name="ai_enhance" value="1" {{ old('ai_enhance') ? 'checked' : '' }}>
-                    Tingkatkan foto dengan AI
-                </label>
-                <p class="mt-1 text-xs text-gray-600">
-                    AI akan membuat foto produk lebih rapi, terang, dan menarik untuk katalog.
-                </p>
-                <textarea name="ai_prompt" rows="2" class="mt-2 w-full border rounded px-3 py-2 text-sm"
-                          placeholder="Opsional: contoh, latar putih premium, nuansa strawberry, lighting natural">{{ old('ai_prompt') }}</textarea>
-            </div>
-            @if($product->image)
-                <div class="mt-2">
-                    <img src="{{ asset('storage/'.$product->image) }}" alt="Preview" class="h-24 w-24 object-cover rounded">
+                    <div class="col-md-3">
+                        <label class="form-label fw-semibold text-dark">Stok <span class="text-danger">*</span></label>
+                        <input type="number" name="stock" class="form-control" value="{{ old('stock',$product->stock) }}" min="0" required>
+                        @error('stock')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold text-dark">Deskripsi <span class="text-danger">*</span></label>
+                        <textarea name="description" rows="4" class="form-control" required>{{ old('description',$product->description) }}</textarea>
+                        @error('description')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold text-dark">Foto Produk {!! $method === 'POST' ? '<span class="text-danger">*</span>' : '' !!}</label>
+                        <input type="file" name="image" accept="image/*,.heic,.heif" class="form-control" {{ $method === 'POST' ? 'required' : '' }}>
+                        <div class="form-text text-muted">Format: JPG, PNG, WEBP, HEIC/HEIF. Maksimal 5MB.</div>
+                        @error('image')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
+
+                        <!-- Fitur AI Enhance -->
+                        <div class="mt-3 p-3 rounded-3" style="background-color: #fff5f5; border: 1px solid #ffe0e8;">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="ai_enhance" value="1" id="ai_enhance" {{ old('ai_enhance') ? 'checked' : '' }}>
+                                <label class="form-check-label fw-semibold text-dark" for="ai_enhance">
+                                    <i class="fas fa-magic text-warning me-1"></i> Tingkatkan foto dengan AI
+                                </label>
+                            </div>
+                            <div class="form-text mt-1 text-muted">AI akan membuat foto produk lebih rapi, terang, dan menarik untuk katalog.</div>
+                            
+                            <textarea name="ai_prompt" rows="2" class="form-control form-control-sm mt-2" placeholder="Opsional prompt tambahan. Cth: latar putih premium, nuansa strawberry, lighting natural">{{ old('ai_prompt') }}</textarea>
+                        </div>
+
+                        @if($product->image)
+                            <div class="mt-3">
+                                <p class="small text-muted mb-1">Preview Foto Saat Ini:</p>
+                                <img src="{{ asset('storage/'.$product->image) }}" alt="Preview" class="rounded object-fit-cover shadow-sm border" style="width: 100px; height: 100px;">
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label fw-semibold text-dark mb-3">Status Produk</label>
+                        <div class="d-flex flex-wrap gap-4">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_available" value="1" id="is_available" {{ old('is_available',$product->is_available ?? true) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="is_available">Tersedia</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_featured" value="1" id="is_featured" {{ old('is_featured',$product->is_featured) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="is_featured">Produk Unggulan</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_new" value="1" id="is_new" {{ old('is_new',$product->is_new) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="is_new">Produk Baru</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_promo" value="1" id="is_promo" {{ old('is_promo',$product->is_promo) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="is_promo">Promo</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 pt-3 border-top mt-4">
+                        <button type="submit" class="btn btn-primary px-5 py-2 rounded-pill fw-semibold">
+                            <i class="fas fa-save me-2"></i>Simpan
+                        </button>
+                        <a href="{{ route('admin.products.index') }}" class="btn btn-link text-decoration-none text-muted ms-2">Batal</a>
+                    </div>
                 </div>
-            @endif
+            </form>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <label class="flex items-center gap-2 text-sm">
-                <input type="checkbox" name="is_available" value="1"
-                    {{ old('is_available',$product->is_available ?? true) ? 'checked' : '' }}>
-                Tersedia
-            </label>
-            <label class="flex items-center gap-2 text-sm">
-                <input type="checkbox" name="is_featured" value="1"
-                    {{ old('is_featured',$product->is_featured) ? 'checked' : '' }}>
-                Produk Unggulan
-            </label>
-            <label class="flex items-center gap-2 text-sm">
-                <input type="checkbox" name="is_new" value="1"
-                    {{ old('is_new',$product->is_new) ? 'checked' : '' }}>
-                Produk Baru
-            </label>
-            <label class="flex items-center gap-2 text-sm">
-                <input type="checkbox" name="is_promo" value="1"
-                    {{ old('is_promo',$product->is_promo) ? 'checked' : '' }}>
-                Promo
-            </label>
-        </div>
-
-        <div class="pt-4">
-            <button class="bg-pink-500 text-black px-6 py-2 rounded-lg font-semibold">
-                Simpan
-            </button>
-            <a href="{{ route('admin.products.index') }}" class="ml-2 text-gray-600 text-sm">
-                Batal
-            </a>
-        </div>
-    </form>
+    </div>
 </div>
 @endsection

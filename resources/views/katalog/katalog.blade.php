@@ -3,7 +3,13 @@
 @section('title', 'Katalog Produk')
 
 @section('content')
-<div class="bg-gray-50 py-10">
+<div class="text-white text-center py-5 mb-5" style="background: linear-gradient(135deg, rgba(233, 79, 112, 0.95), rgba(201, 52, 85, 0.95)), url('https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=1200') center/cover; border-radius: 0 0 2rem 2rem; margin-top: -3rem; padding-top: 5rem !important;">
+    <div class="container py-4">
+        <h1 class="display-4 fw-bold mb-3" style="font-family: 'Playfair Display', serif;">Katalog Produk</h1>
+        <p class="lead mb-0 text-white-50">Temukan ragam pilihan roti, kue, dan pastry premium kami.</p>
+    </div>
+</div>
+<div class="bg-gray-50 pb-5">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row gap-8">
         <!-- Sidebar Filter -->
         <aside class="w-full md:w-1/4">

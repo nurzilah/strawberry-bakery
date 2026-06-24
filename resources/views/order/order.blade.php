@@ -4,236 +4,249 @@
 
 @section('content')
 <!-- Hero Section -->
-<section class="min-h-screen flex items-center justify-center py-12 px-4">
-    <div class="container mx-auto max-w-2xl">
+<section class="min-vh-100 d-flex align-items-center justify-content-center py-5 px-3">
+    <div class="container" style="max-width: 800px;">
 
         <!-- Logo and Title -->
-        <div class="text-center mb-12">
-            <div class="flex items-center justify-center mb-6">
-                <div class="w-16 h-16 bg-pink-500 rounded-full flex items-center justify-center mr-4">
-                    <svg class="w-10 h-10 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
-                        <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
-                    </svg>
+        <div class="text-center mb-5">
+            <div class="d-flex align-items-center justify-content-center mb-4">
+                <div class="rounded-circle d-flex align-items-center justify-content-center bg-primary bg-gradient shadow-sm" style="width: 80px; height: 80px;">
+                    <i class="fa-solid fa-box-open text-white" style="font-size: 2rem;"></i>
                 </div>
             </div>
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-3">
-                🔍 Lacak Pesanan Anda
+            <h1 class="display-5 fw-bold text-dark mb-3">
+                Lacak Pesanan Anda
             </h1>
-            <p class="text-gray-600 text-lg">
+            <p class="text-muted fs-5">
                 Masukkan nomor pesanan untuk melacak status pesanan Anda
             </p>
         </div>
 
         <!-- Search Card -->
-        <div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
-            <form id="trackingForm" class="space-y-6">
-                <div>
-                    <label for="orderNumber" class="block text-sm font-medium text-gray-700 mb-2">
-                        Nomor Pesanan
-                    </label>
-                    <div class="relative">
-                        <input
-                            type="text"
-                            id="orderNumber"
-                            name="orderNumber"
-                            placeholder="Masukkan nomor pesanan (contoh: ORD-20251109-001)"
-                            class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:outline-none focus:border-pink-500 transition text-gray-700"
-                            required
-                        >
-                        <div class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                            </svg>
+        <div class="card border-0 shadow-lg rounded-4 mb-4">
+            <div class="card-body p-4 p-md-5">
+                <form id="trackingForm" class="d-flex flex-column gap-4">
+                    <div>
+                        <label for="orderNumber" class="form-label fw-bold text-dark">
+                            Nomor Pesanan
+                        </label>
+                        <div class="input-group input-group-lg">
+                            <input
+                                type="text"
+                                id="orderNumber"
+                                name="orderNumber"
+                                placeholder="Contoh: ORD-20251109-001"
+                                class="form-control bg-light border-0 px-4 py-3"
+                                required
+                            >
+                            <span class="input-group-text bg-light border-0 text-muted px-4">
+                                <i class="fa-solid fa-magnifying-glass"></i>
+                            </span>
+                        </div>
+                        <div class="form-text mt-2">
+                            Format: ORD-YYYYMMDD-XXX
                         </div>
                     </div>
-                    <p class="text-sm text-gray-500 mt-2">
-                        Format: ORD-YYYYMMDD-XXX (contoh: ORD-20251109-001)
-                    </p>
-                </div>
 
-                <button
-                    type="submit"
-                    class="w-full bg-gradient-to-r from-pink-500 to-pink-600 text-white py-4 rounded-xl font-semibold hover:from-pink-600 hover:to-pink-700 transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 flex items-center justify-center"
-                >
-                    <span class="mr-2">🔍</span>
-                    Lacak Pesanan
-                </button>
-            </form>
+                    <button
+                        type="submit"
+                        class="btn btn-strawberry rounded-pill py-3 fw-bold shadow-sm d-flex align-items-center justify-content-center gap-2"
+                    >
+                        <i class="fa-solid fa-location-crosshairs"></i>
+                        Lacak Pesanan
+                    </button>
+                </form>
+            </div>
         </div>
 
         <!-- Result Card (Hidden by default) -->
-        <div id="resultCard" class="bg-white rounded-2xl shadow-lg p-8 hidden">
-            <!-- Success State -->
-            <div id="successState" class="hidden">
-                <!-- Order Header -->
-                <div class="border-b border-gray-200 pb-6 mb-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-2xl font-bold text-gray-800">Detail Pesanan</h2>
-                        <span id="orderStatus" class="px-4 py-2 rounded-full text-sm font-semibold"></span>
+        <div id="resultCard" class="card border-0 shadow-lg rounded-4 d-none mb-4">
+            <div class="card-body p-4 p-md-5">
+                <!-- Success State -->
+                <div id="successState" class="d-none">
+                    <!-- Order Header -->
+                    <div class="border-bottom pb-4 mb-4">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h2 class="h4 fw-bold text-dark mb-0">Detail Pesanan</h2>
+                            <span id="orderStatus" class="badge rounded-pill px-3 py-2 fs-6"></span>
+                        </div>
+                        <p class="text-muted mb-1">Nomor Pesanan: <span id="displayOrderNumber" class="fw-bold text-dark"></span></p>
+                        <p class="text-muted mb-1">Tanggal Pemesanan: <span id="orderDate" class="fw-bold text-dark"></span></p>
+                        <p class="text-muted mb-0">Tanggal Pengambilan: <span id="pickupDate" class="fw-bold text-dark"></span></p>
                     </div>
-                    <p class="text-gray-600">Nomor Pesanan: <span id="displayOrderNumber" class="font-semibold text-gray-800"></span></p>
-                    <p class="text-gray-600">Tanggal Pemesanan: <span id="orderDate" class="font-semibold text-gray-800"></span></p>
-                    <p class="text-gray-600">Tanggal Pengambilan: <span id="pickupDate" class="font-semibold text-gray-800"></span></p>
-                </div>
 
-                <!-- Status Timeline -->
-                <div class="mb-8">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Status Pesanan</h3>
-                    <div class="space-y-4">
-                        <!-- Step 1: Order Placed -->
-                        <div class="flex items-start timeline-step" data-step="placed">
-                            <div class="flex-shrink-0">
-                                <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center step-icon">
-                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
-                                    </svg>
+                    <!-- Status Timeline -->
+                    <div class="mb-5">
+                        <h3 class="h5 fw-bold text-dark mb-4">Status Pesanan</h3>
+                        <div class="d-flex flex-column gap-0 position-relative ps-3">
+                            <!-- Step 1: Order Placed -->
+                            <div class="d-flex align-items-start timeline-step mb-4 position-relative" data-step="placed">
+                                <div class="rounded-circle d-flex align-items-center justify-content-center step-icon bg-secondary" style="width: 40px; height: 40px; z-index: 2;">
+                                    <i class="fa-solid fa-check text-white"></i>
+                                </div>
+                                <div class="ms-3 flex-grow-1 pt-1">
+                                    <p class="fw-bold text-dark mb-0">Pesanan Diterima</p>
+                                    <p class="small text-muted mb-0">Pesanan Anda telah diterima dan sedang diproses</p>
                                 </div>
                             </div>
-                            <div class="ml-4 flex-1">
-                                <p class="font-semibold text-gray-800">Pesanan Diterima</p>
-                                <p class="text-sm text-gray-600">Pesanan Anda telah diterima dan sedang diproses</p>
-                            </div>
-                        </div>
 
-                        <!-- Connector -->
-                        <div class="ml-5 w-0.5 h-8 bg-gray-300 timeline-connector"></div>
-
-                        <!-- Step 2: Payment Confirmed -->
-                        <div class="flex items-start timeline-step" data-step="paid">
-                            <div class="flex-shrink-0">
-                                <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center step-icon">
-                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z"></path>
-                                        <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd"></path>
-                                    </svg>
+                            <!-- Step 2: Payment Confirmed -->
+                            <div class="d-flex align-items-start timeline-step mb-4 position-relative" data-step="paid">
+                                <div class="timeline-connector bg-secondary position-absolute" style="width: 2px; height: 100%; top: -100%; left: 19px; z-index: 1;"></div>
+                                <div class="rounded-circle d-flex align-items-center justify-content-center step-icon bg-secondary" style="width: 40px; height: 40px; z-index: 2;">
+                                    <i class="fa-solid fa-money-bill-wave text-white"></i>
+                                </div>
+                                <div class="ms-3 flex-grow-1 pt-1">
+                                    <p class="fw-bold text-dark mb-0">Pembayaran Dikonfirmasi</p>
+                                    <p class="small text-muted mb-0">Pembayaran Anda telah diterima dan diverifikasi</p>
                                 </div>
                             </div>
-                            <div class="ml-4 flex-1">
-                                <p class="font-semibold text-gray-800">Pembayaran Dikonfirmasi</p>
-                                <p class="text-sm text-gray-600">Pembayaran Anda telah diterima dan diverifikasi</p>
-                            </div>
-                        </div>
 
-                        <!-- Connector -->
-                        <div class="ml-5 w-0.5 h-8 bg-gray-300 timeline-connector"></div>
-
-                        <!-- Step 3: Preparing -->
-                        <div class="flex items-start timeline-step" data-step="preparing">
-                            <div class="flex-shrink-0">
-                                <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center step-icon">
-                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M3 1a1 1 0 000 2h1.22l.305 1.222a.997.997 0 00.01.042l1.358 5.43-.893.892C3.74 11.846 4.632 14 6.414 14H15a1 1 0 000-2H6.414l1-1H14a1 1 0 00.894-.553l3-6A1 1 0 0017 3H6.28l-.31-1.243A1 1 0 005 1H3zM16 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM6.5 18a1.5 1.5 0 100-3 1.5 1.5 0 000 3z"></path>
-                                    </svg>
+                            <!-- Step 3: Preparing -->
+                            <div class="d-flex align-items-start timeline-step mb-4 position-relative" data-step="preparing">
+                                <div class="timeline-connector bg-secondary position-absolute" style="width: 2px; height: 100%; top: -100%; left: 19px; z-index: 1;"></div>
+                                <div class="rounded-circle d-flex align-items-center justify-content-center step-icon bg-secondary" style="width: 40px; height: 40px; z-index: 2;">
+                                    <i class="fa-solid fa-fire-burner text-white"></i>
+                                </div>
+                                <div class="ms-3 flex-grow-1 pt-1">
+                                    <p class="fw-bold text-dark mb-0">Sedang Diproses</p>
+                                    <p class="small text-muted mb-0">Pesanan Anda sedang disiapkan dengan cermat</p>
                                 </div>
                             </div>
-                            <div class="ml-4 flex-1">
-                                <p class="font-semibold text-gray-800">Sedang Diproses</p>
-                                <p class="text-sm text-gray-600">Pesanan Anda sedang disiapkan dengan cermat</p>
-                            </div>
-                        </div>
 
-                        <!-- Connector -->
-                        <div class="ml-5 w-0.5 h-8 bg-gray-300 timeline-connector"></div>
-
-                        <!-- Step 4: Ready -->
-                        <div class="flex items-start timeline-step" data-step="ready">
-                            <div class="flex-shrink-0">
-                                <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center step-icon">
-                                    <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                                        <path d="M10 2a5 5 0 00-5 5v2a2 2 0 00-2 2v5a2 2 0 002 2h10a2 2 0 002-2v-5a2 2 0 00-2-2H7V7a3 3 0 015.905-.75 1 1 0 001.937-.5A5.002 5.002 0 0010 2z"></path>
-                                    </svg>
+                            <!-- Step 4: Ready -->
+                            <div class="d-flex align-items-start timeline-step position-relative" data-step="ready">
+                                <div class="timeline-connector bg-secondary position-absolute" style="width: 2px; height: 100%; top: -100%; left: 19px; z-index: 1;"></div>
+                                <div class="rounded-circle d-flex align-items-center justify-content-center step-icon bg-secondary" style="width: 40px; height: 40px; z-index: 2;">
+                                    <i class="fa-solid fa-bag-shopping text-white"></i>
                                 </div>
-                            </div>
-                            <div class="ml-4 flex-1">
-                                <p class="font-semibold text-gray-800">Siap Diambil</p>
-                                <p class="text-sm text-gray-600">Pesanan siap untuk diambil di toko</p>
+                                <div class="ms-3 flex-grow-1 pt-1">
+                                    <p class="fw-bold text-dark mb-0">Siap Diambil</p>
+                                    <p class="small text-muted mb-0">Pesanan siap untuk diambil di toko</p>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Order Items -->
-                <div class="mb-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Item Pesanan</h3>
-                    <div id="orderItems" class="space-y-3">
-                        <!-- Items will be populated here -->
+                    <!-- Order Items -->
+                    <div class="mb-4">
+                        <h3 class="h5 fw-bold text-dark mb-3">Item Pesanan</h3>
+                        <div id="orderItems" class="d-flex flex-column gap-2">
+                            <!-- Items will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Total -->
+                    <div class="border-top pt-3 mb-4">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="fw-bold text-dark fs-5">Total Pembayaran</span>
+                            <span id="totalAmount" class="fw-bold text-primary fs-4"></span>
+                        </div>
+                    </div>
+
+                    <!-- Pickup Info -->
+                    <div class="alert bg-primary bg-opacity-10 border-0 rounded-3 p-4 mb-4">
+                        <h4 class="h6 fw-bold text-dark mb-2 d-flex align-items-center gap-2">
+                            <i class="fa-solid fa-circle-info text-primary"></i>
+                            Informasi Pengambilan
+                        </h4>
+                        <p class="small text-dark mb-0">
+                            <strong>Lokasi:</strong> Strawberry Bakery<br>
+                            Jl. Makmur Sejahtera No. 123, Ngawi, East Java 63251<br>
+                            <strong>Jam Operasional:</strong> Senin-Sabtu (09.00-19.00), Minggu (10.00-17.00)
+                        </p>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex flex-column flex-md-row gap-3 mt-4">
+                        <button onclick="window.print()" class="btn btn-light rounded-pill py-2 px-4 fw-bold flex-grow-1">
+                            <i class="fa-solid fa-print me-2"></i> Print
+                        </button>
+                        <button onclick="location.reload()" class="btn btn-strawberry rounded-pill py-2 px-4 fw-bold flex-grow-1">
+                            <i class="fa-solid fa-rotate-right me-2"></i> Lacak Pesanan Lain
+                        </button>
                     </div>
                 </div>
 
-                <!-- Total -->
-                <div class="border-t border-gray-200 pt-4">
-                    <div class="flex justify-between items-center text-lg">
-                        <span class="font-semibold text-gray-800">Total Pembayaran</span>
-                        <span id="totalAmount" class="font-bold text-pink-500 text-xl"></span>
+                <!-- Error State -->
+                <div id="errorState" class="d-none text-center py-5">
+                    <div class="rounded-circle bg-danger bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-4" style="width: 80px; height: 80px;">
+                        <i class="fa-solid fa-circle-xmark text-danger" style="font-size: 2.5rem;"></i>
                     </div>
-                </div>
-
-                <!-- Pickup Info -->
-                <div class="bg-pink-50 rounded-xl p-4 mt-6">
-                    <h4 class="font-semibold text-gray-800 mb-2 flex items-center">
-                        <svg class="w-5 h-5 mr-2 text-pink-500" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"></path>
-                        </svg>
-                        Informasi Pengambilan
-                    </h4>
-                    <p class="text-sm text-gray-700">
-                        <strong>Lokasi:</strong> Strawberry Bakery<br>
-                        Jl. Makmur Sejahtera No. 123, Ngawi, East Java 63251<br>
-                        <strong>Jam Operasional:</strong> Senin-Sabtu (09.00-19.00), Minggu (10.00-17.00)
+                    <h3 class="h4 fw-bold text-dark mb-2">Pesanan Tidak Ditemukan</h3>
+                    <p class="text-muted mb-4">
+                        Nomor pesanan yang Anda masukkan tidak ditemukan dalam sistem kami.<br>
+                        Pastikan Anda memasukkan nomor yang benar.
                     </p>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="flex gap-4 mt-6">
-                    <button onclick="window.print()" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-xl font-semibold hover:bg-gray-200 transition">
-                        🖨️ Print
-                    </button>
-                    <button onclick="location.reload()" class="flex-1 bg-pink-500 text-white py-3 rounded-xl font-semibold hover:bg-pink-600 transition">
-                        🔍 Lacak Pesanan Lain
+                    <button onclick="location.reload()" class="btn btn-strawberry rounded-pill px-5 py-2 fw-bold">
+                        Coba Lagi
                     </button>
                 </div>
-            </div>
-
-            <!-- Error State -->
-            <div id="errorState" class="hidden text-center py-8">
-                <div class="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <svg class="w-10 h-10 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
-                    </svg>
-                </div>
-                <h3 class="text-xl font-bold text-gray-800 mb-2">Pesanan Tidak Ditemukan</h3>
-                <p class="text-gray-600 mb-6">
-                    Nomor pesanan yang Anda masukkan tidak ditemukan dalam sistem kami.<br>
-                    Pastikan Anda memasukkan nomor yang benar.
-                </p>
-                <button onclick="location.reload()" class="bg-pink-500 text-white px-8 py-3 rounded-xl font-semibold hover:bg-pink-600 transition">
-                    Coba Lagi
-                </button>
             </div>
         </div>
 
         <!-- Info Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8">
-            <div class="bg-white rounded-xl p-6 text-center shadow-sm">
-                <div class="text-3xl mb-2">📱</div>
-                <h3 class="font-semibold text-gray-800 mb-1">WhatsApp</h3>
-                <p class="text-sm text-gray-600">+62 812-3456-7890</p>
+        <div class="row g-3">
+            <div class="col-12 col-md-4">
+                <div class="card border-0 shadow-sm rounded-4 text-center h-100">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <i class="fa-brands fa-whatsapp text-success" style="font-size: 2rem;"></i>
+                        </div>
+                        <h3 class="h6 fw-bold text-dark mb-1">WhatsApp</h3>
+                        <p class="small text-muted mb-0">+62 812-3456-7890</p>
+                    </div>
+                </div>
             </div>
-            <div class="bg-white rounded-xl p-6 text-center shadow-sm">
-                <div class="text-3xl mb-2">📧</div>
-                <h3 class="font-semibold text-gray-800 mb-1">Email</h3>
-                <p class="text-sm text-gray-600">info@strawberrybakery.com</p>
+            <div class="col-12 col-md-4">
+                <div class="card border-0 shadow-sm rounded-4 text-center h-100">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <i class="fa-solid fa-envelope text-primary" style="font-size: 2rem;"></i>
+                        </div>
+                        <h3 class="h6 fw-bold text-dark mb-1">Email</h3>
+                        <p class="small text-muted mb-0">info@strawberrybakery.com</p>
+                    </div>
+                </div>
             </div>
-            <div class="bg-white rounded-xl p-6 text-center shadow-sm">
-                <div class="text-3xl mb-2">❓</div>
-                <h3 class="font-semibold text-gray-800 mb-1">FAQ</h3>
-                <a href="{{ route('faq') }}" class="text-sm text-pink-500 hover:underline">Lihat Pertanyaan</a>
+            <div class="col-12 col-md-4">
+                <div class="card border-0 shadow-sm rounded-4 text-center h-100">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <i class="fa-solid fa-circle-question text-warning" style="font-size: 2rem;"></i>
+                        </div>
+                        <h3 class="h6 fw-bold text-dark mb-1">FAQ</h3>
+                        <a href="{{ route('faq') }}" class="small text-primary text-decoration-none hover-primary">Lihat Pertanyaan</a>
+                    </div>
+                </div>
             </div>
         </div>
 
     </div>
 </section>
+
+@push('styles')
+<style>
+@media print {
+    body * {
+        visibility: hidden;
+    }
+    #resultCard, #resultCard * {
+        visibility: visible;
+    }
+    #resultCard {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        box-shadow: none !important;
+    }
+    .btn, .badge {
+        display: none !important;
+    }
+}
+</style>
+@endpush
 
 <!-- Tracking Script -->
 <script>
@@ -271,15 +284,15 @@ document.getElementById('trackingForm').addEventListener('submit', function(e) {
     const errorState = document.getElementById('errorState');
 
     // Show result card
-    resultCard.classList.remove('hidden');
+    resultCard.classList.remove('d-none');
 
     // Check if order exists
     if (demoOrders[orderNumber]) {
         const order = demoOrders[orderNumber];
 
         // Hide error, show success
-        errorState.classList.add('hidden');
-        successState.classList.remove('hidden');
+        errorState.classList.add('d-none');
+        successState.classList.remove('d-none');
 
         // Populate order details
         document.getElementById('displayOrderNumber').textContent = order.orderNumber;
@@ -290,17 +303,17 @@ document.getElementById('trackingForm').addEventListener('submit', function(e) {
         // Set status badge
         const statusBadge = document.getElementById('orderStatus');
         const statusConfig = {
-            'placed': { text: 'Pesanan Diterima', class: 'bg-blue-100 text-blue-700' },
-            'paid': { text: 'Pembayaran Dikonfirmasi', class: 'bg-green-100 text-green-700' },
-            'preparing': { text: 'Sedang Diproses', class: 'bg-yellow-100 text-yellow-700' },
-            'ready': { text: 'Siap Diambil', class: 'bg-purple-100 text-purple-700' },
-            'completed': { text: 'Selesai', class: 'bg-gray-100 text-gray-700' },
-            'cancelled': { text: 'Dibatalkan', class: 'bg-red-100 text-red-700' }
+            'placed': { text: 'Pesanan Diterima', class: 'bg-primary bg-opacity-10 text-primary' },
+            'paid': { text: 'Pembayaran Dikonfirmasi', class: 'bg-success bg-opacity-10 text-success' },
+            'preparing': { text: 'Sedang Diproses', class: 'bg-warning bg-opacity-10 text-warning' },
+            'ready': { text: 'Siap Diambil', class: 'bg-info bg-opacity-10 text-info' },
+            'completed': { text: 'Selesai', class: 'bg-secondary bg-opacity-10 text-secondary' },
+            'cancelled': { text: 'Dibatalkan', class: 'bg-danger bg-opacity-10 text-danger' }
         };
 
         const currentStatus = statusConfig[order.status];
         statusBadge.textContent = currentStatus.text;
-        statusBadge.className = `px-4 py-2 rounded-full text-sm font-semibold ${currentStatus.class}`;
+        statusBadge.className = `badge rounded-pill px-3 py-2 fs-6 ${currentStatus.class}`;
 
         // Update timeline
         updateTimeline(order.status);
@@ -310,12 +323,12 @@ document.getElementById('trackingForm').addEventListener('submit', function(e) {
         itemsContainer.innerHTML = '';
         order.items.forEach(item => {
             itemsContainer.innerHTML += `
-                <div class="flex justify-between items-center py-2 border-b border-gray-100">
+                <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
                     <div>
-                        <p class="font-medium text-gray-800">${item.name}</p>
-                        <p class="text-sm text-gray-600">Jumlah: ${item.quantity}</p>
+                        <p class="fw-medium text-dark mb-0">${item.name}</p>
+                        <p class="small text-muted mb-0">Jumlah: ${item.quantity}</p>
                     </div>
-                    <span class="font-semibold text-gray-800">${item.price}</span>
+                    <span class="fw-bold text-dark">${item.price}</span>
                 </div>
             `;
         });
@@ -324,8 +337,8 @@ document.getElementById('trackingForm').addEventListener('submit', function(e) {
         resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     } else {
         // Show error state
-        successState.classList.add('hidden');
-        errorState.classList.remove('hidden');
+        successState.classList.add('d-none');
+        errorState.classList.remove('d-none');
 
         // Smooth scroll to result
         resultCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -339,25 +352,25 @@ function updateTimeline(status) {
     steps.forEach((step, index) => {
         const stepElement = document.querySelector(`[data-step="${step}"]`);
         const icon = stepElement.querySelector('.step-icon');
-        const connector = stepElement.nextElementSibling;
+        const connector = stepElement.querySelector('.timeline-connector');
 
         if (index <= currentStepIndex) {
             // Completed step
-            icon.classList.remove('bg-gray-300');
-            icon.classList.add('bg-pink-500');
+            icon.classList.remove('bg-secondary');
+            icon.classList.add('bg-primary');
 
-            if (connector && connector.classList.contains('timeline-connector')) {
-                connector.classList.remove('bg-gray-300');
-                connector.classList.add('bg-pink-500');
+            if (connector) {
+                connector.classList.remove('bg-secondary');
+                connector.classList.add('bg-primary');
             }
         } else {
             // Upcoming step
-            icon.classList.remove('bg-pink-500');
-            icon.classList.add('bg-gray-300');
+            icon.classList.remove('bg-primary');
+            icon.classList.add('bg-secondary');
 
-            if (connector && connector.classList.contains('timeline-connector')) {
-                connector.classList.remove('bg-pink-500');
-                connector.classList.add('bg-gray-300');
+            if (connector) {
+                connector.classList.remove('bg-primary');
+                connector.classList.add('bg-secondary');
             }
         }
     });

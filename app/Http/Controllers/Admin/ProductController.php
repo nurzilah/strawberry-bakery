@@ -20,7 +20,8 @@ class ProductController extends Controller
     public function index()
     {
         $products = Product::with('category')->latest()->paginate(10);
-        return view('admin.products.index', compact('products'));
+        $recentReviews = \App\Models\ProductReview::with(['user', 'product'])->latest()->paginate(10, ['*'], 'reviews_page');
+        return view('admin.products.index', compact('products', 'recentReviews'));
     }
 
     public function create()

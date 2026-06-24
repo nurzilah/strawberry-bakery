@@ -152,12 +152,12 @@
 @endpush
 
 @section('content')
-    <section class="hero-section contact-hero text-center">
-        <div class="container">
-            <span class="badge rounded-pill text-bg-light px-3 py-2">Customer Support</span>
-            <h1 class="contact-hero__title mt-3">Hubungi Kami</h1>
-            <p class="contact-hero__text">
-                Kami siap membantu pemesanan, pre-order H-2, pembayaran, dan informasi produk Strawberry Cake & Bakery Tegal.
+    <section class="text-white text-center py-5 mb-5" style="background: linear-gradient(135deg, rgba(233, 79, 112, 0.95), rgba(201, 52, 85, 0.95)), url('https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=1200') center/cover; border-radius: 0 0 2rem 2rem; margin-top: -3rem; padding-top: 5rem !important;">
+        <div class="container py-4">
+            <span class="badge bg-white text-primary rounded-pill px-3 py-2 mb-3 shadow-sm fw-bold"><i class="fa-solid fa-headset me-1"></i> Customer Support</span>
+            <h1 class="display-4 fw-bold mb-3" style="font-family: 'Playfair Display', serif;">Hubungi Kami</h1>
+            <p class="lead mb-0 text-white-50 mx-auto" style="max-width: 600px;">
+                Kami siap membantu pemesanan, pre-order, pembayaran, dan informasi produk Strawberry Cake & Bakery Tegal.
             </p>
         </div>
     </section>

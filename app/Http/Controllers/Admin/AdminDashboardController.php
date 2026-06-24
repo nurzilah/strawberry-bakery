@@ -74,15 +74,19 @@ class AdminDashboardController extends Controller
         // Stok Menipis (Misal < 10)
         $lowStockProducts = Product::where('stock', '<=', 10)->orderBy('stock', 'asc')->take(5)->get();
 
-        // Sistem Rekomendasi (Dummy atau Actual Stats jika ada tabelnya, disini kita buat dummy/placeholder untuk views)
+        $recommendationService = app(\App\Services\RecommendationService::class);
+        // Untuk demo, kita ambil evaluasi dari semua user atau user pertama
+        $testUserId = auth()->id() ?? User::first()->id ?? 1;
+
+        $precision = $recommendationService->calculatePrecision();
+
         $recommendationStats = [
-            'usage_count' => rand(100, 500),
-            'top_recommended' => Product::inRandomOrder()->take(3)->get(),
-            'accuracy' => 85.5,
-            'precision' => 82.3,
-            'recall' => 88.1,
-            'mae' => 1.2,
-            'rmse' => 1.5,
+            'usage_count' => DB::table('recommendation_logs')->count(),
+            'accuracy' => $precision, // Dalam konteks log click, akurasi bisa disamakan dengan precision
+            'precision' => $precision,
+            'recall' => $recommendationService->calculateRecall($testUserId),
+            'mae' => $recommendationService->calculateMAE($testUserId),
+            'rmse' => $recommendationService->calculateRMSE($testUserId),
         ];
 
         return view('admin.dashboard', compact(

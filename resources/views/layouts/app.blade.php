@@ -9,7 +9,7 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ mix('css/app.css') }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" rel="stylesheet">
@@ -19,371 +19,304 @@
             --sb-primary: #e94f70;
             --sb-primary-dark: #c93455;
             --sb-primary-soft: #fff1f4;
-            --sb-accent: #f8b84e;
-            --sb-dark: #0f172a;
-            --sb-dark-2: #111827;
-            --sb-text: #1f2937;
+            --sb-dark: #1e293b;
+            --sb-text: #334155;
             --sb-muted: #64748b;
-            --sb-border: #e5e7eb;
-            --sb-surface: #ffffff;
-            --sb-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
         }
 
-        html {
-            scroll-padding-top: 92px;
+        html, body {
+            height: 100%;
         }
 
         body {
-            font-family: 'Poppins', 'Inter', sans-serif;
+            font-family: 'Poppins', sans-serif;
             color: var(--sb-text);
-            background:
-                radial-gradient(circle at top left, rgba(233, 79, 112, 0.08), transparent 34rem),
-                linear-gradient(180deg, #fff8fa 0%, #f8fafc 38%, #ffffff 100%);
-            min-height: 100vh;
+            background-color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            scroll-padding-top: 100px;
         }
 
-        a {
-            text-decoration: none;
+        h1, h2, h3, h4, h5, h6, .brand-title {
+            font-family: 'Playfair Display', serif;
         }
 
-        img {
-            max-width: 100%;
+        .hover-primary:hover {
+            color: var(--sb-primary) !important;
+            transition: color 0.2s ease;
+        }
+
+        /* --- Header & Navbar --- */
+        .top-bar {
+            background-color: #0f172a;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
         }
 
         .app-navbar {
-            min-height: 76px;
-            border-bottom: 1px solid rgba(226, 232, 240, 0.95);
-            backdrop-filter: blur(14px);
+            background-color: #ffffff;
+            transition: all 0.3s ease;
         }
 
         .navbar-brand img {
-            width: 48px;
-            height: 48px;
+            height: 50px;
             object-fit: contain;
         }
 
         .brand-title {
-            font-weight: 700;
-            color: var(--sb-primary);
-            line-height: 1.1;
-            letter-spacing: 0;
-            white-space: normal;
+            color: #0f172a;
+            font-size: 1.4rem;
+            line-height: 1;
+            margin-bottom: 2px;
         }
 
         .brand-subtitle {
-            display: block;
-            color: var(--sb-muted);
-            font-size: 0.72rem;
-            font-weight: 500;
-            margin-top: 0.12rem;
+            color: var(--sb-primary);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         .nav-link {
-            border-radius: 999px;
-            font-weight: 500;
-            color: #334155;
-            padding: 0.55rem 0.9rem !important;
-            transition: color 0.2s ease, background-color 0.2s ease;
-        }
-
-        .nav-link:hover,
-        .nav-link.active {
-            color: var(--sb-primary);
-            background-color: var(--sb-primary-soft);
-        }
-
-        .navbar-toggler {
-            border-color: var(--sb-border);
-            box-shadow: none !important;
-        }
-
-        .auth-chip {
-            background-color: #f8fafc;
-            border: 1px solid var(--sb-border);
             color: #475569;
-            font-weight: 600;
+            font-weight: 500;
+            padding: 1rem 1.25rem !important;
+            position: relative;
+            transition: color 0.3s ease;
         }
 
-        .btn,
-        button,
-        input,
-        select,
-        textarea {
-            letter-spacing: 0;
+        .nav-link:hover, .nav-link.active {
+            color: var(--sb-primary);
         }
 
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 2px;
+            background-color: var(--sb-primary);
+            transition: width 0.3s ease;
+            border-radius: 2px;
+        }
+
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 40%;
+        }
+
+        /* --- Buttons --- */
         .btn {
-            border-radius: 999px;
-            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            padding: 0.6rem 1.5rem;
+            border-radius: 8px;
+            transition: all 0.3s ease;
         }
 
-        .btn-primary,
-        .btn-strawberry {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-            min-height: 42px;
-            padding: 0.62rem 1.15rem;
-            border-radius: 999px;
+        .btn-primary, .btn-strawberry {
             background-color: var(--sb-primary);
             border-color: var(--sb-primary);
-            color: #fff;
-            font-weight: 600;
-            box-shadow: 0 10px 22px rgba(233, 79, 112, 0.22);
-            transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+            color: white;
+            box-shadow: 0 4px 15px rgba(233, 79, 112, 0.2);
         }
 
-        .btn-primary:hover,
-        .btn-primary:focus,
-        .btn-strawberry:hover {
+        .btn-primary:hover, .btn-strawberry:hover {
             background-color: var(--sb-primary-dark);
             border-color: var(--sb-primary-dark);
-            color: #fff;
-            transform: translateY(-1px);
-            box-shadow: 0 12px 28px rgba(201, 52, 85, 0.28);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(233, 79, 112, 0.3);
         }
 
         .btn-outline-secondary {
-            border-color: var(--sb-border);
+            border: 1px solid #cbd5e1;
             color: #475569;
+            background-color: white;
         }
 
         .btn-outline-secondary:hover {
-            background-color: var(--sb-dark);
-            border-color: var(--sb-dark);
-            color: #fff;
+            background-color: #f1f5f9;
+            color: #0f172a;
+            border-color: #94a3b8;
         }
 
-        .cart-button {
-            width: 44px;
-            height: 44px;
+        .cart-icon-btn {
+            position: relative;
+            color: #475569;
+            font-size: 1.25rem;
+            padding: 0.5rem;
+            transition: color 0.3s ease;
+        }
+
+        .cart-icon-btn:hover {
             color: var(--sb-primary);
         }
 
-        .dropdown-menu {
-            border: 1px solid var(--sb-border);
-            border-radius: 0.9rem;
-            padding: 0.45rem;
+        .cart-badge {
+            position: absolute;
+            top: 0px;
+            right: -5px;
+            font-size: 0.65rem;
+            padding: 0.35em 0.5em;
         }
 
-        .dropdown-item {
-            border-radius: 0.65rem;
-            font-weight: 500;
-            padding: 0.65rem 0.8rem;
-        }
-
+        /* --- Main Content --- */
         main.app-main {
-            clear: both;
-            overflow-x: hidden;
+            flex-grow: 1;
         }
 
-        .hero-section {
-            background:
-                linear-gradient(135deg, rgba(233, 79, 112, 0.96), rgba(248, 184, 78, 0.88)),
-                url("{{ asset('images/logo.png') }}");
-            background-position: center;
-            background-size: cover;
-            border-bottom: 1px solid rgba(233, 79, 112, 0.18);
-        }
-
-        .card,
-        .bg-white.rounded-2xl,
-        .bg-white.rounded-xl,
-        .bg-white.rounded-lg {
-            border: 1px solid rgba(226, 232, 240, 0.9);
-            box-shadow: var(--sb-shadow);
-        }
-
-        .card {
-            border-radius: 1rem;
-            overflow: hidden;
-        }
-
-        .card-img-top {
-            background-color: #fff1f4;
-        }
-
-        input,
-        select,
-        textarea,
-        .form-control,
-        .form-select {
-            border-color: #dbe3ed !important;
-            border-radius: 0.85rem !important;
-        }
-
-        input:focus,
-        select:focus,
-        textarea:focus,
-        .form-control:focus,
-        .form-select:focus {
-            border-color: rgba(233, 79, 112, 0.72) !important;
-            box-shadow: 0 0 0 0.2rem rgba(233, 79, 112, 0.14) !important;
-        }
-
-        .badge {
-            letter-spacing: 0;
-        }
-
+        /* --- Footer --- */
         .site-footer {
-            background:
-                linear-gradient(180deg, #111827 0%, #0f172a 100%);
-            clear: both;
-            border-top: 4px solid rgba(233, 79, 112, 0.72);
-        }
-
-        .footer-brand-mark {
-            width: 48px;
-            height: 48px;
-            object-fit: contain;
-            background-color: #fff;
-            border-radius: 14px;
-            padding: 0.35rem;
+            background-color: #0f172a;
+            color: #cbd5e1;
+            padding-top: 4rem;
+            padding-bottom: 2rem;
+            margin-top: auto;
         }
 
         .footer-title {
+            font-family: 'Poppins', sans-serif;
             color: #ffffff;
-            font-weight: 700;
-            margin-bottom: 1rem;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            margin-bottom: 1.5rem;
         }
 
         .footer-link {
-            color: rgba(255, 255, 255, 0.72);
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: color 0.2s ease, transform 0.2s ease;
+            color: #cbd5e1;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
         }
 
         .footer-link:hover {
-            color: #fff;
-            transform: translateX(3px);
+            color: var(--sb-primary);
+            transform: translateX(5px);
         }
 
-        .footer-meta {
-            color: rgba(255, 255, 255, 0.72);
-            line-height: 1.75;
+        .footer-icon-circle {
+            width: 36px;
+            height: 36px;
+            background-color: rgba(255, 255, 255, 0.1);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .footer-icon-circle:hover {
+            background-color: var(--sb-primary);
+            color: white;
+            transform: translateY(-3px);
         }
 
         @media (max-width: 991.98px) {
             .navbar-collapse {
-                margin-top: 1rem;
+                background: white;
                 padding: 1rem;
-                border: 1px solid var(--sb-border);
-                border-radius: 1rem;
-                background-color: #fff;
-                box-shadow: var(--sb-shadow);
+                border-radius: 8px;
+                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+                margin-top: 10px;
             }
-
-            .navbar-nav {
-                gap: 0.2rem;
-            }
-
-            .brand-title {
-                font-size: 0.98rem;
-            }
-
-            .brand-subtitle {
-                display: none;
-            }
-        }
-
-        @media (max-width: 575.98px) {
-            main.app-main {
-                margin-top: 72px !important;
-            }
-
-            .navbar-brand img {
-                width: 42px;
-                height: 42px;
-            }
-
-            .brand-title {
-                max-width: 190px;
-            }
+            .nav-link::after { display: none; }
         }
     </style>
 
     @stack('styles')
 </head>
 <body>
-    <header>
-        <nav class="navbar navbar-expand-lg bg-white fixed-top app-navbar">
+
+        <!-- Main Navbar -->
+        <nav class="navbar navbar-expand-lg app-navbar py-2 py-lg-3">
             <div class="container">
-                <a class="navbar-brand d-flex align-items-center gap-2" href="{{ route('home') }}">
-                    <img src="{{ asset('images/logo.png') }}" alt="Strawberry Cake & Bakery Logo">
-                    <span>
-                        <span class="brand-title">Strawberry Cake & Bakery</span>
-                        <span class="brand-subtitle">Tegal Premium Bakery</span>
-                    </span>
+                <a class="navbar-brand d-flex align-items-center gap-3" href="{{ route('home') }}">
+                    <img src="{{ asset('images/logo.png') }}" alt="Strawberry Bakery Logo" style="mix-blend-mode: multiply; background-color: transparent;">
+                    <div class="d-flex flex-column">
+                        <span class="brand-title">Strawberry Bakery</span>
+                        <span class="brand-subtitle">Premium Cake & Pastry</span>
+                    </div>
                 </a>
 
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+                <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
                 <div class="collapse navbar-collapse" id="mainNavbar">
-                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0 gap-1">
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">Home</a>
+                            <a class="nav-link {{ request()->routeIs('home') ? 'active' : '' }}" href="{{ route('home') }}">Beranda</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}" href="{{ route('products.index') }}">Katalog</a>
+                            <a class="nav-link {{ request()->routeIs('products.*') ? 'active' : '' }}" href="{{ route('products.index') }}">Katalog Produk</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link {{ request()->routeIs('about') ? 'active' : '' }}" href="{{ route('about') }}">Tentang Kami</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('contact') }}">Hubungi Kami</a>
+                            <a class="nav-link {{ request()->routeIs('contact') ? 'active' : '' }}" href="{{ route('contact') }}">Kontak</a>
                         </li>
                     </ul>
 
-                    <div class="d-flex align-items-center gap-2">
+                    <div class="d-flex align-items-center gap-4">
                         @auth
-                            <a href="{{ route('cart.index') }}" class="btn btn-light border rounded-circle d-inline-flex align-items-center justify-content-center position-relative cart-button" aria-label="Keranjang Belanja">
-                                <i class="fa-solid fa-cart-shopping"></i>
+                            <!-- Cart Icon -->
+                            <a href="{{ route('cart.index') }}" class="cart-icon-btn text-decoration-none" aria-label="Keranjang">
+                                <i class="fa-solid fa-bag-shopping"></i>
                                 @php
                                     $cartCount = \App\Models\Cart::countItemsForUser(auth()->id());
                                 @endphp
                                 @if($cartCount > 0)
-                                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                                        {{ $cartCount }}
-                                    </span>
+                                    <span class="badge rounded-pill bg-danger cart-badge shadow-sm">{{ $cartCount }}</span>
                                 @endif
                             </a>
 
+                            <!-- User Dropdown -->
                             <div class="dropdown">
-                                <button class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center gap-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fa-regular fa-user"></i>
-                                    <span>{{ auth()->user()->name }}</span>
+                                <button class="btn btn-outline-secondary d-flex align-items-center gap-2 rounded-pill px-3 py-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fa-regular fa-circle-user fs-5"></i>
+                                    <span class="fw-medium">{{ explode(' ', auth()->user()->name)[0] }}</span>
                                 </button>
-                                <ul class="dropdown-menu dropdown-menu-end shadow-sm">
+                                <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: 12px;">
                                     <li>
-                                        <a class="dropdown-item" href="{{ route('profile.show') }}">
-                                            <i class="fa-regular fa-id-card me-2"></i>Profil
+                                        <a class="dropdown-item py-2" href="{{ route('profile.show') }}">
+                                            <i class="fa-regular fa-id-card me-2 text-primary"></i> Profil Saya
                                         </a>
                                     </li>
                                     <li>
-                                        <a class="dropdown-item" href="{{ route('orders.index') }}">
-                                            <i class="fa-solid fa-receipt me-2"></i>Pesanan Saya
+                                        <a class="dropdown-item py-2" href="{{ route('orders.index') }}">
+                                            <i class="fa-solid fa-receipt me-2 text-primary"></i> Riwayat Pesanan
                                         </a>
                                     </li>
+                                    @if(auth()->user()->role === 'admin' || auth()->user()->role === 'owner')
+                                    <li>
+                                        <a class="dropdown-item py-2" href="{{ route('admin.dashboard') }}">
+                                            <i class="fa-solid fa-chart-line me-2 text-primary"></i> Dashboard Admin
+                                        </a>
+                                    </li>
+                                    @endif
                                     <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <form method="POST" action="{{ route('logout') }}">
                                             @csrf
-                                            <button type="submit" class="dropdown-item text-danger">
-                                                <i class="fa-solid fa-right-from-bracket me-2"></i>Logout
+                                            <button type="submit" class="dropdown-item py-2 text-danger fw-medium">
+                                                <i class="fa-solid fa-arrow-right-from-bracket me-2"></i> Keluar
                                             </button>
                                         </form>
                                     </li>
                                 </ul>
                             </div>
                         @else
-                            <span class="badge rounded-pill auth-chip">Guest</span>
-                            <a href="{{ route('login') }}" class="btn btn-outline-secondary btn-sm">Login</a>
-                            <a href="{{ route('register') }}" class="btn btn-strawberry btn-sm">Register</a>
+                            <div class="d-flex align-items-center gap-2">
+                                <a href="{{ route('login') }}" class="btn text-secondary fw-semibold px-3 hover-primary border-0 bg-transparent">Masuk</a>
+                                <a href="{{ route('register') }}" class="btn btn-primary px-4 shadow-sm">Daftar</a>
+                            </div>
                         @endauth
                     </div>
                 </div>
@@ -391,61 +324,83 @@
         </nav>
     </header>
 
-    <main class="app-main py-5" style="min-height: 80vh; margin-top: 76px;">
+    <main class="app-main">
         @yield('content')
     </main>
 
-    <footer class="site-footer text-white pt-5 pb-4">
+    <footer class="site-footer">
         <div class="container">
-            <div class="row g-4 g-lg-5">
-                <div class="col-12 col-md-6 col-lg-3">
-                    <div class="d-flex align-items-center gap-3 mb-3">
-                        <img src="{{ asset('images/logo.png') }}" alt="Strawberry Cake & Bakery" class="footer-brand-mark">
-                        <h2 class="h5 fw-bold mb-0">Strawberry Cake & Bakery</h2>
+            <div class="row g-5 mb-5">
+                <!-- Brand & Description -->
+                <div class="col-12 col-lg-4">
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <img src="{{ asset('images/logo.png') }}" alt="Strawberry Bakery Logo" style="height: 50px; background-color: transparent;">
+                        <h2 class="h4 text-white mb-0" style="font-family: 'Playfair Display', serif;">Strawberry<br>Bakery</h2>
                     </div>
-                    <p class="mb-3 footer-meta">
-                        Strawberry Cake & Bakery Tegal - Premium pre-order bakery system.
+                    <p class="mb-4 text-white-50" style="line-height: 1.8;">
+                        Menghadirkan kreasi roti dan kue premium berkualitas tinggi untuk setiap momen spesial Anda. Dibuat dengan bahan pilihan dan dedikasi penuh.
                     </p>
-                    <div class="d-flex gap-2">
-                        <span class="badge rounded-pill text-bg-light">Pre-order</span>
-                        <span class="badge rounded-pill text-bg-light">Fresh Bakery</span>
+                    <div class="d-flex gap-3">
+                        <a href="https://instagram.com/strawberrycaketegal" target="_blank" class="footer-icon-circle text-decoration-none">
+                            <i class="fa-brands fa-instagram"></i>
+                        </a>
+                        <a href="https://wa.me/628157173138" target="_blank" class="footer-icon-circle text-decoration-none">
+                            <i class="fa-brands fa-whatsapp"></i>
+                        </a>
                     </div>
                 </div>
 
-                <div class="col-12 col-md-6 col-lg-3">
-                    <h2 class="h6 footer-title">Quick Links</h2>
-                    <ul class="list-unstyled d-grid gap-2 mb-0">
-                        <li><a class="footer-link" href="{{ route('home') }}"><i class="fa-solid fa-chevron-right small"></i>Home</a></li>
-                        <li><a class="footer-link" href="{{ route('products.index') }}"><i class="fa-solid fa-chevron-right small"></i>Katalog</a></li>
-                        <li><a class="footer-link" href="{{ route('about') }}"><i class="fa-solid fa-chevron-right small"></i>Tentang Kami</a></li>
-                        <li><a class="footer-link" href="{{ route('contact') }}"><i class="fa-solid fa-chevron-right small"></i>Hubungi Kami</a></li>
+                <!-- Navigation Links -->
+                <div class="col-12 col-md-4 col-lg-2 offset-lg-1">
+                    <h3 class="footer-title">Perusahaan</h3>
+                    <ul class="list-unstyled d-flex flex-column gap-3">
+                        <li><a href="{{ route('about') }}" class="footer-link">Tentang Kami</a></li>
+                        <li><a href="{{ route('products.index') }}" class="footer-link">Katalog Produk</a></li>
+                        <li><a href="{{ route('contact') }}" class="footer-link">Lokasi Toko</a></li>
+                        <li><a href="{{ route('contact') }}" class="footer-link">Hubungi Kami</a></li>
                     </ul>
                 </div>
 
-                <div class="col-12 col-md-6 col-lg-3">
-                    <h2 class="h6 footer-title">Operational Info & Support</h2>
-                    <ul class="list-unstyled d-grid gap-2 mb-0">
-                        <li><a class="footer-link" href="{{ route('faq') }}"><i class="fa-regular fa-circle-question"></i>FAQ</a></li>
-                        <li><a class="footer-link" href="{{ route('terms') }}"><i class="fa-solid fa-shield-halved"></i>Kebijakan Privasi</a></li>
-                        <li><a class="footer-link" href="{{ route('order.track') }}"><i class="fa-solid fa-truck-fast"></i>Lacak Pesanan</a></li>
+                <!-- Support Links -->
+                <div class="col-12 col-md-4 col-lg-2">
+                    <h3 class="footer-title">Bantuan</h3>
+                    <ul class="list-unstyled d-flex flex-column gap-3">
+                        <li><a href="{{ route('faq') }}" class="footer-link">FAQ / Bantuan</a></li>
+                        <li><a href="{{ route('order.track') }}" class="footer-link">Lacak Pesanan</a></li>
+                        <li><a href="{{ route('terms') }}" class="footer-link">Syarat & Ketentuan</a></li>
+                        <li><a href="{{ route('terms') }}" class="footer-link">Kebijakan Privasi</a></li>
                     </ul>
                 </div>
 
-                <div class="col-12 col-md-6 col-lg-3">
-                    <h2 class="h6 footer-title">Store Metadata</h2>
-                    <ul class="list-unstyled d-grid gap-2 mb-0 footer-meta">
-                        <li><i class="fa-solid fa-location-dot me-2 text-white"></i>Jl. AR. Hakim No.149, Mangkukusuman, Kota Tegal</li>
-                        <li><i class="fa-brands fa-whatsapp me-2 text-white"></i>Whatsapp: +62 815-7173-138</li>
-                        <li><i class="fa-regular fa-clock me-2 text-white"></i>Setiap hari, 08.00 - 21.00 WIB</li>
+                <!-- Contact Info -->
+                <div class="col-12 col-md-4 col-lg-3">
+                    <h3 class="footer-title">Hubungi Kami</h3>
+                    <ul class="list-unstyled d-flex flex-column gap-3 text-white-50">
+                        <li class="d-flex align-items-start gap-3">
+                            <i class="fa-solid fa-location-dot mt-1 text-primary"></i>
+                            <span>Jl. AR. Hakim No.149,<br>Mangkukusuman, Kota Tegal</span>
+                        </li>
+                        <li class="d-flex align-items-center gap-3">
+                            <i class="fa-solid fa-phone text-primary"></i>
+                            <span>+62 815-7173-138</span>
+                        </li>
+                        <li class="d-flex align-items-center gap-3">
+                            <i class="fa-regular fa-clock text-primary"></i>
+                            <span>08.00 - 21.00 WIB</span>
+                        </li>
                     </ul>
+                    <a href="https://wa.me/628157173138" target="_blank" class="btn btn-primary w-100 mt-3 d-flex align-items-center justify-content-center gap-2">
+                        <i class="fa-brands fa-whatsapp fs-5"></i> Pesan via WhatsApp
+                    </a>
                 </div>
             </div>
 
-            <hr class="border-secondary opacity-50 my-4">
-
-            <div class="d-flex flex-column flex-md-row justify-content-between align-items-center gap-2 text-white-50 small">
-                <p class="mb-0">&copy; {{ now()->year }} Strawberry Cake & Bakery Tegal. All rights reserved.</p>
-                <p class="mb-0">Sistem pre-order bakery untuk pelanggan Tegal.</p>
+            <!-- Copyright -->
+            <div class="border-top border-secondary pt-4 mt-4 text-center text-md-start d-md-flex justify-content-between align-items-center text-white-50" style="border-opacity: 0.2 !important; font-size: 0.85rem;">
+                <p class="mb-2 mb-md-0">&copy; {{ now()->year }} Strawberry Cake & Bakery. All rights reserved.</p>
+                <div class="d-flex gap-3 justify-content-center">
+                    <span>Designed with ❤️ in Tegal</span>
+                </div>
             </div>
         </div>
     </footer>

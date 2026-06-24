@@ -224,20 +224,20 @@
     @endphp
 
     <div class="catalog-page">
-        <section class="hero-section catalog-hero">
-            <div class="container">
-                <div class="row align-items-end g-3">
-                    <div class="col-12 col-lg-8">
-                        <span class="badge rounded-pill catalog-hero__badge px-3 py-2">Fresh Bakery Tegal</span>
-                        <h1 class="catalog-hero__title mt-3">Katalog Produk Strawberry Cake & Bakery</h1>
-                        <p class="catalog-hero__subtitle mt-3">
+        <section class="text-white py-5 mb-5" style="background: linear-gradient(135deg, rgba(233, 79, 112, 0.95), rgba(201, 52, 85, 0.95)), url('https://images.unsplash.com/photo-1517433670267-08bbd4be890f?w=1200') center/cover; border-radius: 0 0 2rem 2rem; margin-top: -3rem; padding-top: 5rem !important;">
+            <div class="container py-4">
+                <div class="row align-items-center justify-content-between g-4">
+                    <div class="col-12 col-lg-8 text-center text-lg-start">
+                        <span class="badge bg-white text-primary rounded-pill px-3 py-2 mb-3 shadow-sm fw-bold"><i class="fa-solid fa-cake-candles me-1"></i> Fresh Bakery Tegal</span>
+                        <h1 class="display-4 fw-bold mb-3" style="font-family: 'Playfair Display', serif;">Katalog Produk Strawberry Cake & Bakery</h1>
+                        <p class="lead mb-0 text-white-50 mx-auto mx-lg-0" style="max-width: 600px;">
                             Pilih roti, pastry, dan cake pre-order dengan tampilan grid yang rapi, lembut, dan mudah dipindai.
                         </p>
                     </div>
-                    <div class="col-12 col-lg-4 text-lg-end">
+                    <div class="col-12 col-lg-4 text-center text-lg-end">
                         @if(isset($paginatedProducts))
-                            <span class="badge rounded-pill catalog-hero__badge px-3 py-2">
-                                {{ $paginatedProducts->total() }} produk tersedia
+                            <span class="badge bg-white text-dark rounded-pill px-4 py-3 shadow fs-6 fw-bold border border-light">
+                                <i class="fa-solid fa-boxes-stacked text-primary me-2"></i> {{ $paginatedProducts->total() }} produk tersedia
                             </span>
                         @endif
                     </div>
@@ -268,16 +268,20 @@
 
                                 @if($product)
                                     <article class="product-card">
-                                        <img
-                                            src="{{ $product->image ? asset('storage/' . $product->image) : asset('images/logo.png') }}"
-                                            class="product-card__image"
-                                            alt="{{ $product->name }}"
-                                        >
+                                        <a href="{{ route('products.show', $product->slug) }}" onclick="logRecommendationClick({{ $product->id }})">
+                                            <img
+                                                src="{{ $product->image ? asset('storage/' . $product->image) : asset('images/logo.png') }}"
+                                                class="product-card__image"
+                                                alt="{{ $product->name }}"
+                                            >
+                                        </a>
                                         <div class="product-card__body">
                                             <span class="badge rounded-pill product-card__category">
                                                 {{ $product->category->name ?? 'Produk Bakery' }}
                                             </span>
-                                            <h3 class="product-card__title">{{ $product->name }}</h3>
+                                            <a href="{{ route('products.show', $product->slug) }}" class="text-decoration-none" onclick="logRecommendationClick({{ $product->id }})">
+                                                <h3 class="product-card__title hover-text-primary">{{ $product->name }}</h3>
+                                            </a>
                                             <p class="product-card__description">
                                                 {{ Str::limit($product->description ?? 'Produk pilihan Strawberry Cake & Bakery Tegal.', 120) }}
                                             </p>
@@ -311,16 +315,20 @@
                     @forelse($paginatedProducts ?? [] as $product)
                         <div class="col">
                             <article class="product-card">
-                                <img
-                                    src="{{ $product->image ? asset('storage/' . $product->image) : asset('images/logo.png') }}"
-                                    class="product-card__image"
-                                    alt="{{ $product->name }}"
-                                >
+                                <a href="{{ route('products.show', $product->slug) }}">
+                                    <img
+                                        src="{{ $product->image ? asset('storage/' . $product->image) : asset('images/logo.png') }}"
+                                        class="product-card__image"
+                                        alt="{{ $product->name }}"
+                                    >
+                                </a>
                                 <div class="product-card__body">
                                     <span class="badge rounded-pill product-card__category">
                                         {{ $product->category->name ?? 'Produk Bakery' }}
                                     </span>
-                                    <h3 class="product-card__title">{{ $product->name }}</h3>
+                                    <a href="{{ route('products.show', $product->slug) }}" class="text-decoration-none">
+                                        <h3 class="product-card__title hover-text-primary">{{ $product->name }}</h3>
+                                    </a>
                                     <p class="product-card__description">
                                         {{ Str::limit($product->description ?? 'Produk segar pilihan Strawberry Cake & Bakery Tegal.', 120) }}
                                     </p>

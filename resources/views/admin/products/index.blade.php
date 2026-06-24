@@ -175,5 +175,80 @@
     <div class="mt-4">
         {{ $products->links('pagination::bootstrap-5') }}
     </div>
+
+    <!-- Moderasi Review -->
+    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4 mt-5">
+        <div>
+            <h2 class="h4 fw-bold text-dark mb-1">Moderasi Ulasan</h2>
+            <p class="text-muted mb-0">Kelola ulasan dari pelanggan.</p>
+        </div>
+    </div>
+
+    <div class="admin-table-card">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 products-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Pelanggan</th>
+                        <th scope="col">Produk</th>
+                        <th scope="col">Rating</th>
+                        <th scope="col">Komentar</th>
+                        <th scope="col">Tanggal</th>
+                        <th scope="col" class="text-end">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($recentReviews as $review)
+                        <tr>
+                            <td>
+                                <div class="fw-semibold text-dark">{{ $review->user->name }}</div>
+                            </td>
+                            <td>
+                                <div class="text-muted">{{ $review->product->name }}</div>
+                            </td>
+                            <td>
+                                <div class="text-warning">
+                                    @for($i = 1; $i <= 5; $i++)
+                                        @if($i <= $review->rating)
+                                            <i class="fas fa-star"></i>
+                                        @else
+                                            <i class="far fa-star text-muted" style="opacity: 0.3;"></i>
+                                        @endif
+                                    @endfor
+                                </div>
+                            </td>
+                            <td>
+                                <div class="text-muted small text-wrap" style="max-width: 300px;">
+                                    {{ $review->comment ?? '-' }}
+                                </div>
+                            </td>
+                            <td class="text-muted small">
+                                {{ $review->created_at->format('d M Y H:i') }}
+                            </td>
+                            <td class="actions-cell">
+                                <div class="d-flex align-items-center justify-content-end gap-2">
+                                    <form action="{{ route('reviews.destroy', $review->id) }}" method="POST" class="m-0" onsubmit="return confirm('Hapus ulasan ini?');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-sm btn-soft-danger rounded-pill px-3">
+                                            Hapus
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted">Belum ada ulasan dari pelanggan.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        {{ $recentReviews->links('pagination::bootstrap-5') }}
+    </div>
 </div>
 @endsection

@@ -47,6 +47,7 @@ Route::middleware(['auth'])->group(function () {
     // Dashboard
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/recommendations', [RecommendationController::class, 'index'])->name('recommendations.index');
+    Route::post('/recommendations/{product}/click', [RecommendationController::class, 'logClick'])->name('recommendations.click');
 
     // Profile Routes
     Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
@@ -61,6 +62,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [CheckoutController::class, 'index'])->name('index');
         Route::post('/', [CheckoutController::class, 'process'])->name('process');
     });
+
+    // Reviews
+    Route::post('/products/{product}/reviews', [\App\Http\Controllers\ReviewController::class, 'store'])->name('reviews.store');
+    Route::delete('/reviews/{review}', [\App\Http\Controllers\ReviewController::class, 'destroy'])->name('reviews.destroy');
 
     // Orders
     Route::prefix('orders')->name('orders.')->group(function () {
@@ -88,6 +93,11 @@ Route::middleware(['auth', 'role:owner,admin,superadmin'])->prefix('admin')->nam
     Route::get('/', fn () => redirect()->route('admin.dashboard'));
     Route::get('/dashboard', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
     
+    // Notifications
+    Route::get('notifications/unread', [\App\Http\Controllers\Admin\NotificationController::class, 'unread'])->name('notifications.unread');
+    Route::post('notifications/{id}/read', [\App\Http\Controllers\Admin\NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('notifications/read-all', [\App\Http\Controllers\Admin\NotificationController::class, 'markAllRead'])->name('notifications.read-all');
+    
     Route::resource('products', \App\Http\Controllers\Admin\ProductController::class)->except(['show']);
     Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class)->except(['show']);
     
@@ -103,6 +113,10 @@ Route::middleware(['auth', 'role:owner,kasir,superadmin'])->prefix('admin/kasir'
     Route::get('/pos', [\App\Http\Controllers\Kasir\KasirController::class, 'index'])->name('pos');
     Route::post('/pos/store', [\App\Http\Controllers\Kasir\KasirController::class, 'store'])->name('store');
     Route::get('/pos/receipt/{id}', [\App\Http\Controllers\Kasir\KasirController::class, 'printReceipt'])->name('receipt');
+    
+    // Transactions History
+    Route::get('/transactions', [\App\Http\Controllers\Kasir\TransactionHistoryController::class, 'index'])->name('transactions.index');
+    Route::get('/transactions/{id}', [\App\Http\Controllers\Kasir\TransactionHistoryController::class, 'show'])->name('transactions.show');
 });
 
 // ['role:owner,superadmin']
