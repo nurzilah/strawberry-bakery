@@ -10,6 +10,17 @@ use Illuminate\Support\Facades\DB;
 class RecommendationService
 {
     /**
+     * Cek apakah user memiliki riwayat pembelian.
+     */
+    public function hasPurchaseHistory(int $userId): bool
+    {
+        return DB::table('order_items')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.user_id', $userId)
+            ->exists();
+    }
+
+    /**
      * Bangun matriks user-produk dari riwayat pembelian (order_items).
      * Mengembalikan array 2D: [user_id => [product_id => total_quantity]]
      */

@@ -127,6 +127,15 @@ class OrderController extends Controller
         ]);
 
         $targetStatus = $request->status;
+
+        if (auth()->user()->role === 'kasir') {
+            if ($order->status !== 'processing' || $targetStatus !== 'completed') {
+                return redirect()->back()->withErrors([
+                    'status' => 'Kasir hanya dapat mengubah status pesanan dari processing menjadi completed.',
+                ]);
+            }
+        }
+
         $allowedTransitions = [
             'pending' => ['waiting_verification', 'cancelled'],
             'waiting_verification' => ['processing', 'cancelled'],

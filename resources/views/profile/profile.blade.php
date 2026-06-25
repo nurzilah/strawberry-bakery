@@ -12,10 +12,14 @@
 
                 {{-- Avatar --}}
                 <div class="flex items-center space-x-6 mb-6">
-                    <div class="w-20 h-20 rounded-full bg-pink-100 flex items-center justify-center
-                        text-pink-600 text-3xl font-bold">
-                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                    </div>
+                    @if(auth()->user()->avatar)
+                        <img src="{{ auth()->user()->avatar }}" alt="Avatar" class="w-20 h-20 rounded-full object-cover shadow-sm" referrerpolicy="no-referrer">
+                    @else
+                        <div class="w-20 h-20 rounded-full bg-pink-100 flex items-center justify-center
+                            text-pink-600 text-3xl font-bold">
+                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                        </div>
+                    @endif
 
                     <div>
                         <h3 class="text-xl font-semibold">

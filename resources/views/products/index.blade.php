@@ -214,13 +214,7 @@
 @section('content')
     @php
         $products = collect($paginatedProducts ?? []);
-        $recommendationItems = collect($recommendations ?? [])
-            ->whenEmpty(fn () => $products->take(4)->map(fn ($product) => [
-                'product' => $product,
-                'score' => null,
-                'algorithm' => 'popular_catalog_fallback',
-            ]))
-            ->take(6);
+        $recommendationItems = collect($recommendations ?? [])->take(6);
     @endphp
 
     <div class="catalog-page">

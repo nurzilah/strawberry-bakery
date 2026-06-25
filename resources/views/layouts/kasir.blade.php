@@ -207,19 +207,15 @@
             </div>
 
             <nav class="kasir-nav">
-                <a href="{{ route('kasir.dashboard') }}" class="{{ request()->routeIs('kasir.dashboard') ? 'active' : '' }}">
+                <a href="{{ route('kasir.pos') }}" class="{{ request()->routeIs('kasir.pos') ? 'active' : '' }}">
                     <i class="fa-solid fa-house"></i>
-                    <span>Beranda Kasir</span>
+                    <span>Beranda / POS</span>
                 </a>
-                <a href="{{ route('kasir.transactions.create') }}" class="{{ request()->routeIs('kasir.transactions.create') ? 'active' : '' }}">
-                    <i class="fa-solid fa-cash-register"></i>
-                    <span>Transaksi Baru</span>
-                </a>
-                <a href="{{ route('kasir.orders.index') }}" class="{{ request()->routeIs('kasir.orders.index') ? 'active' : '' }}">
+                <a href="{{ route('admin.orders.index') }}" class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
                     <i class="fa-solid fa-list-check"></i>
                     <span>Antrean Pesanan</span>
                 </a>
-                <a href="{{ route('kasir.orders.index', ['status' => 'completed']) }}" class="{{ request()->routeIs('kasir.orders.receipt') ? 'active' : '' }}">
+                <a href="{{ route('kasir.transactions.index') }}" class="{{ request()->routeIs('kasir.transactions.*') ? 'active' : '' }}">
                     <i class="fa-solid fa-receipt"></i>
                     <span>Riwayat & Cetak Struk</span>
                 </a>
@@ -243,7 +239,11 @@
                             <i class="fa-solid fa-store me-2"></i>Lihat Web
                         </a>
                         <div class="d-flex align-items-center gap-2">
-                            <span class="kasir-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'K', 0, 1)) }}</span>
+                            @if(auth()->user()->avatar)
+                                <img src="{{ auth()->user()->avatar }}" alt="Avatar" class="kasir-avatar shadow-sm" style="object-fit: cover;" referrerpolicy="no-referrer">
+                            @else
+                                <span class="kasir-avatar">{{ strtoupper(substr(auth()->user()->name ?? 'K', 0, 1)) }}</span>
+                            @endif
                             <span class="badge bg-pink-100 text-pink-600 rounded-pill px-3 py-2">Kasir Toko</span>
                         </div>
                         <form action="{{ route('logout') }}" method="POST" class="m-0">

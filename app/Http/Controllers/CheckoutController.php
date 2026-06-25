@@ -3,12 +3,39 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Order;
+use Midtrans\Config;
+use Midtrans\Snap;
+use Midtrans\Notification;
 
 class CheckoutController extends Controller
 {
+    public function __construct()
+    {
+        Config::$serverKey = config('midtrans.server_key');
+        Config::$isProduction = config('midtrans.is_production');
+        Config::$isSanitized = config('midtrans.is_sanitized');
+        Config::$is3ds = config('midtrans.is_3ds');
+    }
+
     public function index()
     {
-        return view('checkout.index');
+        $user = auth()->user();
+        $carts = $user->carts;
+        
+        $total = 0;
+        foreach ($carts as $cart) {
+            $product = \Illuminate\Support\Facades\Schema::hasColumn('carts', 'product_id') 
+                ? $cart->product 
+                : $cart->detailCart->product;
+            $qty = \Illuminate\Support\Facades\Schema::hasColumn('carts', 'quantity') 
+                ? $cart->quantity 
+                : $cart->detailCart->quantity;
+            
+            $total += $product->price * $qty;
+        }
+
+        return view('checkout.index', compact('carts', 'total'));
     }
 
     public function process(Request $request)
@@ -37,13 +64,19 @@ class CheckoutController extends Controller
             'user_id' => $user->id,
             'total_amount' => $total,
             'status' => 'pending',
-            'payment_method' => $request->payment_method ?? 'transfer'
+            'payment_status' => 'pending',
+            'payment_method' => $request->payment_method ?? 'midtrans'
         ]);
 
-        // Clear cart
+        // Clear cart — hapus detail dulu sebelum parent
         foreach ($carts as $cart) {
-            if (!\Illuminate\Support\Facades\Schema::hasColumn('carts', 'product_id')) {
-                $cart->detailCart?->delete();
+            // Hapus semua relasi child dulu
+            if ($cart->detailCart) {
+                $cart->detailCart->delete();
+            }
+            // Hapus cart items jika ada
+            if (method_exists($cart, 'items')) {
+                $cart->items()->delete();
             }
             $cart->delete();
         }
@@ -56,6 +89,66 @@ class CheckoutController extends Controller
             'data' => ['order_id' => $order->id]
         ]);
 
-        return redirect()->route('home')->with('success', 'Checkout berhasil');
+        // Set Midtrans params
+        $params = array(
+            'transaction_details' => array(
+                'order_id' => 'TRX-' . $order->id . '-' . time(),
+                'gross_amount' => $total,
+            ),
+            'customer_details' => array(
+                'first_name' => $user->name,
+                'email' => $user->email,
+            )
+        );
+
+        try {
+            $snapToken = Snap::getSnapToken($params);
+            
+            $order->update([
+                'snap_token' => $snapToken,
+                'midtrans_order_id' => $params['transaction_details']['order_id']
+            ]);
+
+            return view('checkout.index', compact('snapToken', 'order', 'carts', 'total'));
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal memproses pembayaran. ' . $e->getMessage());
+        }
+    }
+
+    public function callback(Request $request)
+    {
+        $serverKey = config('midtrans.server_key');
+        $hashed = hash('sha512', $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
+        
+        if ($hashed == $request->signature_key) {
+            $order = Order::where('midtrans_order_id', $request->order_id)->first();
+            
+            if ($order) {
+                if ($request->transaction_status == 'capture' || $request->transaction_status == 'settlement') {
+                    $order->update(['payment_status' => 'paid', 'status' => 'processing']);
+                } else if ($request->transaction_status == 'deny' || $request->transaction_status == 'cancel' || $request->transaction_status == 'expire') {
+                    $order->update(['payment_status' => 'failed', 'status' => 'cancelled']);
+                } else if ($request->transaction_status == 'pending') {
+                    $order->update(['payment_status' => 'pending']);
+                }
+            }
+        }
+        
+        return response()->json(['status' => 'ok']);
+    }
+
+    public function success()
+    {
+        return view('checkout.success');
+    }
+
+    public function pending()
+    {
+        return view('checkout.pending');
+    }
+
+    public function failed()
+    {
+        return view('checkout.failed');
     }
 }

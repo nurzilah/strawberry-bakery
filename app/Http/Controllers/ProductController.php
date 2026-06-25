@@ -80,9 +80,17 @@ class ProductController extends Controller
             ['stars' => 3, 'count' => Product::where('rating', '>=', 3)->count()],
         ];
 
-        $recommendations = auth()->check()
-            ? app(RecommendationService::class)->getRecommendations(auth()->id(), 6)
-            : [];
+        $recommendations = [];
+        $hasPurchaseHistory = false;
+        
+        if (auth()->check()) {
+            $recommendationService = app(RecommendationService::class);
+            $hasPurchaseHistory = $recommendationService->hasPurchaseHistory(auth()->id());
+            
+            if ($hasPurchaseHistory) {
+                $recommendations = $recommendationService->getRecommendations(auth()->id(), 6);
+            }
+        }
 
         return view('products.index', compact(
             'paginatedProducts',

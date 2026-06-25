@@ -64,6 +64,8 @@
             height: 100vh;
             overflow-y: auto;
             z-index: 1000;
+            display: flex;
+            flex-direction: column;
         }
 
         .dark-mode #sidebar {
@@ -91,6 +93,7 @@
 
         #sidebar ul.components {
             padding: 20px 0;
+            flex: 1;
         }
 
         #sidebar ul p {
@@ -242,6 +245,11 @@
                 <i class="fas fa-shopping-cart me-2"></i> Pesanan Online
             </a>
         </li>
+        <li class="{{ request()->routeIs('owner.users.*') ? 'active' : '' }}">
+            <a href="{{ route('owner.users.index') }}">
+                <i class="fas fa-users me-2"></i> Manajemen Akun
+            </a>
+        </li>
 
     {{-- ===== KASIR ===== --}}
     @elseif(auth()->user()->role === 'kasir')
@@ -249,6 +257,11 @@
         <li class="{{ request()->routeIs('kasir.pos') ? 'active' : '' }}">
             <a href="{{ route('kasir.pos') }}">
                 <i class="fas fa-cash-register me-2"></i> Mesin POS / Kasir
+            </a>
+        </li>
+        <li class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.orders.index') }}">
+                <i class="fas fa-shopping-cart me-2"></i> Update Pesanan
             </a>
         </li>
         <li class="{{ request()->routeIs('kasir.transactions.*') ? 'active' : '' }}">
@@ -260,6 +273,44 @@
     @endif
 
 </ul>
+
+        @php
+            $role = auth()->user()->role;
+            if (in_array($role, ['owner', 'superadmin'])) {
+                $badgeBg = '#d63384';
+                $icon = '👑';
+            } elseif ($role === 'admin') {
+                $badgeBg = '#0d6efd';
+                $icon = '🛠️';
+            } elseif ($role === 'kasir') {
+                $badgeBg = '#198754';
+                $icon = '🖥️';
+            } else {
+                $badgeBg = '#6c757d';
+                $icon = '👤';
+            }
+        @endphp
+        <div style="padding:16px;border-top:1px solid #dee2e6;background:transparent;margin-top:auto;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:0 4px;">
+                <div style="width:40px;height:40px;border-radius:50%;background:{{ $badgeBg }};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;flex-shrink:0;">
+                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                </div>
+                <div style="overflow:hidden;">
+                    <p style="margin:0;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ auth()->user()->name }}</p>
+                    <div style="margin-top:4px;">
+                        <span style="background:{{ $badgeBg }};color:#fff;font-size:10px;padding:3px 8px;border-radius:50rem;text-transform:uppercase;font-weight:600;display:inline-flex;align-items:center;gap:4px;">
+                            <span>{{ $icon }}</span> {{ $role }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <button type="submit" style="width:100%;padding:10px;background:none;border:1px solid #dee2e6;border-radius:8px;color:#dc3545;cursor:pointer;font-size:13px;font-family:inherit;transition:0.2s;display:flex;align-items:center;justify-content:center;gap:6px;" onmouseover="this.style.background='rgba(220,53,69,0.1)'" onmouseout="this.style.background='none'">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </form>
+        </div>
         </nav>
 
         <!-- Page Content -->

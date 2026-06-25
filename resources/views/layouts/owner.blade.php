@@ -65,9 +65,13 @@
     
     <!-- Owner Role Identification -->
     <div class="d-flex align-items-center mb-4 gap-3">
-        <div class="owner-avatar-badge">
-            {{ strtoupper(substr(auth()->user()->name ?? 'O', 0, 1)) }}
-        </div>
+        @if(auth()->user()->avatar)
+            <img src="{{ auth()->user()->avatar }}" alt="Avatar" class="owner-avatar-badge shadow-sm" style="object-fit: cover;" referrerpolicy="no-referrer">
+        @else
+            <div class="owner-avatar-badge">
+                {{ strtoupper(substr(auth()->user()->name ?? 'O', 0, 1)) }}
+            </div>
+        @endif
         <div>
             <h4 class="mb-0 fw-bold text-dark">Owner Workspace</h4>
             <span class="badge bg-dark text-white rounded-pill px-3 py-1 mt-1">Administrator Access</span>

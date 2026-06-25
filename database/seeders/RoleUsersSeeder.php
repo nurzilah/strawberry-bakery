@@ -13,7 +13,7 @@ class RoleUsersSeeder extends Seeder
         $users = [
             [
                 'email' => 'admin@strawberrybakery.com',
-                'name' => 'Admin Strawberry Bakery',
+                'name' => 'IT Developer Strawberry Bakery',
                 'password' => 'Bakery!123',
                 'role' => 'admin',
                 'phone' => '081234567890',

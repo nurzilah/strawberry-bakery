@@ -65,9 +65,13 @@
 
     <div class="p-4 border-t border-slate-800 bg-slate-950/50">
         <div class="flex items-center gap-3 px-2 mb-4">
-            <div class="w-10 h-10 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold shadow-lg shadow-pink-500/30">
-                {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
-            </div>
+            @if(auth()->user()->avatar)
+                <img src="{{ auth()->user()->avatar }}" alt="Avatar" class="w-10 h-10 rounded-full object-cover shadow-lg shadow-pink-500/30" referrerpolicy="no-referrer">
+            @else
+                <div class="w-10 h-10 rounded-full bg-pink-500 flex items-center justify-center text-white font-bold shadow-lg shadow-pink-500/30">
+                    {{ strtoupper(substr(auth()->user()->name ?? 'U', 0, 1)) }}
+                </div>
+            @endif
             <div>
                 <p class="text-sm font-semibold text-white">{{ auth()->user()->name }}</p>
                 <p class="text-xs text-pink-400 uppercase tracking-wider">{{ auth()->user()->role }}</p>

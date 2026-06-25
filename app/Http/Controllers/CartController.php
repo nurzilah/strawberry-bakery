@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Cart;
 use App\Models\DetailCart;
 use App\Models\Product;
+use App\Services\RecommendationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
@@ -17,7 +18,12 @@ class CartController extends Controller
             : ['detailCart.product.category'];
 
         $carts = auth()->user()->carts()->with($relations)->get();
-        return view('cart.index', compact('carts'));
+        
+        $recommendations = auth()->check()
+            ? app(RecommendationService::class)->getRecommendations(auth()->id(), 4)
+            : collect();
+
+        return view('cart.index', compact('carts', 'recommendations'));
     }
 
     public function store(Request $request)

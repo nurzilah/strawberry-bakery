@@ -96,25 +96,24 @@
                 </div>
 
                 <div class="checkout-panel p-4 p-md-5">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">Upload Bukti Pembayaran</h2>
-                    <form id="paymentForm" action="{{ route('checkout.process') }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700 mb-2">Bukti Pembayaran (JPG/PNG)</label>
-                            <input type="file" name="payment_proof" accept="image/png,image/jpeg" required
-                                   class="form-control">
-                            @error('payment_proof')
-                                <p class="text-sm text-red-600 mt-2">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <button type="submit"
-                                class="btn btn-strawberry w-100 rounded-pill py-3">
-                            Konfirmasi Pembayaran
+                    @if(isset($snapToken))
+                        <h2 class="text-xl font-bold text-gray-800 mb-4">Selesaikan Pembayaran</h2>
+                        <button id="pay-button" class="btn btn-strawberry w-100 rounded-pill py-3">
+                            Bayar Sekarang
                         </button>
-                        <p class="text-sm text-gray-500 mt-3">
-                            Setelah upload, status pembayaran: menunggu konfirmasi admin.
-                        </p>
-                    </form>
+                    @else
+                        <h2 class="text-xl font-bold text-gray-800 mb-4">Konfirmasi Pesanan</h2>
+                        <form id="paymentForm" action="{{ route('checkout.process') }}" method="POST">
+                            @csrf
+                            <button type="submit"
+                                    class="btn btn-strawberry w-100 rounded-pill py-3">
+                                Lanjutkan Pembayaran
+                            </button>
+                            <p class="text-sm text-gray-500 mt-3 text-center">
+                                Anda akan diarahkan ke halaman pembayaran Midtrans.
+                            </p>
+                        </form>
+                    @endif
                 </div>
             </div>
 
@@ -170,4 +169,27 @@ if (pickupInput) {
     });
 }
 </script>
+
+@if(isset($snapToken))
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
+<script>
+    document.getElementById('pay-button').onclick = function(){
+        snap.pay('{{ $snapToken }}', {
+            onSuccess: function(result){
+                window.location.href = '{{ route("checkout.success") }}';
+            },
+            onPending: function(result){
+                window.location.href = '{{ route("checkout.pending") }}';
+            },
+            onError: function(result){
+                window.location.href = '{{ route("checkout.failed") }}';
+            },
+            onClose: function(){
+                alert('Anda menutup popup tanpa menyelesaikan pembayaran');
+            }
+        });
+    };
+</script>
+@endif
+
 @endsection

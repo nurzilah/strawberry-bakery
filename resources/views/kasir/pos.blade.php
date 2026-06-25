@@ -51,6 +51,11 @@
                 </li>
                 <li>
                     <a href="{{ route('admin.orders.index') }}" style="display:block;padding:12px 20px;color:#495057;text-decoration:none;font-size:1em;transition:0.2s;">
+                        <i class="fas fa-shopping-cart" style="margin-right:8px;width:20px;text-align:center;"></i> Pesanan Online
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('kasir.transactions.index') }}" style="display:block;padding:12px 20px;color:#495057;text-decoration:none;font-size:1em;transition:0.2s;">
                         <i class="fas fa-history" style="margin-right:8px;width:20px;text-align:center;"></i> Riwayat Transaksi
                     </a>
                 </li>
@@ -88,26 +93,51 @@
                 </li>
                 <li>
                     <a href="{{ route('admin.orders.index') }}" style="display:block;padding:12px 20px;color:#495057;text-decoration:none;font-size:1em;">
+                        <i class="fas fa-shopping-cart" style="margin-right:8px;width:20px;text-align:center;"></i> Update Pesanan
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('kasir.transactions.index') }}" style="display:block;padding:12px 20px;color:#495057;text-decoration:none;font-size:1em;">
                         <i class="fas fa-history" style="margin-right:8px;width:20px;text-align:center;"></i> Riwayat Transaksi
                     </a>
                 </li>
             @endif
         </ul>
 
-        <div style="padding:16px;border-top:1px solid #dee2e6;background:#fff;">
-            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;padding:0 4px;">
-                <div style="width:36px;height:36px;border-radius:50%;background:#d63384;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;">
+        @php
+            $role = auth()->user()->role;
+            if (in_array($role, ['owner', 'superadmin'])) {
+                $badgeBg = '#d63384';
+                $icon = '👑';
+            } elseif ($role === 'admin') {
+                $badgeBg = '#0d6efd';
+                $icon = '🛠️';
+            } elseif ($role === 'kasir') {
+                $badgeBg = '#198754';
+                $icon = '🖥️';
+            } else {
+                $badgeBg = '#6c757d';
+                $icon = '👤';
+            }
+        @endphp
+        <div style="padding:16px;border-top:1px solid #dee2e6;background:transparent;margin-top:auto;">
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:0 4px;">
+                <div style="width:40px;height:40px;border-radius:50%;background:{{ $badgeBg }};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;flex-shrink:0;">
                     {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
                 </div>
-                <div>
-                    <p style="margin:0;font-size:13px;font-weight:600;color:#212529;">{{ auth()->user()->name }}</p>
-                    <p style="margin:0;font-size:11px;color:#d63384;text-transform:uppercase;letter-spacing:0.05em;">{{ auth()->user()->role }}</p>
+                <div style="overflow:hidden;">
+                    <p style="margin:0;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ auth()->user()->name }}</p>
+                    <div style="margin-top:4px;">
+                        <span style="background:{{ $badgeBg }};color:#fff;font-size:10px;padding:3px 8px;border-radius:50rem;text-transform:uppercase;font-weight:600;display:inline-flex;align-items:center;gap:4px;">
+                            <span>{{ $icon }}</span> {{ $role }}
+                        </span>
+                    </div>
                 </div>
             </div>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
-                <button type="submit" style="width:100%;padding:10px;background:none;border:1px solid #dee2e6;border-radius:8px;color:#dc3545;cursor:pointer;font-size:13px;font-family:inherit;transition:0.2s;" onmouseover="this.style.background='#fff5f5'" onmouseout="this.style.background='none'">
-                    <i class="fas fa-sign-out-alt" style="margin-right:6px;"></i> Logout
+                <button type="submit" style="width:100%;padding:10px;background:none;border:1px solid #dee2e6;border-radius:8px;color:#dc3545;cursor:pointer;font-size:13px;font-family:inherit;transition:0.2s;display:flex;align-items:center;justify-content:center;gap:6px;" onmouseover="this.style.background='rgba(220,53,69,0.1)'" onmouseout="this.style.background='none'">
+                    <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
             </form>
         </div>

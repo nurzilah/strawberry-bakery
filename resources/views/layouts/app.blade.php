@@ -280,7 +280,11 @@
                             <!-- User Dropdown -->
                             <div class="dropdown">
                                 <button class="btn btn-outline-secondary d-flex align-items-center gap-2 rounded-pill px-3 py-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fa-regular fa-circle-user fs-5"></i>
+                                    @if(auth()->user()->avatar)
+                                        <img src="{{ auth()->user()->avatar }}" alt="Avatar" class="rounded-circle" style="width: 24px; height: 24px; object-fit: cover;" referrerpolicy="no-referrer">
+                                    @else
+                                        <i class="fa-regular fa-circle-user fs-5"></i>
+                                    @endif
                                     <span class="fw-medium">{{ explode(' ', auth()->user()->name)[0] }}</span>
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow border-0 mt-2" style="border-radius: 12px;">

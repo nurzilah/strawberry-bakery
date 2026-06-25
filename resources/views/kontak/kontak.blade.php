@@ -294,11 +294,11 @@
 
             <div class="contact-panel overflow-hidden">
                 <iframe
-                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3960.5678!2d109.1234!3d-6.8765!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zNsKwNTInMzUuNCJTIDEwOcKwMDcnMjQuMiJF!5e0!3m2!1sen!2sid!4v1234567890"
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3961.1139371247173!2d109.13642019999999!3d-6.8769504999999995!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e6fb9d443a4af25%3A0x8b142b6849cf9ecd!2sStrawberry%20Bakery!5e0!3m2!1sen!2sid!4v1782323122049!5m2!1sen!2sid"
                     class="contact-map border-0 d-block"
-                    allowfullscreen
+                    allowfullscreen=""
                     loading="lazy"
-                    referrerpolicy="no-referrer-when-downgrade"
+                    referrerpolicy="strict-origin-when-cross-origin"
                     title="Lokasi Strawberry Cake & Bakery Tegal">
                 </iframe>
             </div>

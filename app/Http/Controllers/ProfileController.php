@@ -24,11 +24,20 @@ class ProfileController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'nullable|string|max:20',
-            'address' => 'nullable|string',
+            'delivery_preference' => 'required|in:pickup,delivery',
+            'phone' => 'required_if:delivery_preference,delivery|nullable|string|max:20',
+            'address' => 'required_if:delivery_preference,delivery|nullable|string',
+            'city' => 'required_if:delivery_preference,delivery|nullable|string',
+            'district' => 'nullable|string|max:255',
+            'postal_code' => 'nullable|numeric|digits_between:1,5',
+            'address_note' => 'nullable|string',
+        ], [
+            'phone.required_if' => 'No. Handphone wajib diisi jika preferensi adalah Diantar.',
+            'address.required_if' => 'Alamat Lengkap wajib diisi jika preferensi adalah Diantar.',
+            'city.required_if' => 'Kota/Kabupaten wajib diisi jika preferensi adalah Diantar.',
         ]);
 
-        Auth::user()->update($request->only('name', 'phone', 'address'));
+        Auth::user()->update($request->only('name', 'phone', 'address', 'city', 'district', 'postal_code', 'address_note', 'delivery_preference'));
 
         return redirect()->route('profile.show')->with('success', 'Profil berhasil diperbarui');
     }

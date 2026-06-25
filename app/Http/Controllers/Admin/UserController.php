@@ -22,6 +22,12 @@ class UserController extends Controller
             'role' => 'required|in:customer,admin,superadmin,kasir',
         ]);
 
+        if (auth()->user()->role === 'admin') {
+            if (in_array($user->role, ['owner', 'superadmin']) || in_array($request->role, ['owner', 'superadmin'])) {
+                return redirect()->back()->withErrors('Admin tidak dapat mengubah atau memberikan role owner/superadmin.');
+            }
+        }
+
         $user->update(['role' => $request->role]);
 
         return redirect()->back()->with('success', 'Role pengguna berhasil diperbarui.');

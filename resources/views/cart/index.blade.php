@@ -220,23 +220,23 @@
         </div>
         
         <!-- Recommendations -->
-        @if(count($carts ?? []) > 0)
+        @if(count($carts ?? []) > 0 && isset($recommendations) && count($recommendations) > 0)
         <div class="mt-5 pt-4">
             <h3 class="product-title mb-4">Rekomendasi Spesial Untuk Anda</h3>
             <div class="row g-4">
-                @for($i = 0; $i < 4; $i++)
+                @foreach($recommendations as $rec)
                 <div class="col-6 col-md-3">
-                    <a href="{{ route('products.index') }}" class="text-decoration-none">
+                    <a href="{{ route('products.index') }}" class="text-decoration-none" onclick="fetch('{{ url('/recommendations/' . $rec->id . '/click') }}', { method: 'POST', headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } })">
                         <div class="card border-0 shadow-sm h-100 cart-item-card bg-white">
-                            <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=400&h=300&fit=crop" class="card-img-top p-2" style="border-radius: 1rem;" alt="Product">
+                            <img src="{{ Storage::url($rec->image) }}" class="card-img-top p-2" style="border-radius: 1rem; aspect-ratio: 4/3; object-fit: cover;" alt="{{ $rec->name }}">
                             <div class="card-body p-3 text-center">
-                                <h6 class="text-dark fw-bold mb-1">Roti Tawar Spesial</h6>
-                                <p class="fw-bold mb-0" style="color: var(--sb-primary)">Rp 25.000</p>
+                                <h6 class="text-dark fw-bold mb-1">{{ $rec->name }}</h6>
+                                <p class="text-primary fw-bold mb-0">Rp {{ number_format($rec->price, 0, ',', '.') }}</p>
                             </div>
                         </div>
                     </a>
                 </div>
-                @endfor
+                @endforeach
             </div>
         </div>
         @endif

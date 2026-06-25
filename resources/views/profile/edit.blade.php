@@ -23,6 +23,14 @@
         </div>
     @endif
 
+    <!-- Warning Alert for Delivery -->
+    @if(auth()->user()->delivery_preference === 'delivery' && (empty(auth()->user()->address) || empty(auth()->user()->phone) || empty(auth()->user()->city)))
+        <div class="alert alert-warning d-flex align-items-center shadow-sm border-0 rounded-3 mb-4" role="alert">
+            <i class="fa-solid fa-triangle-exclamation fs-5 me-2"></i>
+            <div>Anda memilih <strong>Diantar ke Alamat</strong>, tapi data profil Anda belum lengkap. Silakan lengkapi No. Handphone, Kota/Kabupaten, dan Alamat Lengkap.</div>
+        </div>
+    @endif
+
     <div class="row g-4">
         <!-- Left Column: User Card -->
         <div class="col-12 col-lg-4">
@@ -30,9 +38,13 @@
                 <div class="card-body p-4 p-md-5 d-flex flex-column align-items-center justify-content-center">
                     
                     <div class="position-relative mb-4">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm" style="width: 120px; height: 120px; font-size: 3rem; background: linear-gradient(135deg, var(--sb-primary) 0%, var(--sb-primary-dark) 100%);">
-                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                        </div>
+                        @if(auth()->user()->avatar)
+                            <img src="{{ auth()->user()->avatar }}" alt="Avatar" class="rounded-circle shadow-sm" style="width: 120px; height: 120px; object-fit: cover;" referrerpolicy="no-referrer">
+                        @else
+                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm" style="width: 120px; height: 120px; font-size: 3rem; background: linear-gradient(135deg, var(--sb-primary) 0%, var(--sb-primary-dark) 100%);">
+                                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                            </div>
+                        @endif
                     </div>
 
                     <h2 class="h5 fw-bold text-dark mb-1">{{ auth()->user()->name }}</h2>
@@ -87,6 +99,17 @@
                         </div>
 
                         <div class="mb-4">
+                            <label class="form-label fw-semibold text-dark">Preferensi Pengambilan <span class="text-danger">*</span></label>
+                            <select name="delivery_preference" class="form-select form-select-lg @error('delivery_preference') is-invalid @enderror">
+                                <option value="pickup" {{ old('delivery_preference', auth()->user()->delivery_preference) === 'pickup' ? 'selected' : '' }}>Ambil di Toko</option>
+                                <option value="delivery" {{ old('delivery_preference', auth()->user()->delivery_preference) === 'delivery' ? 'selected' : '' }}>Diantar ke Alamat</option>
+                            </select>
+                            @error('delivery_preference')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
                             <label class="form-label fw-semibold text-dark">No. Handphone</label>
                             <input type="text" name="phone" 
                                 value="{{ old('phone', auth()->user()->phone) }}" 
@@ -98,11 +121,56 @@
                         </div>
 
                         <div class="mb-4">
+                            <label class="form-label fw-semibold text-dark">Kota/Kabupaten</label>
+                            <select name="city" class="form-select form-select-lg @error('city') is-invalid @enderror">
+                                <option value="" disabled {{ !old('city', auth()->user()->city) ? 'selected' : '' }}>Pilih Kota/Kabupaten...</option>
+                                @foreach(['Tegal', 'Slawi', 'Brebes', 'Pemalang'] as $city)
+                                    <option value="{{ $city }}" {{ old('city', auth()->user()->city) === $city ? 'selected' : '' }}>{{ $city }}</option>
+                                @endforeach
+                            </select>
+                            @error('city')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold text-dark">Kecamatan</label>
+                            <input type="text" name="district" 
+                                value="{{ old('district', auth()->user()->district) }}" 
+                                placeholder="Contoh: Tegal Timur"
+                                class="form-control form-control-lg @error('district') is-invalid @enderror">
+                            @error('district')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold text-dark">Kode Pos</label>
+                            <input type="text" name="postal_code" 
+                                value="{{ old('postal_code', auth()->user()->postal_code) }}" 
+                                placeholder="Contoh: 52121"
+                                class="form-control form-control-lg @error('postal_code') is-invalid @enderror">
+                            @error('postal_code')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
                             <label class="form-label fw-semibold text-dark">Alamat Lengkap</label>
                             <textarea name="address" rows="4" 
                                 placeholder="Masukkan alamat lengkap Anda..."
                                 class="form-control form-control-lg @error('address') is-invalid @enderror">{{ old('address', auth()->user()->address) }}</textarea>
                             @error('address')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold text-dark">Catatan Alamat (Opsional)</label>
+                            <textarea name="address_note" rows="2" 
+                                placeholder="Patokan: rumah cat hijau sebelah warung"
+                                class="form-control form-control-lg @error('address_note') is-invalid @enderror">{{ old('address_note', auth()->user()->address_note) }}</textarea>
+                            @error('address_note')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>

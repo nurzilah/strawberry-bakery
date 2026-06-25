@@ -21,9 +21,7 @@ class HomeController extends Controller
         if (auth()->check()) {
             $recommendationService = app(\App\Services\RecommendationService::class);
             $recommendedProducts = $recommendationService->getRecommendations(auth()->id(), 5, 4);
-            // Cek apakah ini benar-benar hasil CF (bukan fallback) dengan melihat order_items user.
-            // Secara sederhana, kita bisa anggap selalu ada "Rekomendasi untuk Kamu" jika user login.
-            $isRecommendation = true;
+            $isRecommendation = $recommendationService->hasPurchaseHistory(auth()->id());
         } else {
             // Jika belum login, ambil produk populer sebagai fallback
             $recommendedProducts = Product::with('category')

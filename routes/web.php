@@ -27,6 +27,9 @@ Route::get('/terms', [PageController::class, 'terms'])->name('terms');
 Route::get('/track-order', [PageController::class, 'trackOrder'])->name('order.track');
 Route::post('/track-order', [PageController::class, 'searchOrder'])->name('order.search');
 
+// Webhook Midtrans
+Route::post('/checkout/callback', [CheckoutController::class, 'callback'])->name('checkout.callback');
+
 // Products
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
 Route::get('/products/{slug}', [ProductController::class, 'show'])->name('products.show');
@@ -61,6 +64,9 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('checkout')->name('checkout.')->group(function () {
         Route::get('/', [CheckoutController::class, 'index'])->name('index');
         Route::post('/', [CheckoutController::class, 'process'])->name('process');
+        Route::get('/success', [CheckoutController::class, 'success'])->name('success');
+        Route::get('/pending', [CheckoutController::class, 'pending'])->name('pending');
+        Route::get('/failed', [CheckoutController::class, 'failed'])->name('failed');
     });
 
     // Reviews
@@ -100,7 +106,10 @@ Route::middleware(['auth', 'role:owner,admin,superadmin'])->prefix('admin')->nam
     
     Route::resource('products', \App\Http\Controllers\Admin\ProductController::class)->except(['show']);
     Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class)->except(['show']);
-    
+});
+
+// ['role:owner,admin,superadmin,kasir']
+Route::middleware(['auth', 'role:owner,admin,superadmin,kasir'])->prefix('admin')->name('admin.')->group(function () {
     // Legacy orders for online checkout
     Route::resource('orders', \App\Http\Controllers\Admin\OrderController::class)->only(['index', 'show', 'update']);
     Route::patch('orders/{order}/confirm', [\App\Http\Controllers\Admin\OrderController::class, 'confirm'])->name('orders.confirm');
@@ -119,11 +128,14 @@ Route::middleware(['auth', 'role:owner,kasir,superadmin'])->prefix('admin/kasir'
     Route::get('/transactions/{id}', [\App\Http\Controllers\Kasir\TransactionHistoryController::class, 'show'])->name('transactions.show');
 });
 
-// ['role:owner,superadmin']
-Route::middleware(['auth', 'role:owner,superadmin'])->prefix('admin/owner')->name('owner.')->group(function () {
+// ['role:owner,superadmin,admin']
+Route::middleware(['auth', 'role:owner,superadmin,admin'])->prefix('admin/owner')->name('owner.')->group(function () {
     Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->only(['index', 'update']);
     Route::post('users/{user}/role', [\App\Http\Controllers\Admin\UserController::class, 'updateRole'])->name('users.role');
-    
+});
+
+// ['role:owner,superadmin']
+Route::middleware(['auth', 'role:owner,superadmin'])->prefix('admin/owner')->name('owner.')->group(function () {
     // Financial reports
     Route::get('reports', [\App\Http\Controllers\Owner\ReportController::class, 'index'])->name('reports.index');
     Route::get('reports/export-pdf', [\App\Http\Controllers\Owner\ReportController::class, 'exportPdf'])->name('reports.pdf');

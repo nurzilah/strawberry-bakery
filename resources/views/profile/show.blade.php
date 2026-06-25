@@ -25,9 +25,13 @@
                 <div class="card-body p-4 p-md-5 d-flex flex-column align-items-center justify-content-center">
                     
                     <div class="position-relative mb-4">
-                        <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm" style="width: 120px; height: 120px; font-size: 3rem; background: linear-gradient(135deg, var(--sb-primary) 0%, var(--sb-primary-dark) 100%);">
-                            {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                        </div>
+                        @if(auth()->user()->avatar)
+                            <img src="{{ auth()->user()->avatar }}" alt="Avatar" class="rounded-circle shadow-sm" style="width: 120px; height: 120px; object-fit: cover;" referrerpolicy="no-referrer">
+                        @else
+                            <div class="rounded-circle d-flex align-items-center justify-content-center text-white fw-bold shadow-sm" style="width: 120px; height: 120px; font-size: 3rem; background: linear-gradient(135deg, var(--sb-primary) 0%, var(--sb-primary-dark) 100%);">
+                                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                            </div>
+                        @endif
                         <span class="position-absolute bottom-0 end-0 p-2 bg-success border border-3 border-white rounded-circle"></span>
                     </div>
 
