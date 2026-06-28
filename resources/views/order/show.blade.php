@@ -75,6 +75,14 @@
             </div>
         @endif
 
+        @if($order->payment_status === 'pending' && $order->snap_token)
+            <div class="mt-6">
+                <button id="pay-button" class="btn btn-strawberry w-full rounded-pill py-3 bg-pink-600 hover:bg-pink-700 text-white font-bold text-lg">
+                    Bayar Sekarang dengan Midtrans
+                </button>
+            </div>
+        @endif
+
         @if($order->payment_proof_path)
             <div class="mt-6">
                 <h3 class="text-lg font-semibold text-gray-800 mb-2">Bukti Pembayaran</h3>
@@ -85,4 +93,27 @@
         @endif
     </div>
 </div>
+
+@if($order->payment_status === 'pending' && $order->snap_token)
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
+<script>
+    document.getElementById('pay-button').onclick = function(){
+        snap.pay('{{ $order->snap_token }}', {
+            onSuccess: function(result){
+                window.location.href = '{{ route("checkout.success") }}';
+            },
+            onPending: function(result){
+                window.location.href = '{{ route("checkout.pending") }}';
+            },
+            onError: function(result){
+                window.location.href = '{{ route("checkout.failed") }}';
+            },
+            onClose: function(){
+                // Optional: Nothing needs to happen here. The order is already in the database.
+            }
+        });
+    };
+</script>
+@endif
+
 @endsection

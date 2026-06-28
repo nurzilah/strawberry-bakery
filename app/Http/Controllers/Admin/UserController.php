@@ -11,7 +11,7 @@ class UserController extends Controller
     public function index()
     {
         $users = User::latest()->paginate(15);
-        $roles = ['customer', 'admin', 'superadmin', 'kasir'];
+        $roles = ['owner', 'admin', 'kasir', 'customer'];
 
         return view('admin.users.index', compact('users', 'roles'));
     }
@@ -19,12 +19,15 @@ class UserController extends Controller
     public function updateRole(Request $request, User $user)
     {
         $request->validate([
-            'role' => 'required|in:customer,admin,superadmin,kasir',
+            'role' => 'required|in:owner,admin,kasir,customer',
         ]);
 
         if (auth()->user()->role === 'admin') {
-            if (in_array($user->role, ['owner', 'superadmin']) || in_array($request->role, ['owner', 'superadmin'])) {
-                return redirect()->back()->withErrors('Admin tidak dapat mengubah atau memberikan role owner/superadmin.');
+            if ($user->role === 'owner') {
+                abort(403, 'Anda tidak memiliki akses untuk mengubah role ini');
+            }
+            if ($request->role === 'owner') {
+                abort(403, 'Anda tidak memiliki akses untuk mengubah role ini');
             }
         }
 

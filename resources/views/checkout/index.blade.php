@@ -37,6 +37,7 @@
             <h1 class="text-3xl font-bold text-gray-800">Pembayaran</h1>
         </div>
 
+        @if(isset($carts) && count($carts) > 0)
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <div class="lg:col-span-2 space-y-6">
                 <div class="checkout-panel p-4 p-md-5">
@@ -63,57 +64,17 @@
                 </div>
 
                 <div class="checkout-panel p-4 p-md-5">
-                    <h2 class="text-xl font-bold text-gray-800 mb-4">Metode Pembayaran</h2>
-                    <div class="space-y-3 mb-4">
-                        <label class="flex items-center space-x-2 text-gray-700">
-                            <input type="radio" name="payment_method" value="bca" checked form="paymentForm"
-                                   class="form-check-input checkout-radio">
-                            <span>Transfer Bank BCA</span>
-                        </label>
-                        <label class="flex items-center space-x-2 text-gray-700">
-                            <input type="radio" name="payment_method" value="dana" form="paymentForm"
-                                   class="form-check-input checkout-radio">
-                            <span>DANA</span>
-                        </label>
-                        <label class="flex items-center space-x-2 text-gray-700">
-                            <input type="radio" name="payment_method" value="shopeepay" form="paymentForm"
-                                   class="form-check-input checkout-radio">
-                            <span>ShopeePay</span>
-                        </label>
-                        <label class="flex items-center space-x-2 text-gray-700">
-                            <input type="radio" name="payment_method" value="gopay" form="paymentForm"
-                                   class="form-check-input checkout-radio">
-                            <span>GoPay</span>
-                        </label>
-                    </div>
-
-                    <div class="checkout-soft-box p-4">
-                        <div class="text-sm text-gray-600 mb-2">Nomor Pembayaran</div>
-                        <div class="text-lg font-bold text-gray-800 mb-3">085712799296</div>
-                        <div class="text-sm text-gray-600 mt-2">Atas Nama</div>
-                        <div class="text-lg font-semibold text-gray-800">Strawberry Bakery</div>
-                    </div>
-                </div>
-
-                <div class="checkout-panel p-4 p-md-5">
-                    @if(isset($snapToken))
-                        <h2 class="text-xl font-bold text-gray-800 mb-4">Selesaikan Pembayaran</h2>
-                        <button id="pay-button" class="btn btn-strawberry w-100 rounded-pill py-3">
-                            Bayar Sekarang
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">Konfirmasi Pesanan</h2>
+                    <form id="paymentForm" action="{{ route('checkout.process') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="payment_method" value="midtrans">
+                        <button type="submit" class="btn btn-strawberry w-100 rounded-pill py-3">
+                            Lanjutkan Pembayaran
                         </button>
-                    @else
-                        <h2 class="text-xl font-bold text-gray-800 mb-4">Konfirmasi Pesanan</h2>
-                        <form id="paymentForm" action="{{ route('checkout.process') }}" method="POST">
-                            @csrf
-                            <button type="submit"
-                                    class="btn btn-strawberry w-100 rounded-pill py-3">
-                                Lanjutkan Pembayaran
-                            </button>
-                            <p class="text-sm text-gray-500 mt-3 text-center">
-                                Anda akan diarahkan ke halaman pembayaran Midtrans.
-                            </p>
-                        </form>
-                    @endif
+                        <p class="text-sm text-gray-500 mt-3 text-center">
+                            Anda akan diarahkan ke halaman detail pesanan untuk melakukan pembayaran via Midtrans.
+                        </p>
+                    </form>
                 </div>
             </div>
 
@@ -121,7 +82,7 @@
                 <div class="checkout-panel p-4 p-md-5 sticky top-24">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">Ringkasan Pesanan</h2>
                     <div class="space-y-4 mb-4">
-                        @forelse($carts ?? [] as $cart)
+                        @forelse($carts as $cart)
                             <div class="flex justify-between text-gray-600">
                                 <span>{{ $cart->detailCart->product->name ?? 'Produk' }} x {{ $cart->detailCart->quantity ?? 0 }}</span>
                                 <span class="font-semibold">
@@ -140,6 +101,20 @@
                 </div>
             </div>
         </div>
+        @else
+        <div class="text-center py-16 bg-white rounded-2xl shadow-sm border">
+            <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+            </div>
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Keranjang Belanja Kosong</h2>
+            <p class="text-gray-600 mb-8">Silakan tambahkan produk ke keranjang Anda sebelum melakukan pembayaran.</p>
+            <a href="{{ route('products.index') }}" class="inline-block py-3 px-8 bg-pink-600 hover:bg-pink-700 text-white rounded-xl font-medium transition-colors">
+                Belanja Sekarang
+            </a>
+        </div>
+        @endif
     </div>
 </div>
 
@@ -169,27 +144,5 @@ if (pickupInput) {
     });
 }
 </script>
-
-@if(isset($snapToken))
-<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
-<script>
-    document.getElementById('pay-button').onclick = function(){
-        snap.pay('{{ $snapToken }}', {
-            onSuccess: function(result){
-                window.location.href = '{{ route("checkout.success") }}';
-            },
-            onPending: function(result){
-                window.location.href = '{{ route("checkout.pending") }}';
-            },
-            onError: function(result){
-                window.location.href = '{{ route("checkout.failed") }}';
-            },
-            onClose: function(){
-                alert('Anda menutup popup tanpa menyelesaikan pembayaran');
-            }
-        });
-    };
-</script>
-@endif
 
 @endsection

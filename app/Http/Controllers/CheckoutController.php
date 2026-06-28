@@ -68,17 +68,20 @@ class CheckoutController extends Controller
             'payment_method' => $request->payment_method ?? 'midtrans'
         ]);
 
-        // Clear cart — hapus detail dulu sebelum parent
+        // Clear cart
         foreach ($carts as $cart) {
-            // Hapus semua relasi child dulu
-            if ($cart->detailCart) {
-                $cart->detailCart->delete();
-            }
-            // Hapus cart items jika ada
+            $detailCart = $cart->detailCart; // Simpan referensi ke parent (detail_carts)
+            
+            // Hapus child (carts) terlebih dahulu agar tidak melanggar foreign key constraint
             if (method_exists($cart, 'items')) {
                 $cart->items()->delete();
             }
             $cart->delete();
+            
+            // Setelah child dihapus, aman untuk menghapus parent (detail_carts)
+            if ($detailCart) {
+                $detailCart->delete();
+            }
         }
 
         // Notifikasi untuk Admin/Owner
@@ -109,9 +112,9 @@ class CheckoutController extends Controller
                 'midtrans_order_id' => $params['transaction_details']['order_id']
             ]);
 
-            return view('checkout.index', compact('snapToken', 'order', 'carts', 'total'));
+            return redirect()->route('orders.show', $order->id)->with('success', 'Pesanan berhasil dibuat. Silakan selesaikan pembayaran.');
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Gagal memproses pembayaran. ' . $e->getMessage());
+            return redirect()->route('orders.index')->with('error', 'Gagal memproses pembayaran. ' . $e->getMessage());
         }
     }
 
