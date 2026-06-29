@@ -300,9 +300,24 @@
                     </section>
                 @endif
 
-                <div class="d-flex align-items-center justify-content-between gap-3 mb-3">
-                    <h2 class="catalog-title">Semua Produk</h2>
-                    <span class="catalog-subtitle">Grid 2-3-4 kolom responsif</span>
+                <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
+                    <div>
+                        <h2 class="catalog-title">Semua Produk</h2>
+                        <span class="catalog-subtitle">Temukan produk favorit Anda</span>
+                    </div>
+                    <form action="{{ route('products.index') }}" method="GET" class="d-flex gap-2">
+                        <!-- Pertahankan filter kategori jika ada -->
+                        @if(request('category'))
+                            <input type="hidden" name="category" value="{{ request('category') }}">
+                        @endif
+                        @if(request('sort'))
+                            <input type="hidden" name="sort" value="{{ request('sort') }}">
+                        @endif
+                        <input type="text" name="search" class="form-control rounded-pill px-4 shadow-sm" placeholder="Cari nama atau rasa..." value="{{ request('search') }}">
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                            <i class="fa-solid fa-magnifying-glass"></i> Cari
+                        </button>
+                    </form>
                 </div>
 
                 <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">

@@ -199,10 +199,32 @@
     <div class="kasir-wrapper">
         <aside id="kasirSidebar" aria-label="Navigasi Kasir">
             <div class="kasir-brand d-flex align-items-center gap-3">
-                <img src="{{ asset('images/logo.png') }}" alt="Strawberry Bakery">
-                <div>
-                    <div class="kasir-brand-title">Strawberry Bakery</div>
-                    <p class="kasir-brand-subtitle">Kasir Operasional</p>
+                <img src="{{ asset('images/logo.png') }}" alt="SB" style="width: 40px; height: 40px; object-fit: contain;">
+                <div class="d-flex flex-column text-start" style="overflow: hidden;">
+                    <span class="fw-bold text-truncate" style="font-size: 1rem; line-height: 1.2; color: var(--sb-crimson);">
+                        {{ \Illuminate\Support\Str::limit(auth()->user()->name, 15) }}
+                    </span>
+                    <div class="mt-1">
+                        @php
+                            $role = auth()->user()->role ?? 'guest';
+                            if(in_array($role, ['owner', 'superadmin'])) {
+                                $bg = '#d63384';
+                                $label = 'OWNER';
+                            } elseif($role === 'admin') {
+                                $bg = '#0d6efd';
+                                $label = 'ADMIN';
+                            } elseif($role === 'kasir') {
+                                $bg = '#198754';
+                                $label = 'KASIR';
+                            } else {
+                                $bg = '#6c757d';
+                                $label = strtoupper($role);
+                            }
+                        @endphp
+                        <span class="badge" style="background-color: {{ $bg }}; color: white; font-size: 0.65rem; padding: 0.35em 0.6em; letter-spacing: 0.5px;">
+                            {{ $label }}
+                        </span>
+                    </div>
                 </div>
             </div>
 

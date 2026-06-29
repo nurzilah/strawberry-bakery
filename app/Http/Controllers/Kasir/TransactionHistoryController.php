@@ -13,10 +13,7 @@ class TransactionHistoryController extends Controller
     {
         $query = Transaction::with(['user', 'items'])->latest();
 
-        // Kasir hanya melihat transaksi mereka sendiri, owner/admin bisa melihat semua
-        if (auth()->user()->role === 'kasir') {
-            $query->where('user_id', auth()->id());
-        }
+        // Kasir dapat melihat semua riwayat transaksi (filter user_id dihapus agar tidak terlalu ketat)
 
         // Filter tanggal dari
         if ($request->filled('date_from')) {
@@ -42,10 +39,7 @@ class TransactionHistoryController extends Controller
     {
         $transaction = Transaction::with(['user', 'items'])->findOrFail($id);
         
-        // Proteksi: Kasir hanya bisa melihat transaksi milik mereka sendiri
-        if (auth()->user()->role === 'kasir' && $transaction->user_id !== auth()->id()) {
-            abort(403, 'Anda tidak berhak mengakses detail transaksi ini.');
-        }
+        // Proteksi dihilangkan agar kasir dapat melihat semua riwayat.
 
         return view('kasir.transactions.show', compact('transaction'));
     }

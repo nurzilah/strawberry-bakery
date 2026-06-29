@@ -20,6 +20,15 @@ class ProductController extends Controller
             });
         }
 
+        // Filter berdasarkan pencarian
+        if ($request->has('search') && $request->search) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('name', 'like', "%{$searchTerm}%")
+                  ->orWhere('description', 'like', "%{$searchTerm}%");
+            });
+        }
+
         // Filter berdasarkan harga
         if ($request->has('min_price') && $request->min_price) {
             $query->where('price', '>=', $request->min_price);

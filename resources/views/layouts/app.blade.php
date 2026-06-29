@@ -369,14 +369,14 @@
                 <div class="col-12 col-md-4 col-lg-2">
                     <h3 class="footer-title">Bantuan</h3>
                     <ul class="list-unstyled d-flex flex-column gap-3">
-                        <li><a href="{{ route('faq') }}" class="footer-link">FAQ / Bantuan</a></li>
-                        <li><a href="{{ route('order.track') }}" class="footer-link">Lacak Pesanan</a></li>
-                        <li><a href="{{ route('terms') }}" class="footer-link">Syarat & Ketentuan</a></li>
-                        <li><a href="{{ route('terms') }}" class="footer-link">Kebijakan Privasi</a></li>
+                        <li><a href="{{ route('faq') ?? '#' }}" class="footer-link">FAQ / Bantuan</a></li>
+                        <li><a href="{{ route('order.track') ?? '#' }}" class="footer-link">Lacak Pesanan</a></li>
+                        <li><a href="{{ route('terms') ?? '#' }}" class="footer-link">Syarat & Ketentuan</a></li>
+                        <li><a href="{{ route('terms') ?? '#' }}" class="footer-link">Kebijakan Privasi</a></li>
                     </ul>
                 </div>
 
-                <!-- Contact Info -->
+                <!-- Contact Info & Payments -->
                 <div class="col-12 col-md-4 col-lg-3">
                     <h3 class="footer-title">Hubungi Kami</h3>
                     <ul class="list-unstyled d-flex flex-column gap-3 text-white-50">
@@ -388,14 +388,22 @@
                             <i class="fa-solid fa-phone text-primary"></i>
                             <span>+62 815-7173-138</span>
                         </li>
-                        <li class="d-flex align-items-center gap-3">
-                            <i class="fa-regular fa-clock text-primary"></i>
-                            <span>08.00 - 21.00 WIB</span>
+                        <li class="d-flex align-items-start gap-3">
+                            <i class="fa-regular fa-clock mt-1 text-primary"></i>
+                            <span>Jam Operasional:<br>Senin–Sabtu<br>08.00–20.00 WIB</span>
                         </li>
                     </ul>
-                    <a href="https://wa.me/628157173138" target="_blank" class="btn btn-primary w-100 mt-3 d-flex align-items-center justify-content-center gap-2">
-                        <i class="fa-brands fa-whatsapp fs-5"></i> Pesan via WhatsApp
-                    </a>
+
+                    <div class="mt-4 pt-3 border-top border-secondary border-opacity-25">
+                        <h4 class="h6 text-white mb-3 font-semibold">Metode Pembayaran</h4>
+                        <div class="d-flex gap-2 flex-wrap">
+                            <span class="badge bg-white text-dark shadow-sm">QRIS</span>
+                            <span class="badge bg-white text-dark shadow-sm">BCA</span>
+                            <span class="badge bg-white text-dark shadow-sm">BRI</span>
+                            <span class="badge bg-white text-dark shadow-sm">Mandiri</span>
+                            <span class="badge bg-white text-dark shadow-sm">Dana</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -408,6 +416,120 @@
             </div>
         </div>
     </footer>
+
+    <!-- WhatsApp Floating Button -->
+    <div class="wa-float-container" id="waFloatContainer" style="display: none;">
+        <div class="wa-bubble shadow-lg d-none d-md-block">
+            <button class="wa-close" aria-label="Tutup" onclick="document.getElementById('waFloatContainer').style.display='none'"><i class="fa-solid fa-xmark"></i></button>
+            <div class="wa-bubble-text">
+                <span class="d-block fw-bold text-dark mb-1" style="font-size: 14px;">💬 Ada yang ingin ditanyakan?</span>
+                <span class="d-block text-muted" style="font-size: 12px;">Kami siap membantu 😊</span>
+            </div>
+        </div>
+        <a href="https://wa.me/628157173138" class="whatsapp-float" target="_blank" aria-label="Chat WhatsApp">
+            <i class="fa-brands fa-whatsapp"></i>
+        </a>
+    </div>
+
+    <style>
+        .wa-float-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            align-items: flex-end;
+            gap: 15px;
+            animation: fade-up-wa 0.5s ease-out forwards;
+        }
+
+        .wa-bubble {
+            background: white;
+            border-radius: 12px;
+            padding: 12px 35px 12px 15px;
+            position: relative;
+            border: 1px solid rgba(0,0,0,0.05);
+            margin-bottom: 5px;
+        }
+
+        .wa-bubble::after {
+            content: '';
+            position: absolute;
+            right: -8px;
+            bottom: 15px;
+            border-left: 8px solid white;
+            border-top: 8px solid transparent;
+            border-bottom: 8px solid transparent;
+        }
+
+        .wa-close {
+            position: absolute;
+            top: 5px;
+            right: 8px;
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 14px;
+            padding: 0;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+        .wa-close:hover { color: #333; }
+
+        .whatsapp-float {
+            background-color: #25d366;
+            color: #FFF;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.4);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .whatsapp-float i {
+            font-size: 32px;
+        }
+
+        .whatsapp-float:hover {
+            background-color: #128C7E;
+            color: #FFF;
+            transform: scale(1.1);
+        }
+
+        @keyframes fade-up-wa {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 768px) {
+            .wa-float-container {
+                bottom: 20px;
+                right: 20px;
+            }
+            .whatsapp-float {
+                width: 50px;
+                height: 50px;
+            }
+            .whatsapp-float i {
+                font-size: 26px;
+            }
+        }
+    </style>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Auto show WhatsApp bubble after 3 seconds
+            setTimeout(function() {
+                const waContainer = document.getElementById('waFloatContainer');
+                if(waContainer) {
+                    waContainer.style.display = 'flex';
+                }
+            }, 3000);
+        });
+    </script>
 
     <script src="{{ mix('js/app.js') }}" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

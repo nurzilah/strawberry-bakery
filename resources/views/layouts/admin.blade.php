@@ -178,7 +178,33 @@
         <!-- Sidebar -->
         <nav id="sidebar">
             <div class="sidebar-header">
-                <img src="{{ asset('images/logo.png') }}" alt="Strawberry Bakery" class="sidebar-logo">
+                <img src="{{ asset('images/logo.png') }}" alt="SB" style="width: 40px; height: 40px; object-fit: contain;">
+                <div class="d-flex flex-column text-start" style="overflow: hidden;">
+                    <span class="fw-bold text-truncate" style="font-size: 1rem; line-height: 1.2;">
+                        {{ \Illuminate\Support\Str::limit(auth()->user()->name, 15) }}
+                    </span>
+                    <div class="mt-1">
+                        @php
+                            $role = auth()->user()->role ?? 'guest';
+                            if(in_array($role, ['owner', 'superadmin'])) {
+                                $bg = '#d63384';
+                                $label = 'OWNER';
+                            } elseif($role === 'admin') {
+                                $bg = '#0d6efd';
+                                $label = 'ADMIN';
+                            } elseif($role === 'kasir') {
+                                $bg = '#198754';
+                                $label = 'KASIR';
+                            } else {
+                                $bg = '#6c757d';
+                                $label = strtoupper($role);
+                            }
+                        @endphp
+                        <span class="badge" style="background-color: {{ $bg }}; color: white; font-size: 0.65rem; padding: 0.35em 0.6em; letter-spacing: 0.5px;">
+                            {{ $label }}
+                        </span>
+                    </div>
+                </div>
             </div>
 
 <ul class="list-unstyled components">
@@ -274,43 +300,7 @@
 
 </ul>
 
-        @php
-            $role = auth()->user()->role;
-            if (in_array($role, ['owner', 'superadmin'])) {
-                $badgeBg = '#d63384';
-                $icon = '👑';
-            } elseif ($role === 'admin') {
-                $badgeBg = '#0d6efd';
-                $icon = '🛠️';
-            } elseif ($role === 'kasir') {
-                $badgeBg = '#198754';
-                $icon = '🖥️';
-            } else {
-                $badgeBg = '#6c757d';
-                $icon = '👤';
-            }
-        @endphp
-        <div style="padding:16px;border-top:1px solid #dee2e6;background:transparent;margin-top:auto;">
-            <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:0 4px;">
-                <div style="width:40px;height:40px;border-radius:50%;background:{{ $badgeBg }};display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;flex-shrink:0;">
-                    {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                </div>
-                <div style="overflow:hidden;">
-                    <p style="margin:0;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ auth()->user()->name }}</p>
-                    <div style="margin-top:4px;">
-                        <span style="background:{{ $badgeBg }};color:#fff;font-size:10px;padding:3px 8px;border-radius:50rem;text-transform:uppercase;font-weight:600;display:inline-flex;align-items:center;gap:4px;">
-                            <span>{{ $icon }}</span> {{ $role }}
-                        </span>
-                    </div>
-                </div>
-            </div>
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit" style="width:100%;padding:10px;background:none;border:1px solid #dee2e6;border-radius:8px;color:#dc3545;cursor:pointer;font-size:13px;font-family:inherit;transition:0.2s;display:flex;align-items:center;justify-content:center;gap:6px;" onmouseover="this.style.background='rgba(220,53,69,0.1)'" onmouseout="this.style.background='none'">
-                    <i class="fas fa-sign-out-alt"></i> Logout
-                </button>
-            </form>
-        </div>
+
         </nav>
 
         <!-- Page Content -->
