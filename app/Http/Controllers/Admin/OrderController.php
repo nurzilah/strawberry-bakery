@@ -212,6 +212,18 @@ class OrderController extends Controller
             ]);
         }
 
+        // Return stock if cancelled after being processed
+        if ($order->status === 'processing' && $targetStatus === 'cancelled') {
+            foreach ($order->items as $item) {
+                if ($item->product_id) {
+                    \App\Models\Product::whereKey($item->product_id)->update([
+                        'stock' => DB::raw('stock + ' . (int) $item->quantity),
+                        'purchase_count' => DB::raw('GREATEST(0, purchase_count - ' . (int) $item->quantity . ')')
+                    ]);
+                }
+            }
+        }
+
         $order->update(['status' => $targetStatus]);
 
         $message = $targetStatus === 'completed'

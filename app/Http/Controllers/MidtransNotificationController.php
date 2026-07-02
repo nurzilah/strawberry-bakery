@@ -52,6 +52,17 @@ class MidtransNotificationController extends Controller
             $order->status = 'waiting_verification'; // Otomatis masuk ke status Menunggu Konfirmasi
             $order->paid_at = now();
         } else if ($transactionStatus == 'cancel' || $transactionStatus == 'deny' || $transactionStatus == 'expire') {
+            if ($order->status === 'processing') {
+                foreach ($order->items as $item) {
+                    if ($item->product_id) {
+                        \App\Models\Product::whereKey($item->product_id)->update([
+                            'stock' => \Illuminate\Support\Facades\DB::raw('stock + ' . (int) $item->quantity),
+                            'purchase_count' => \Illuminate\Support\Facades\DB::raw('GREATEST(0, purchase_count - ' . (int) $item->quantity . ')')
+                        ]);
+                    }
+                }
+            }
+            
             $order->payment_status = $transactionStatus === 'expire' ? 'expired' : ($transactionStatus === 'cancel' ? 'cancelled' : 'failed');
             $order->status = 'cancelled';
         } else if ($transactionStatus == 'pending') {

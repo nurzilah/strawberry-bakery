@@ -65,7 +65,7 @@
 
                 <div class="checkout-panel p-4 p-md-5">
                     <h2 class="text-xl font-bold text-gray-800 mb-4">Konfirmasi Pesanan</h2>
-                    <form id="paymentForm" action="{{ route('checkout.process') }}" method="POST">
+                    <form id="paymentForm" action="/checkout" method="POST">
                         @csrf
                         <input type="hidden" name="payment_method" value="midtrans">
                         <button type="submit" class="btn btn-strawberry w-100 rounded-pill py-3">
@@ -167,12 +167,24 @@ if (paymentForm) {
                 headers: {
                     'X-CSRF-TOKEN': '{{ csrf_token() }}',
                     'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'ngrok-skip-browser-warning': 'true'
                 },
                 body: formData
             });
 
-            const result = await response.json();
+            // Baca raw text dulu untuk debugging
+            const rawText = await response.text();
+            let result;
+            try {
+                result = JSON.parse(rawText);
+            } catch (e) {
+                console.error("Bukan JSON! Response dari server:", rawText);
+                alert("Server mengembalikan error (cek console untuk detail).");
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+                return;
+            }
 
             if (result.status === 'success' && result.snap_token) {
                 // Trigger Snap popup
@@ -196,7 +208,7 @@ if (paymentForm) {
                 submitBtn.disabled = false;
             }
         } catch (error) {
-            alert('Terjadi kesalahan pada server. Silakan coba lagi.');
+            alert('Error Javascript: ' + error.message);
             submitBtn.innerHTML = originalText;
             submitBtn.disabled = false;
             console.error(error);

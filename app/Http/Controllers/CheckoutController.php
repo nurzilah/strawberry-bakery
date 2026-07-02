@@ -16,6 +16,11 @@ class CheckoutController extends Controller
         Config::$isProduction = config('midtrans.is_production');
         Config::$isSanitized = config('midtrans.is_sanitized');
         Config::$is3ds = config('midtrans.is_3ds');
+        
+        Config::$curlOptions = [
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_HTTPHEADER => []
+        ];
     }
 
     public function index()
@@ -44,7 +49,11 @@ class CheckoutController extends Controller
         $carts = $user->carts;
         
         if ($carts->isEmpty()) {
-            return redirect()->back()->with('error', 'Keranjang kosong');
+            \Illuminate\Support\Facades\Log::warning("Checkout failed: Cart is empty for user " . $user->id);
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Keranjang kosong'
+            ], 400);
         }
 
         $total = 0;
@@ -69,20 +78,23 @@ class CheckoutController extends Controller
             'pickup_date' => $request->pickup_date ?? \Carbon\Carbon::now()->addDays(2)->format('Y-m-d')
         ]);
 
-        // Clear cart
+        // Create Order Items
         foreach ($carts as $cart) {
-            $detailCart = $cart->detailCart; // Simpan referensi ke parent (detail_carts)
-            
-            // Hapus child (carts) terlebih dahulu agar tidak melanggar foreign key constraint
-            if (method_exists($cart, 'items')) {
-                $cart->items()->delete();
-            }
-            $cart->delete();
-            
-            // Setelah child dihapus, aman untuk menghapus parent (detail_carts)
-            if ($detailCart) {
-                $detailCart->delete();
-            }
+            $product = \Illuminate\Support\Facades\Schema::hasColumn('carts', 'product_id') 
+                ? $cart->product 
+                : $cart->detailCart->product;
+            $qty = \Illuminate\Support\Facades\Schema::hasColumn('carts', 'quantity') 
+                ? $cart->quantity 
+                : $cart->detailCart->quantity;
+
+            \App\Models\OrderItem::create([
+                'order_id' => $order->id,
+                'product_id' => $product->id,
+                'product_name' => $product->name,
+                'price' => $product->price,
+                'quantity' => $qty,
+                'subtotal' => $product->price * $qty
+            ]);
         }
 
         // Notifikasi untuk Admin/Owner
@@ -106,6 +118,7 @@ class CheckoutController extends Controller
         );
 
         try {
+            // Jalankan request token ke Midtrans terlebih dahulu
             $snapToken = Snap::getSnapToken($params);
             
             $order->update([
@@ -113,7 +126,22 @@ class CheckoutController extends Controller
                 'midtrans_order_id' => $params['transaction_details']['order_id']
             ]);
 
+            // PROSES CLEAR CART DIPINDAHKAN DI SINI (Dijalankan hanya saat pembuatan token SUKSES)
+            foreach ($carts as $cart) {
+                $detailCart = $cart->detailCart; 
+                
+                if (method_exists($cart, 'items')) {
+                    $cart->items()->delete();
+                }
+                $cart->delete();
+                
+                if ($detailCart) {
+                    $detailCart->delete();
+                }
+            }
+
             if ($request->ajax()) {
+                \Illuminate\Support\Facades\Log::info("Checkout Success: returning snap token for order " . $order->id);
                 return response()->json([
                     'status' => 'success',
                     'snap_token' => $snapToken,
@@ -123,6 +151,7 @@ class CheckoutController extends Controller
 
             return redirect()->route('checkout.status', $order->id)->with('success', 'Pesanan berhasil dibuat. Silakan selesaikan pembayaran.');
         } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Midtrans Error: " . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
             if ($request->ajax()) {
                 return response()->json([
                     'status' => 'error',
@@ -135,7 +164,6 @@ class CheckoutController extends Controller
 
     public function status(Order $order)
     {
-        // Pastikan order milik user yang login
         if ($order->user_id !== auth()->id()) {
             abort(403);
         }
@@ -161,7 +189,7 @@ class CheckoutController extends Controller
                     ]);
                 }
             } catch (\Exception $e) {
-                // Biarkan saja jika error/belum ada di Midtrans
+                // Biarkan lolos jika gagal
             }
         }
 
