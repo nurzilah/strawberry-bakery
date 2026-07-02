@@ -10,8 +10,6 @@ use Illuminate\Support\Str;
 
 class ProductSeeder extends Seeder
 {
-    use WithoutModelEvents;
-
     /**
      * Run the database seeds.
      *
@@ -19,113 +17,195 @@ class ProductSeeder extends Seeder
      */
     public function run()
     {
-        $categories = [
-            'roti-manis-gurih' => Category::firstOrCreate(
-                ['slug' => 'roti-manis-gurih'],
-                [
-                    'name' => 'Roti Manis & Gurih',
-                    'description' => 'Pilihan roti manis dan gurih khas Strawberry Bakery.',
-                    'icon' => 'bread-slice',
-                    'is_active' => true,
-                ]
-            ),
-            'cake-tart' => Category::firstOrCreate(
-                ['slug' => 'cake-tart'],
-                [
-                    'name' => 'Cake & Tart',
-                    'description' => 'Aneka cake dan tart untuk hadiah, acara, dan pesanan spesial.',
-                    'icon' => 'cake',
-                    'is_active' => true,
-                ]
-            ),
-            'pastry-donat' => Category::firstOrCreate(
-                ['slug' => 'pastry-donat'],
-                [
-                    'name' => 'Pastry & Donat',
-                    'description' => 'Produk pastry renyah dan donat lembut siap santap.',
-                    'icon' => 'croissant',
-                    'is_active' => true,
-                ]
-            ),
-        ];
+        $catRoti = Category::firstOrCreate(['slug' => 'roti-manis-gurih'], ['name' => 'Roti Manis & Gurih', 'is_active' => true]);
+        $catCake = Category::firstOrCreate(['slug' => 'cake-tart'], ['name' => 'Cake & Tart', 'is_active' => true]);
+        $catPastry = Category::firstOrCreate(['slug' => 'pastry-donat'], ['name' => 'Pastry & Donat', 'is_active' => true]);
 
         $products = [
+            // Roti Manis & Gurih
             [
-                'category_id' => $categories['roti-manis-gurih']->id,
-                'name' => 'Roti Banana Split',
-                'price' => 10500,
+                'name' => 'Cream Cheese Coklat',
+                'category_id' => $catRoti->id,
+                'price' => 11000,
                 'stock' => 30,
-                'description' => 'Roti lembut dengan perpaduan rasa pisang manis khas Strawberry Bakery.',
+                'description' => 'Roti manis dengan perpaduan isian cream cheese yang gurih lumer dan lapisan coklat lezat.',
+                'is_featured' => true,
+                'is_new' => false,
             ],
             [
-                'category_id' => $categories['roti-manis-gurih']->id,
-                'name' => 'Roti Chicken Cheese',
+                'name' => 'Cream Cheese Blue',
+                'category_id' => $catRoti->id,
+                'price' => 11000,
+                'stock' => 30,
+                'description' => 'Sensasi roti manis isi cream cheese yang nikmat dipadukan dengan selai blueberry segar.',
+                'is_featured' => false,
+                'is_new' => false,
+            ],
+            [
+                'name' => 'Sobek Coklat Keju',
+                'category_id' => $catRoti->id,
+                'price' => 27000,
+                'stock' => 20,
+                'description' => 'Roti sobek super empuk yang pas untuk berbagi dengan taburan coklat dan keju melimpah.',
+                'is_featured' => false,
+                'is_new' => false,
+            ],
+            [
+                'name' => 'Sobek Strawberry',
+                'category_id' => $catRoti->id,
+                'price' => 23000,
+                'stock' => 20,
+                'description' => 'Roti sobek lembut dengan balutan selai stroberi manis asam yang menyegarkan.',
+                'is_featured' => false,
+                'is_new' => false,
+            ],
+            [
+                'name' => 'Roti Pisang Banana Split',
+                'category_id' => $catRoti->id,
                 'price' => 10500,
                 'stock' => 25,
-                'description' => 'Roti gurih dengan topping daging ayam cincang bumbu spesial dan taburan keju melimpah.',
+                'description' => 'Kombinasi klasik pisang manis berbalut adonan roti lembut khas cita rasa banana split.',
+                'is_featured' => false,
+                'is_new' => false,
             ],
             [
-                'category_id' => $categories['roti-manis-gurih']->id,
-                'name' => 'Roti Long Coklat Keju',
-                'price' => 23000,
-                'stock' => 15,
-                'description' => 'Roti ukuran panjang dengan kombinasi toping meses coklat premium dan parutan keju gurih.',
-            ],
-            [
-                'category_id' => $categories['roti-manis-gurih']->id,
-                'name' => 'Roti Pandan Chiffon',
-                'price' => 29000,
-                'stock' => 10,
-                'description' => 'Kue chiffon pandan super lembut, wangi aroma pandan alami.',
-            ],
-            [
-                'category_id' => $categories['roti-manis-gurih']->id,
-                'name' => 'Rainbow Wool Bread',
-                'price' => 34000,
-                'stock' => 12,
-                'description' => 'Roti hits bertekstur serat rajutan wol dengan tampilan warna-warni pelangi.',
-            ],
-            [
-                'category_id' => $categories['roti-manis-gurih']->id,
-                'name' => 'Roti Karakter Kura-Kura',
-                'price' => 11000,
-                'stock' => 20,
-                'description' => 'Roti manis berbentuk karakter kura-kura lucu yang sangat disukai anak-anak.',
-            ],
-            [
-                'category_id' => $categories['cake-tart']->id,
-                'name' => 'Bento Cake Custom',
-                'price' => 40000,
-                'stock' => 8,
-                'description' => 'Kue tart mini ala Korea berukuran personal, bebas custom tulisan untuk hadiah.',
-            ],
-            [
-                'category_id' => $categories['cake-tart']->id,
-                'name' => 'Kue Tart Black Forest Ukuran 14',
-                'price' => 45000,
-                'stock' => 5,
-                'description' => 'Kue tart basic rasa coklat Black Forest klasik dengan hiasan buah ceri segar.',
-            ],
-            [
-                'category_id' => $categories['cake-tart']->id,
-                'name' => 'Red Velvet Slice Cake',
-                'price' => 27000,
-                'stock' => 15,
-                'description' => 'Potongan kue red velvet mewah dengan lapisan cream cheese premium.',
-            ],
-            [
-                'category_id' => $categories['pastry-donat']->id,
-                'name' => 'Premium Croissant Mentega',
-                'price' => 15000,
-                'stock' => 15,
-                'description' => 'Pastry khas Prancis bertekstur renyah di luar dengan aroma butter kuat.',
-            ],
-            [
-                'category_id' => $categories['pastry-donat']->id,
-                'name' => 'Donat Satuan Meses',
+                'name' => 'Roti Coklat Keju',
+                'category_id' => $catRoti->id,
                 'price' => 10000,
-                'stock' => 40,
-                'description' => 'Donat kentang empuk dengan balutan mentega dan taburan meses coklat tebal.',
+                'stock' => 25,
+                'description' => 'Favorit sepanjang masa, roti empuk perpaduan coklat lumer dan parutan keju.',
+                'is_featured' => false,
+                'is_new' => false,
+            ],
+            [
+                'name' => 'Paket 7 Rasa',
+                'category_id' => $catRoti->id,
+                'price' => 22000,
+                'stock' => 15,
+                'description' => 'Beragam kenikmatan dalam satu kemasan hemat dengan tujuh varian rasa andalan.',
+                'is_featured' => false,
+                'is_new' => false,
+            ],
+            [
+                'name' => 'Pizza Ayam',
+                'category_id' => $catRoti->id,
+                'price' => 35000,
+                'stock' => 10,
+                'description' => 'Roti gurih ala pizza dengan topping ayam cincang bumbu spesial, saus tomat, dan keju leleh.',
+                'is_featured' => false,
+                'is_new' => false,
+            ],
+
+            // Cake & Tart
+            [
+                'name' => 'Brownies Slice',
+                'category_id' => $catCake->id,
+                'price' => 8500,
+                'stock' => 20,
+                'description' => 'Potongan kecil kebahagiaan dari brownies panggang fudgy yang super nyoklat di lidah.',
+                'is_featured' => true,
+                'is_new' => false,
+            ],
+            [
+                'name' => 'Brownies Mika',
+                'category_id' => $catCake->id,
+                'price' => 31000,
+                'stock' => 10,
+                'description' => 'Satu mika penuh brownies fudgy berpadu topping aneka rasa yang cocok untuk hadiah.',
+                'is_featured' => false,
+                'is_new' => false,
+            ],
+            [
+                'name' => 'Red Velvet Gulung',
+                'category_id' => $catCake->id,
+                'price' => 35000,
+                'stock' => 10,
+                'description' => 'Roll cake istimewa red velvet dengan sentuhan cream cheese manis nan legit.',
+                'is_featured' => false,
+                'is_new' => true,
+            ],
+            [
+                'name' => 'Black Forest Slice',
+                'category_id' => $catCake->id,
+                'price' => 20000,
+                'stock' => 15,
+                'description' => 'Irisan cake black forest lembut yang berpadu dengan whipped cream dan buah ceri.',
+                'is_featured' => false,
+                'is_new' => false,
+            ],
+            [
+                'name' => 'Shifon Keju',
+                'category_id' => $catCake->id,
+                'price' => 30000,
+                'stock' => 10,
+                'description' => 'Kue shifon super ringan dan mengembang empuk dengan taburan keju gurih melimpah.',
+                'is_featured' => false,
+                'is_new' => false,
+            ],
+            [
+                'name' => 'Cake Redvelvet',
+                'category_id' => $catCake->id,
+                'price' => 19000,
+                'stock' => 15,
+                'description' => 'Mini cake red velvet premium dengan rasa elegan yang memanjakan momen bersantaimu.',
+                'is_featured' => false,
+                'is_new' => false,
+            ],
+            [
+                'name' => 'Tart Mini Bento',
+                'category_id' => $catCake->id,
+                'price' => 40000,
+                'stock' => 10,
+                'description' => 'Kue tart cantik kekinian dalam wadah bento yang bisa kamu pesan untuk kejutan spesial.',
+                'is_featured' => true,
+                'is_new' => true,
+            ],
+            [
+                'name' => 'Tart Diameter 14',
+                'category_id' => $catCake->id,
+                'price' => 170000,
+                'stock' => 5,
+                'description' => 'Kue tart ukuran 14cm bernuansa estetik yang tepat untuk merayakan hari kebahagiaanmu.',
+                'is_featured' => false,
+                'is_new' => false,
+            ],
+
+            // Pastry & Donat
+            [
+                'name' => 'Donat Coklat Cerry',
+                'category_id' => $catPastry->id,
+                'price' => 8000,
+                'stock' => 30,
+                'description' => 'Donat montok manis yang diselimuti coklat mengkilap dan sebutir ceri segar di tengahnya.',
+                'is_featured' => false,
+                'is_new' => false,
+            ],
+            [
+                'name' => 'Donat Oreo',
+                'category_id' => $catPastry->id,
+                'price' => 8500,
+                'stock' => 30,
+                'description' => 'Paduan serasi donat lembut dengan baluran topping remahan biskuit Oreo renyah memikat.',
+                'is_featured' => false,
+                'is_new' => false,
+            ],
+            [
+                'name' => 'Donat Meses Keju',
+                'category_id' => $catPastry->id,
+                'price' => 8000,
+                'stock' => 30,
+                'description' => 'Dua rasa andalan dalam satu gigitan: gurihnya keju parut bertemu manisnya meses coklat.',
+                'is_featured' => false,
+                'is_new' => false,
+            ],
+            [
+                'name' => 'Donat Tiramisu',
+                'category_id' => $catPastry->id,
+                'price' => 8000,
+                'stock' => 25,
+                'description' => 'Donat modern berlapis glaze rasa tiramisu pekat untuk teman minum kopimu.',
+                'is_featured' => true,
+                'is_new' => false,
             ],
         ];
 
@@ -140,11 +220,11 @@ class ProductSeeder extends Seeder
                     'description' => $item['description'],
                     'price' => $item['price'],
                     'stock' => $item['stock'],
-                    'image' => $slug . '.jpg',
+                    'image' => null,
                     'is_available' => true,
-                    'purchase_count' => rand(15, 70),
-                    'rating' => rand(4, 5),
-                    'reviews_count' => rand(5, 25),
+                    'is_active' => true,
+                    'is_featured' => $item['is_featured'],
+                    'is_new' => $item['is_new'],
                 ]
             );
         }

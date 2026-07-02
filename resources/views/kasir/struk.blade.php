@@ -27,7 +27,7 @@
             <img src="{{ asset('images/logo.png') }}" class="logo" alt="Logo">
             <div class="bold" style="font-size:14px;">STRAWBERRY CAKE & BAKERY</div>
             <div class="small">Jl. AR. Hakim No.149, Mangkukusuman, Kota Tegal</div>
-            <div class="small">WA: +62 815-7173-138</div>
+            <div class="small">WA: +62 815-7173-118</div>
             <div class="small">Instagram: @strawberrycaketegal</div>
             <div class="small">Setiap hari, 08.00 - 21.00 WIB</div>
         </div>

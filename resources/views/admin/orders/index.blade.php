@@ -97,6 +97,7 @@
                         <th scope="col">Tanggal</th>
                         <th scope="col">Nama Pelanggan</th>
                         <th scope="col" class="text-end">Total Uang</th>
+                        <th scope="col" class="text-center">Status Pembayaran</th>
                         <th scope="col" class="text-center">Status Pesanan</th>
                         <th scope="col" class="text-center">Bukti Bayar</th>
                         <th scope="col" class="text-end">Tindakan</th>
@@ -124,6 +125,17 @@
                                 </td>
                                 <td class="text-end fw-semibold text-dark text-nowrap">
                                     Rp {{ number_format((float) $order->total_amount, 0, ',', '.') }}
+                                </td>
+                                <td class="text-center">
+                                    @if($order->payment_status === 'paid')
+                                        <span class="badge rounded-pill bg-success-subtle text-success">Lunas</span>
+                                    @elseif($order->payment_status === 'pending')
+                                        <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis">Pending</span>
+                                    @elseif(in_array($order->payment_status, ['failed', 'expired', 'cancelled']))
+                                        <span class="badge rounded-pill bg-danger-subtle text-danger">{{ ucfirst($order->payment_status) }}</span>
+                                    @else
+                                        <span class="badge rounded-pill bg-secondary-subtle text-secondary">{{ ucfirst($order->payment_status ?? 'Pending') }}</span>
+                                    @endif
                                 </td>
                                 <td class="text-center">
                                     @if($order->status === 'waiting_verification')

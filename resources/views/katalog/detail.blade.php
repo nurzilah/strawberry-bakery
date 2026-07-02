@@ -66,7 +66,6 @@
                 @endauth
             </div>
         </div>
-        </div>
 
         <!-- Ulasan Pelanggan -->
         <div class="mt-12 bg-white rounded-2xl shadow p-6">
@@ -164,6 +163,8 @@
         </div>
     </div>
 </div>
+
+@endsection
 
 @push('scripts')
 <script>

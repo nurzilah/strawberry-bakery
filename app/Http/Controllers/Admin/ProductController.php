@@ -74,6 +74,18 @@ class ProductController extends Controller
         }
         $data['slug'] = $this->buildSlug($data, $product->id, $product->slug);
 
+        // Check if stock was modified in the edit form
+        $oldStock = $product->stock;
+        $newStock = (int) $data['stock'];
+        
+        if ($oldStock !== $newStock) {
+            $difference = $newStock - $oldStock;
+            $product->addStock($difference, 'Penyesuaian stok dari halaman Edit Produk', auth()->id());
+        }
+        
+        // Unset stock from data so it doesn't double-save or overwrite what addStock just did
+        unset($data['stock']);
+
         $product->update($data);
 
         return redirect()->route('admin.products.index')

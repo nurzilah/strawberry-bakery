@@ -51,4 +51,26 @@ class Product extends Model
     {
         return $this->hasMany(Recommendation::class);
     }
+
+    public function stockHistories()
+    {
+        return $this->hasMany(StockHistory::class);
+    }
+
+    public function addStock($quantity, $notes = null, $userId = null)
+    {
+        $stockBefore = $this->stock;
+        $stockAfter = $this->stock + $quantity;
+
+        $this->stock = $stockAfter;
+        $this->save();
+
+        $this->stockHistories()->create([
+            'user_id' => $userId ?? auth()->id(),
+            'quantity_added' => $quantity,
+            'stock_before' => $stockBefore,
+            'stock_after' => $stockAfter,
+            'notes' => $notes,
+        ]);
+    }
 }

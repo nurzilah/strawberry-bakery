@@ -180,7 +180,8 @@
                                 <th class="ps-4">No. Order</th>
                                 <th>Pelanggan</th>
                                 <th>Total</th>
-                                <th>Status</th>
+                                <th>Status Pesanan</th>
+                                <th>Status Bayar</th>
                                 <th class="pe-4">Tanggal</th>
                             </tr>
                         </thead>
@@ -201,11 +202,22 @@
                                             <span class="badge bg-secondary">{{ ucfirst($order->status) }}</span>
                                         @endif
                                     </td>
+                                    <td>
+                                        @if($order->payment_status === 'paid')
+                                            <span class="badge bg-success">Lunas</span>
+                                        @elseif($order->payment_status === 'pending')
+                                            <span class="badge bg-warning text-dark">Pending</span>
+                                        @elseif(in_array($order->payment_status, ['failed', 'expired', 'cancelled']))
+                                            <span class="badge bg-danger">{{ ucfirst($order->payment_status) }}</span>
+                                        @else
+                                            <span class="badge bg-secondary">{{ ucfirst($order->payment_status ?? 'Pending') }}</span>
+                                        @endif
+                                    </td>
                                     <td class="pe-4">{{ $order->created_at->format('d M Y') }}</td>
                                 </tr>
                             @empty
                                 <tr>
-                                    <td colspan="5" class="text-center py-4 text-muted">Belum ada pesanan terbaru.</td>
+                                    <td colspan="6" class="text-center py-4 text-muted">Belum ada pesanan terbaru.</td>
                                 </tr>
                             @endforelse
                         </tbody>

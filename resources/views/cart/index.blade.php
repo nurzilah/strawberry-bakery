@@ -65,6 +65,15 @@
     .bg-primary-subtle {
         background-color: var(--sb-primary-soft) !important;
     }
+    /* Hide up/down arrows for number input */
+    .qty-input::-webkit-outer-spin-button,
+    .qty-input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+    .qty-input[type=number] {
+        -moz-appearance: textfield;
+    }
 </style>
 @endpush
 
@@ -131,22 +140,16 @@
 
                                         <!-- Qty Control -->
                                         <div class="d-flex align-items-center bg-light rounded-pill p-1 border">
-                                            <form action="{{ route('cart.update', $cart->id) }}" method="POST" class="m-0">
+                                            <form action="{{ route('cart.update', $cart->id) }}" method="POST" class="m-0 d-flex align-items-center">
                                                 @csrf
                                                 @method('PATCH')
-                                                <input type="hidden" name="quantity" value="{{ $quantity - 1 }}">
-                                                <button type="submit" class="btn btn-light rounded-circle qty-btn text-secondary border shadow-sm" {{ $quantity <= 1 ? 'disabled' : '' }}>
+                                                <button type="button" class="btn btn-light rounded-circle qty-btn text-secondary border shadow-sm btn-minus" data-target="qty-{{ $cart->id }}">
                                                     <i class="fa-solid fa-minus"></i>
                                                 </button>
-                                            </form>
 
-                                            <input type="text" class="qty-input" value="{{ $quantity }}" readonly>
+                                                <input type="number" name="quantity" id="qty-{{ $cart->id }}" class="qty-input mx-1" value="{{ $quantity }}" min="1" max="{{ $product->stock ?? 999 }}">
 
-                                            <form action="{{ route('cart.update', $cart->id) }}" method="POST" class="m-0">
-                                                @csrf
-                                                @method('PATCH')
-                                                <input type="hidden" name="quantity" value="{{ $quantity + 1 }}">
-                                                <button type="submit" class="btn btn-primary rounded-circle qty-btn shadow-sm">
+                                                <button type="button" class="btn btn-primary rounded-circle qty-btn shadow-sm btn-plus" data-target="qty-{{ $cart->id }}">
                                                     <i class="fa-solid fa-plus"></i>
                                                 </button>
                                             </form>
@@ -172,6 +175,14 @@
                         </div>
                     </div>
                 @endforelse
+
+                @if(count($carts ?? []) > 0)
+                    <div class="mt-4 mb-2 text-center text-md-start">
+                        <a href="{{ route('products.index') }}" class="btn btn-outline-primary rounded-pill px-4 py-2 fw-bold shadow-sm">
+                            <i class="fa-solid fa-plus me-2"></i> Tambah Produk Lain
+                        </a>
+                    </div>
+                @endif
             </div>
 
             <!-- Summary -->
@@ -244,3 +255,73 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    let debounceTimer;
+    
+    const submitForm = (form) => {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            form.submit();
+        }, 600);
+    };
+
+    // Handle plus/minus buttons
+    document.querySelectorAll('.btn-minus, .btn-plus').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-target');
+            const input = document.getElementById(targetId);
+            const form = this.closest('form');
+            const min = parseInt(input.getAttribute('min')) || 1;
+            const max = parseInt(input.getAttribute('max')) || 999;
+            let val = parseInt(input.value) || 0;
+
+            if (this.classList.contains('btn-plus')) {
+                if (val < max) val++;
+            } else {
+                if (val > min) val--;
+            }
+            
+            if (input.value !== val) {
+                input.value = val;
+                submitForm(form);
+            }
+        });
+    });
+
+    // Handle manual input
+    document.querySelectorAll('.qty-input').forEach(input => {
+        input.addEventListener('input', function() {
+            const form = this.closest('form');
+            const max = parseInt(this.getAttribute('max')) || 999;
+            let val = parseInt(this.value);
+
+            if (isNaN(val) || val < 1) {
+                // Tunggu blur jika user sedang hapus/input nol
+                return;
+            }
+
+            if (val > max) {
+                this.value = max;
+            }
+            
+            submitForm(form);
+        });
+
+        // Handle blur (kalau kosong / 0)
+        input.addEventListener('blur', function() {
+            const form = this.closest('form');
+            const min = parseInt(this.getAttribute('min')) || 1;
+            let val = parseInt(this.value);
+            
+            if (isNaN(val) || val < min) {
+                this.value = min;
+                submitForm(form);
+            }
+        });
+    });
+});
+</script>
+@endpush

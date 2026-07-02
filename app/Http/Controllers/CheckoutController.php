@@ -65,7 +65,8 @@ class CheckoutController extends Controller
             'total_amount' => $total,
             'status' => 'pending',
             'payment_status' => 'pending',
-            'payment_method' => $request->payment_method ?? 'midtrans'
+            'payment_method' => $request->payment_method ?? 'midtrans',
+            'pickup_date' => $request->pickup_date ?? \Carbon\Carbon::now()->addDays(2)->format('Y-m-d')
         ]);
 
         // Clear cart
@@ -112,46 +113,33 @@ class CheckoutController extends Controller
                 'midtrans_order_id' => $params['transaction_details']['order_id']
             ]);
 
-            return redirect()->route('orders.show', $order->id)->with('success', 'Pesanan berhasil dibuat. Silakan selesaikan pembayaran.');
-        } catch (\Exception $e) {
-            return redirect()->route('orders.index')->with('error', 'Gagal memproses pembayaran. ' . $e->getMessage());
-        }
-    }
-
-    public function callback(Request $request)
-    {
-        $serverKey = config('midtrans.server_key');
-        $hashed = hash('sha512', $request->order_id . $request->status_code . $request->gross_amount . $serverKey);
-        
-        if ($hashed == $request->signature_key) {
-            $order = Order::where('midtrans_order_id', $request->order_id)->first();
-            
-            if ($order) {
-                if ($request->transaction_status == 'capture' || $request->transaction_status == 'settlement') {
-                    $order->update(['payment_status' => 'paid', 'status' => 'processing']);
-                } else if ($request->transaction_status == 'deny' || $request->transaction_status == 'cancel' || $request->transaction_status == 'expire') {
-                    $order->update(['payment_status' => 'failed', 'status' => 'cancelled']);
-                } else if ($request->transaction_status == 'pending') {
-                    $order->update(['payment_status' => 'pending']);
-                }
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => 'success',
+                    'snap_token' => $snapToken,
+                    'order_id' => $order->id
+                ]);
             }
+
+            return redirect()->route('checkout.status', $order->id)->with('success', 'Pesanan berhasil dibuat. Silakan selesaikan pembayaran.');
+        } catch (\Exception $e) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Gagal memproses pembayaran. ' . $e->getMessage()
+                ], 500);
+            }
+            return redirect()->route('checkout.index')->with('error', 'Gagal memproses pembayaran. ' . $e->getMessage());
         }
-        
-        return response()->json(['status' => 'ok']);
     }
 
-    public function success()
+    public function status(Order $order)
     {
-        return view('checkout.success');
-    }
+        // Pastikan order milik user yang login
+        if ($order->user_id !== auth()->id()) {
+            abort(403);
+        }
 
-    public function pending()
-    {
-        return view('checkout.pending');
-    }
-
-    public function failed()
-    {
-        return view('checkout.failed');
+        return view('checkout.status', compact('order'));
     }
 }

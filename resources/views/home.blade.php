@@ -14,33 +14,113 @@
             transform: translateY(0);
         }
 
-        .home-product-card,
         .home-soft-card {
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border-radius: 1rem;
         }
 
-        .home-product-card:hover,
         .home-soft-card:hover {
             transform: translateY(-6px);
             box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
         }
 
-        .home-product-card .card-img-top {
+        .product-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.04);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            overflow: hidden;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
+            transform: translateY(-4px);
+        }
+
+        .product-card__image {
             aspect-ratio: 1 / 1;
+            background-color: #fff1f4;
+            border-radius: 16px 16px 0 0;
             object-fit: cover;
-            border-top-left-radius: 1rem;
-            border-top-right-radius: 1rem;
-            transition: transform 0.5s ease;
+            width: 100%;
         }
 
-        .home-product-card:hover .card-img-top {
-            transform: scale(1.05);
+        .product-card__body {
+            display: flex;
+            flex: 1;
+            flex-direction: column;
+            padding: 1rem;
         }
 
-        .home-product-card .card-body > .flex:last-child {
-            gap: 0.75rem;
-            flex-wrap: wrap;
+        .product-card__category {
+            align-self: flex-start;
+            background-color: var(--sb-primary-soft);
+            border: 1px solid rgba(233, 79, 112, 0.18);
+            color: var(--sb-primary);
+            font-size: 0.72rem;
+            font-weight: 700;
+            margin-bottom: 0.65rem;
+        }
+
+        .product-card__title {
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 1;
+            color: #0f172a;
+            display: -webkit-box;
+            font-size: 1rem;
+            font-weight: 600;
+            line-height: 1.5;
+            margin-bottom: 0.35rem;
+            min-height: 1.5rem;
+            overflow: hidden;
+        }
+
+        .product-card__description {
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            color: #64748b;
+            display: -webkit-box;
+            font-size: 0.825rem;
+            line-height: 1.58;
+            margin-bottom: 0;
+            min-height: 2.6rem;
+            overflow: hidden;
+        }
+
+        .product-card__actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.85rem;
+            margin-top: auto;
+            padding-top: 1rem;
+        }
+
+        .product-card__price {
+            color: var(--sb-primary);
+            font-size: 0.98rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .product-card__button {
+            border-radius: 999px;
+            height: 42px;
+            min-width: 92px;
+            padding-inline: 1rem;
+        }
+
+        @media (max-width: 575.98px) {
+            .product-card__body {
+                padding: 0.85rem;
+            }
+
+            .product-card__button {
+                width: 100%;
+            }
         }
 
         .home-hero-visual {
@@ -103,9 +183,6 @@
                     <div class="bg-white p-2 rounded-circle shadow-lg" style="width: 380px; height: 380px;">
                         <img src="https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800" alt="Premium Bread" class="w-100 h-100 rounded-circle" style="object-fit: cover;">
                     </div>
-                    <div class="position-absolute bg-warning text-dark px-4 py-2 rounded-pill fw-bold shadow-lg" style="bottom: 10%; left: 0; transform: rotate(-5deg);">
-                        <i class="fa-solid fa-star"></i> Rating 4.9
-                    </div>
                     <div class="position-absolute bg-white text-primary px-4 py-2 rounded-pill fw-bold shadow-lg" style="top: 10%; right: 0; transform: rotate(5deg);">
                         <i class="fa-solid fa-medal"></i> Best Quality
                     </div>
@@ -161,6 +238,7 @@
 </section>
 
 <!-- Recommendations Section -->
+@if(isset($recommendedProducts) && $recommendedProducts->isNotEmpty())
 <section class="py-16 bg-pink-50 fade-up">
     <div class="container mx-auto px-4">
         <div class="text-center mb-12">
@@ -168,65 +246,91 @@
                 {{ $isRecommendation ? 'UNTUK KAMU' : 'PRODUK POPULER' }}
             </span>
             <h2 class="text-4xl font-bold text-gray-800 mt-2">
-                {{ $isRecommendation ? 'Berdasarkan Pembelian Kamu' : 'Favorit Pelanggan Kami' }}
+                {{ $isRecommendation ? 'Rekomendasi Khusus Untukmu' : 'Favorit Pelanggan Kami' }}
             </h2>
             <p class="text-gray-600 mt-4">
-                {{ $isRecommendation ? 'Kami memilihkan produk ini khusus untuk selera Anda.' : 'Pilihan terbaik yang paling sering dipesan.' }}
+                @if($isRecommendation)
+                    Berdasarkan riwayat pembelianmu
+                @elseif(auth()->check() && !$hasOrders)
+                    Lakukan pembelian pertama untuk mendapatkan rekomendasi personal!
+                @else
+                    Pilihan terbaik yang paling sering dipesan
+                @endif
             </p>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            @forelse($recommendedProducts ?? [] as $product)
-            <div class="card home-product-card h-100 bg-white group overflow-hidden border-0">
-                <div class="relative overflow-hidden">
-                    <a href="{{ route('products.show', $product->slug) }}" @if($isRecommendation) onclick="logRecommendationClick({{ $product->id }})" @endif>
-                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="card-img-top">
-                    </a>
-                    <div class="absolute top-4 left-4 flex flex-col gap-2">
-                        @if($isRecommendation)
-                            <span class="badge bg-pink-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md">
-                                <i class="fas fa-star text-yellow-300 me-1"></i> Rekomendasi
-                            </span>
-                        @endif
-                        @if($product->is_new)
-                            <span class="badge bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md">✨ Baru</span>
-                        @endif
-                        @if($product->is_promo)
-                            <span class="badge bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-md">🏷 Promo</span>
-                        @endif
-                    </div>
-                </div>
-                <div class="p-6 flex flex-col flex-grow">
-                    <span class="text-sm text-pink-500 font-semibold uppercase">{{ $product->category->name ?? 'Produk' }}</span>
-                    <a href="{{ route('products.show', $product->slug) }}" class="block mb-4" @if($isRecommendation) onclick="logRecommendationClick({{ $product->id }})" @endif>
-                        <h3 class="text-xl font-bold text-gray-800 mt-2 hover:text-pink-500 transition line-clamp-2">{{ $product->name }}</h3>
-                    </a>
-                    
-                    <div class="mt-auto">
-                        @if($product->is_promo && $product->original_price)
-                            <div class="text-sm text-gray-400 line-through mb-1">Rp {{ number_format($product->original_price, 0, ',', '.') }}</div>
-                        @endif
-                        <div class="flex items-center justify-between">
-                            <span class="text-2xl font-bold text-pink-500">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                            <a href="{{ route('products.show', $product->slug) }}" 
-                               @if($isRecommendation) onclick="logRecommendationClick({{ $product->id }})" @endif
-                               class="btn btn-strawberry btn-sm rounded-full transition-colors hover:bg-pink-600" aria-label="Lihat detail">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                </svg>
-                            </a>
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+            @foreach($recommendedProducts as $product)
+            <div class="col">
+                <article class="product-card h-100">
+                    <div class="position-relative">
+                        <a href="{{ route('products.show', $product->slug) }}" @if($isRecommendation) onclick="logRecommendationClick({{ $product->id }})" @endif>
+                            <img src="{{ $product->image ? asset('storage/' . $product->image) : asset('images/logo.png') }}" alt="{{ $product->name }}" class="product-card__image">
+                        </a>
+                        <div class="position-absolute top-0 start-0 p-2 d-flex flex-column gap-2">
+                            @if($isRecommendation)
+                                <span class="badge bg-danger text-white px-2 py-1 rounded-pill shadow-sm" style="font-size: 0.7rem;">
+                                    ⭐ Rekomendasi AI
+                                </span>
+                            @endif
+                            @if($product->is_new)
+                                <span class="badge bg-primary text-white px-2 py-1 rounded-pill shadow-sm" style="font-size: 0.7rem;">✨ Baru</span>
+                            @endif
+                            @if($product->is_promo)
+                                <span class="badge bg-danger text-white px-2 py-1 rounded-pill shadow-sm" style="font-size: 0.7rem;">🏷 Promo</span>
+                            @endif
                         </div>
                     </div>
-                </div>
+                    <div class="product-card__body">
+                        <span class="badge rounded-pill product-card__category">
+                            {{ $product->category->name ?? 'Produk Bakery' }}
+                        </span>
+                        <a href="{{ route('products.show', $product->slug) }}" class="text-decoration-none" @if($isRecommendation) onclick="logRecommendationClick({{ $product->id }})" @endif>
+                            <h3 class="product-card__title hover-text-primary">{{ $product->name }}</h3>
+                        </a>
+                        <p class="product-card__description">
+                            {{ Str::limit($product->description ?? 'Produk segar pilihan Strawberry Cake & Bakery Tegal.', 60) }}
+                        </p>
+                        
+                        <div class="product-card__actions">
+                            <div>
+                                @if($product->is_promo && $product->original_price)
+                                    <small class="text-muted text-decoration-line-through d-block" style="font-size: 0.75rem;">Rp {{ number_format($product->original_price, 0, ',', '.') }}</small>
+                                @endif
+                                <div class="product-card__price">
+                                    Rp {{ number_format($product->price, 0, ',', '.') }}
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 w-100">
+                                <a href="{{ route('products.show', $product->slug) }}" 
+                                   @if($isRecommendation) onclick="logRecommendationClick({{ $product->id }})" @endif
+                                   class="btn btn-outline-primary rounded-pill d-flex align-items-center justify-content-center shadow-sm flex-fill" style="height: 38px; font-size: 0.85rem;" title="Detail Produk">
+                                    Detail
+                                </a>
+                                @auth
+                                <form action="{{ route('cart.store') }}" method="POST" class="m-0 flex-shrink-0">
+                                    @csrf
+                                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="btn btn-strawberry rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px; padding: 0;" title="Tambah ke Keranjang">
+                                        <i class="fa-solid fa-cart-plus"></i>
+                                    </button>
+                                </form>
+                                @else
+                                <a href="{{ route('login') }}" class="btn btn-strawberry rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 38px; height: 38px; padding: 0;" title="Login untuk beli">
+                                    <i class="fa-solid fa-cart-plus"></i>
+                                </a>
+                                @endauth
+                            </div>
+                        </div>
+                    </div>
+                </article>
             </div>
-            @empty
-            <div class="col-span-full text-center text-gray-500 py-8">
-                Belum ada produk yang tersedia.
-            </div>
-            @endforelse
+            @endforeach
         </div>
     </div>
 </section>
+@endif
 
 <!-- Popular Products -->
 <section class="py-16 bg-gray-50 fade-up">
@@ -238,45 +342,68 @@
         </div>
 
         <!-- Products Grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
             @forelse($products ?? [] as $product)
-            <div class="card home-product-card h-100 bg-white group border-0">
-                <div class="relative overflow-hidden">
-                    <a href="{{ route('products.show', $product->slug) }}">
-                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="card-img-top">
-                    </a>
-                    <div class="absolute top-4 left-4 flex flex-col gap-2">
-                        @if($product->is_new)
-                            <span class="badge bg-blue-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm">✨ Baru</span>
-                        @endif
-                        @if($product->is_promo)
-                            <span class="badge bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold shadow-sm">🏷 Promo</span>
-                        @endif
-                    </div>
-                </div>
-                <div class="p-6 flex flex-col flex-grow">
-                    <span class="text-sm text-pink-500 font-semibold uppercase">{{ $product->category->name ?? 'Produk' }}</span>
-                    <a href="{{ route('products.show', $product->slug) }}" class="block mb-4">
-                        <h3 class="text-xl font-bold text-gray-800 mt-2 hover:text-pink-500 transition line-clamp-2">{{ $product->name }}</h3>
-                    </a>
-                    
-                    <div class="mt-auto">
-                        @if($product->is_promo && $product->original_price)
-                            <div class="text-sm text-gray-400 line-through mb-1">Rp {{ number_format($product->original_price, 0, ',', '.') }}</div>
-                        @endif
-                        <div class="flex items-center justify-between">
-                            <span class="text-2xl font-bold text-pink-500">Rp {{ number_format($product->price, 0, ',', '.') }}</span>
-                            <a href="{{ route('products.show', $product->slug) }}" class="btn btn-strawberry btn-sm rounded-full transition-colors hover:bg-pink-600" aria-label="Lihat detail">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                </svg>
-                            </a>
+            <div class="col">
+                <article class="product-card h-100">
+                    <div class="position-relative">
+                        <a href="{{ route('products.show', $product->slug) }}">
+                            <img src="{{ $product->image ? asset('storage/' . $product->image) : asset('images/logo.png') }}" alt="{{ $product->name }}" class="product-card__image">
+                        </a>
+                        <div class="position-absolute top-0 start-0 p-2 d-flex flex-column gap-2">
+                            @if($product->is_new)
+                                <span class="badge bg-primary text-white px-2 py-1 rounded-pill shadow-sm" style="font-size: 0.7rem;">✨ Baru</span>
+                            @endif
+                            @if($product->is_promo)
+                                <span class="badge bg-danger text-white px-2 py-1 rounded-pill shadow-sm" style="font-size: 0.7rem;">🏷 Promo</span>
+                            @endif
                         </div>
                     </div>
-                </div>
+                    <div class="product-card__body">
+                        <span class="badge rounded-pill product-card__category">
+                            {{ $product->category->name ?? 'Produk Bakery' }}
+                        </span>
+                        <a href="{{ route('products.show', $product->slug) }}" class="text-decoration-none">
+                            <h3 class="product-card__title hover-text-primary">{{ $product->name }}</h3>
+                        </a>
+                        <p class="product-card__description">
+                            {{ Str::limit($product->description ?? 'Produk segar pilihan Strawberry Cake & Bakery Tegal.', 60) }}
+                        </p>
+                        
+                        <div class="product-card__actions">
+                            <div>
+                                @if($product->is_promo && $product->original_price)
+                                    <small class="text-muted text-decoration-line-through d-block" style="font-size: 0.75rem;">Rp {{ number_format($product->original_price, 0, ',', '.') }}</small>
+                                @endif
+                                <div class="product-card__price">
+                                    Rp {{ number_format($product->price, 0, ',', '.') }}
+                                </div>
+                            </div>
+                            <div class="d-flex gap-2 w-100">
+                                <a href="{{ route('products.show', $product->slug) }}" class="btn btn-outline-primary rounded-pill d-flex align-items-center justify-content-center shadow-sm flex-fill" style="height: 38px; font-size: 0.85rem;" title="Detail Produk">
+                                    Detail
+                                </a>
+                                @auth
+                                <form action="{{ route('cart.store') }}" method="POST" class="m-0 flex-shrink-0">
+                                    @csrf
+                                    <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                    <input type="hidden" name="quantity" value="1">
+                                    <button type="submit" class="btn btn-strawberry rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px; padding: 0;" title="Tambah ke Keranjang">
+                                        <i class="fa-solid fa-cart-plus"></i>
+                                    </button>
+                                </form>
+                                @else
+                                <a href="{{ route('login') }}" class="btn btn-strawberry rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 38px; height: 38px; padding: 0;" title="Login untuk beli">
+                                    <i class="fa-solid fa-cart-plus"></i>
+                                </a>
+                                @endauth
+                            </div>
+                        </div>
+                    </div>
+                </article>
             </div>
             @empty
-            <div class="col-span-full text-center text-gray-500 py-8">
+            <div class="col-12 text-center text-gray-500 py-8">
                 Belum ada produk yang tersedia.
             </div>
             @endforelse
@@ -461,7 +588,7 @@
             <a href="{{ route('products.index') }}" class="btn btn-light text-primary px-8 py-3 rounded-pill font-bold text-lg shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition duration-300">
                 Belanja Sekarang
             </a>
-            <a href="https://wa.me/628157173138" target="_blank" class="btn btn-outline-light px-8 py-3 rounded-pill font-bold text-lg hover:bg-white hover:text-primary transition duration-300">
+            <a href="https://wa.me/628157173118" target="_blank" class="btn btn-outline-light px-8 py-3 rounded-pill font-bold text-lg hover:bg-white hover:text-primary transition duration-300">
                 <i class="fa-brands fa-whatsapp me-2"></i> Chat WhatsApp
             </a>
         </div>

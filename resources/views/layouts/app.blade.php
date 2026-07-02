@@ -348,7 +348,7 @@
                         <a href="https://instagram.com/strawberrycaketegal" target="_blank" class="footer-icon-circle text-decoration-none">
                             <i class="fa-brands fa-instagram"></i>
                         </a>
-                        <a href="https://wa.me/628157173138" target="_blank" class="footer-icon-circle text-decoration-none">
+                        <a href="https://wa.me/628157173118" target="_blank" class="footer-icon-circle text-decoration-none">
                             <i class="fa-brands fa-whatsapp"></i>
                         </a>
                     </div>
@@ -426,7 +426,7 @@
                 <span class="d-block text-muted" style="font-size: 12px;">Kami siap membantu 😊</span>
             </div>
         </div>
-        <a href="https://wa.me/628157173138" class="whatsapp-float" target="_blank" aria-label="Chat WhatsApp">
+        <a href="https://wa.me/628157173118" class="whatsapp-float" target="_blank" aria-label="Chat WhatsApp">
             <i class="fa-brands fa-whatsapp"></i>
         </a>
     </div>

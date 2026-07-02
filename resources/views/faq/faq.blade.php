@@ -347,7 +347,7 @@
             <a href="{{ route('contact') }}" class="btn btn-light rounded-pill px-5 py-3 fw-bold text-primary">
                 <i class="fa-solid fa-phone me-2"></i> Hubungi Kami
             </a>
-            <a href="https://wa.me/628157173138" target="_blank" class="btn btn-success rounded-pill px-5 py-3 fw-bold">
+            <a href="https://wa.me/628157173118" target="_blank" class="btn btn-success rounded-pill px-5 py-3 fw-bold">
                 <i class="fa-brands fa-whatsapp me-2"></i> Chat WhatsApp
             </a>
         </div>

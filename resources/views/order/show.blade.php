@@ -100,16 +100,16 @@
     document.getElementById('pay-button').onclick = function(){
         snap.pay('{{ $order->snap_token }}', {
             onSuccess: function(result){
-                window.location.href = '{{ route("checkout.success") }}';
+                window.location.href = '{{ route("checkout.status", $order->id) }}';
             },
             onPending: function(result){
-                window.location.href = '{{ route("checkout.pending") }}';
+                window.location.href = '{{ route("checkout.status", $order->id) }}';
             },
             onError: function(result){
-                window.location.href = '{{ route("checkout.failed") }}';
+                window.location.href = '{{ route("checkout.status", $order->id) }}';
             },
             onClose: function(){
-                // Optional: Nothing needs to happen here. The order is already in the database.
+                // Optional
             }
         });
     };

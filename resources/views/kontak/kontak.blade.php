@@ -184,7 +184,7 @@
                                 <span class="contact-icon"><i class="fa-solid fa-phone"></i></span>
                                 <div>
                                     <h2 class="contact-card-title">Telepon</h2>
-                                    <a href="tel:+6281575123118" class="contact-link">+62 815-7512-3118</a>
+                                    <a href="tel:+628157173118" class="contact-link">+62 815-7173-118</a>
                                     <a href="tel:+6285842810778" class="contact-link">+62 858-4281-0778</a>
                                 </div>
                             </article>
@@ -347,7 +347,7 @@
             <div class="d-flex justify-content-center gap-3">
                 <a href="#" class="contact-social" aria-label="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
                 <a href="#" class="contact-social" aria-label="Instagram"><i class="fa-brands fa-instagram"></i></a>
-                <a href="https://wa.me/6281575123118" target="_blank" rel="noopener" class="contact-social" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                <a href="https://wa.me/628157173118" target="_blank" rel="noopener" class="contact-social" aria-label="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
             </div>
         </div>
     </section>

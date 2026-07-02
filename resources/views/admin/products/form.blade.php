@@ -55,7 +55,7 @@
 
                     <div class="col-md-3">
                         <label class="form-label fw-semibold text-dark">Stok <span class="text-danger">*</span></label>
-                        <input type="number" name="stock" class="form-control" value="{{ old('stock',$product->stock) }}" min="0" required>
+                        <input type="number" name="stock" class="form-control" value="{{ old('stock',$product->stock) }}" required>
                         @error('stock')<div class="text-danger small mt-1">{{ $message }}</div>@enderror
                     </div>
 

@@ -101,10 +101,42 @@
                         <div class="fw-semibold">{{ $order->user->name ?? '-' }}</div>
                         <div class="small text-muted">{{ $order->user->email ?? '-' }}</div>
                     </div>
-                    <div class="mb-4">
-                        <label class="text-muted small mb-1">Metode Pembayaran</label>
+                    <div class="mb-3">
+                        <label class="text-muted small mb-1">Metode Checkout</label>
                         <div class="fw-semibold">{{ strtoupper($order->payment_method) }}</div>
                     </div>
+                    <div class="mb-3">
+                        <label class="text-muted small mb-1">Status Pembayaran</label>
+                        <div>
+                            @if($order->payment_status === 'paid')
+                                <span class="badge bg-success">Lunas</span>
+                            @elseif($order->payment_status === 'pending')
+                                <span class="badge bg-warning text-dark">Pending</span>
+                            @elseif($order->payment_status === 'failed' || $order->payment_status === 'expired' || $order->payment_status === 'cancelled')
+                                <span class="badge bg-danger">{{ ucfirst($order->payment_status) }}</span>
+                            @else
+                                <span class="badge bg-secondary">{{ ucfirst($order->payment_status) }}</span>
+                            @endif
+                        </div>
+                    </div>
+                    @if($order->payment_type)
+                    <div class="mb-3">
+                        <label class="text-muted small mb-1">Tipe Pembayaran (Midtrans)</label>
+                        <div class="fw-semibold">{{ strtoupper(str_replace('_', ' ', $order->payment_type)) }}</div>
+                    </div>
+                    @endif
+                    @if($order->midtrans_transaction_id)
+                    <div class="mb-3">
+                        <label class="text-muted small mb-1">Transaction ID</label>
+                        <div class="fw-semibold" style="word-break: break-all;">{{ $order->midtrans_transaction_id }}</div>
+                    </div>
+                    @endif
+                    @if($order->paid_at)
+                    <div class="mb-4">
+                        <label class="text-muted small mb-1">Waktu Pembayaran</label>
+                        <div class="fw-semibold">{{ \Carbon\Carbon::parse($order->paid_at)->format('d M Y H:i:s') }}</div>
+                    </div>
+                    @endif
 
                     <hr class="my-4">
                     

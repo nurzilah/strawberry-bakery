@@ -17,20 +17,28 @@ class HomeController extends Controller
 
         $recommendedProducts = collect();
         $isRecommendation = false;
+        $hasOrders = false;
 
         if (auth()->check()) {
-            $recommendationService = app(\App\Services\RecommendationService::class);
-            $recommendedProducts = $recommendationService->getRecommendations(auth()->id(), 5, 4);
-            $isRecommendation = $recommendationService->hasPurchaseHistory(auth()->id());
-        } else {
-            // Jika belum login, ambil produk populer sebagai fallback
-            $recommendedProducts = Product::with('category')
-                ->where('is_available', true)
-                ->orderBy('purchase_count', 'desc')
-                ->take(4)
-                ->get();
+            $hasOrders = \App\Models\Order::where('user_id', auth()->id())->where('status', 'completed')->exists();
         }
 
-        return view('home', compact('products', 'recommendedProducts', 'isRecommendation'));
+        if (auth()->check() && $hasOrders) {
+            // Kondisi 3 — Sudah login DAN sudah pernah order (ada history)
+            $recommendationService = app(\App\Services\RecommendationService::class);
+            $recommendedProducts = $recommendationService->getRecommendations(auth()->id(), 4);
+            $isRecommendation = true;
+        } else {
+            // Kondisi 1 & 2 — Belum login (guest) ATAU Sudah login TAPI belum pernah order (customer baru)
+            $recommendedProducts = Product::with('category')
+                ->withCount('orderItems')
+                ->where('is_available', true)
+                ->orderByDesc('order_items_count')
+                ->take(4)
+                ->get();
+            $isRecommendation = false;
+        }
+
+        return view('home', compact('products', 'recommendedProducts', 'isRecommendation', 'hasOrders'));
     }
 }

@@ -262,35 +262,64 @@
 
                                 @if($product)
                                     <article class="product-card">
-                                        <a href="{{ route('products.show', $product->slug) }}" onclick="logRecommendationClick({{ $product->id }})">
-                                            <img
-                                                src="{{ $product->image ? asset('storage/' . $product->image) : asset('images/logo.png') }}"
-                                                class="product-card__image"
-                                                alt="{{ $product->name }}"
-                                            >
+                                        <a href="{{ route('products.show', $product->slug) }}" class="d-block bg-light" style="aspect-ratio: 4/3; overflow: hidden;" onclick="logRecommendationClick({{ $product->id }})">
+                                            @if($product->image)
+                                                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-100 h-100" style="object-fit: cover;">
+                                            @else
+                                                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
+                                                    <i class="fas fa-image fa-3x"></i>
+                                                </div>
+                                            @endif
                                         </a>
-                                        <div class="product-card__body">
-                                            <span class="badge rounded-pill product-card__category">
-                                                {{ $product->category->name ?? 'Produk Bakery' }}
-                                            </span>
+                                        <div class="position-absolute top-0 start-0 p-2 d-flex flex-column gap-2">
+                                            @if($product->is_new)
+                                                <span class="badge bg-primary text-white px-2 py-1 rounded-pill shadow-sm" style="font-size: 0.7rem;">✨ Baru</span>
+                                            @endif
+                                            @if($product->is_promo)
+                                                <span class="badge bg-danger text-white px-2 py-1 rounded-pill shadow-sm" style="font-size: 0.7rem;">🏷 Promo</span>
+                                            @endif
+                                        </div>
+                                        <div class="product-card__body d-flex flex-column h-100">
+                                            <div class="mb-2">
+                                                <span class="badge rounded-pill product-card__category bg-pink-100 text-pink-600">
+                                                    {{ $product->category->name ?? 'Produk Bakery' }}
+                                                </span>
+                                            </div>
                                             <a href="{{ route('products.show', $product->slug) }}" class="text-decoration-none" onclick="logRecommendationClick({{ $product->id }})">
-                                                <h3 class="product-card__title hover-text-primary">{{ $product->name }}</h3>
+                                                <h3 class="product-card__title fw-bold text-dark hover-text-primary">{{ $product->name }}</h3>
                                             </a>
-                                            <p class="product-card__description">
-                                                {{ Str::limit($product->description ?? 'Produk pilihan Strawberry Cake & Bakery Tegal.', 120) }}
+                                            <p class="product-card__description text-muted mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                                {{ Str::limit($product->description ?? 'Produk segar pilihan Strawberry Cake & Bakery Tegal.', 80) }}
                                             </p>
-                                            <div class="product-card__actions">
-                                                <div>
-                                                    <div class="product-card__price">
+                                            
+                                            <div class="mt-auto">
+                                                <div class="mb-3">
+                                                    @if($product->is_promo && $product->original_price)
+                                                        <small class="text-muted text-decoration-line-through d-block" style="font-size: 0.75rem;">Rp {{ number_format($product->original_price, 0, ',', '.') }}</small>
+                                                    @endif
+                                                    <div class="product-card__price fw-bold" style="color: #d63384; font-size: 1.1rem;">
                                                         Rp {{ number_format($product->price, 0, ',', '.') }}
                                                     </div>
-                                                    @if($score !== null)
-                                                        <small class="text-muted">Skor {{ number_format($score, 2) }}</small>
-                                                    @endif
                                                 </div>
-                                                <a href="{{ route('products.show', $product->slug) }}" class="btn btn-strawberry rounded-pill product-card__button">
-                                                    Detail
-                                                </a>
+                                                <div class="d-flex gap-2 w-100">
+                                                    <a href="{{ route('products.show', $product->slug) }}" class="btn btn-outline-primary rounded-pill d-flex align-items-center justify-content-center shadow-sm flex-grow-1" style="height: 38px; font-size: 0.85rem;" title="Detail Produk" onclick="logRecommendationClick({{ $product->id }})">
+                                                        Detail
+                                                    </a>
+                                                    @auth
+                                                    <form action="{{ route('cart.store') }}" method="POST" class="m-0 flex-shrink-0">
+                                                        @csrf
+                                                        <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                                        <input type="hidden" name="quantity" value="1">
+                                                        <button type="submit" class="btn btn-strawberry rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px; padding: 0;" title="Tambah ke Keranjang">
+                                                            <i class="fa-solid fa-cart-plus"></i>
+                                                        </button>
+                                                    </form>
+                                                    @else
+                                                    <a href="{{ route('login') }}" class="btn btn-strawberry rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 38px; height: 38px; padding: 0;" title="Login untuk beli">
+                                                        <i class="fa-solid fa-cart-plus"></i>
+                                                    </a>
+                                                    @endauth
+                                                </div>
                                             </div>
                                         </div>
                                     </article>
@@ -302,10 +331,16 @@
 
                 <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
                     <div>
-                        <h2 class="catalog-title">Semua Produk</h2>
+                        <h2 class="catalog-title">
+                            @if(request('category') && request('category') != 'all')
+                                {{ collect($categories)->firstWhere('slug', request('category'))['name'] ?? 'Kategori' }}
+                            @else
+                                Semua Produk
+                            @endif
+                        </h2>
                         <span class="catalog-subtitle">Temukan produk favorit Anda</span>
                     </div>
-                    <form action="{{ route('products.index') }}" method="GET" class="d-flex gap-2">
+                    <form id="search-form" action="{{ route('products.index') }}" method="GET" class="d-flex gap-2">
                         <!-- Pertahankan filter kategori jika ada -->
                         @if(request('category'))
                             <input type="hidden" name="category" value="{{ request('category') }}">
@@ -313,41 +348,90 @@
                         @if(request('sort'))
                             <input type="hidden" name="sort" value="{{ request('sort') }}">
                         @endif
-                        <input type="text" name="search" class="form-control rounded-pill px-4 shadow-sm" placeholder="Cari nama atau rasa..." value="{{ request('search') }}">
+                        <input type="text" id="search-input" name="search" class="form-control rounded-pill px-4 shadow-sm" placeholder="Cari nama atau rasa..." value="{{ request('search') }}">
                         <button type="submit" class="btn btn-primary rounded-pill px-4 shadow-sm">
                             <i class="fa-solid fa-magnifying-glass"></i> Cari
                         </button>
                     </form>
                 </div>
 
+                <!-- Kategori Produk -->
+                <div class="mb-4 overflow-auto" style="scrollbar-width: thin;">
+                    <div class="d-flex gap-2 pb-2" style="white-space: nowrap;">
+                        @foreach($categories as $category)
+                            <a href="{{ route('products.index', array_merge(request()->except('page'), ['category' => $category['slug']])) }}" 
+                               class="btn {{ request('category', 'all') == $category['slug'] ? 'btn-primary' : 'btn-outline-primary' }} rounded-pill px-4 fw-medium shadow-sm transition">
+                                {{ $category['name'] }} 
+                                <span class="badge {{ request('category', 'all') == $category['slug'] ? 'bg-white text-primary' : 'bg-primary text-white' }} ms-1 rounded-pill">
+                                    {{ $category['count'] }}
+                                </span>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+
                 <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
                     @forelse($paginatedProducts ?? [] as $product)
                         <div class="col">
                             <article class="product-card">
-                                <a href="{{ route('products.show', $product->slug) }}">
-                                    <img
-                                        src="{{ $product->image ? asset('storage/' . $product->image) : asset('images/logo.png') }}"
-                                        class="product-card__image"
-                                        alt="{{ $product->name }}"
-                                    >
+                                <a href="{{ route('products.show', $product->slug) }}" class="d-block bg-light" style="aspect-ratio: 4/3; overflow: hidden;">
+                                    @if($product->image)
+                                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-100 h-100" style="object-fit: cover;">
+                                    @else
+                                        <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
+                                            <i class="fas fa-image fa-3x"></i>
+                                        </div>
+                                    @endif
                                 </a>
-                                <div class="product-card__body">
-                                    <span class="badge rounded-pill product-card__category">
-                                        {{ $product->category->name ?? 'Produk Bakery' }}
-                                    </span>
-                                    <a href="{{ route('products.show', $product->slug) }}" class="text-decoration-none">
-                                        <h3 class="product-card__title hover-text-primary">{{ $product->name }}</h3>
-                                    </a>
-                                    <p class="product-card__description">
-                                        {{ Str::limit($product->description ?? 'Produk segar pilihan Strawberry Cake & Bakery Tegal.', 120) }}
-                                    </p>
-                                    <div class="product-card__actions">
-                                        <span class="product-card__price">
-                                            Rp {{ number_format($product->price, 0, ',', '.') }}
+                                <div class="position-absolute top-0 start-0 p-2 d-flex flex-column gap-2">
+                                    @if($product->is_new)
+                                        <span class="badge bg-primary text-white px-2 py-1 rounded-pill shadow-sm" style="font-size: 0.7rem;">✨ Baru</span>
+                                    @endif
+                                    @if($product->is_promo)
+                                        <span class="badge bg-danger text-white px-2 py-1 rounded-pill shadow-sm" style="font-size: 0.7rem;">🏷 Promo</span>
+                                    @endif
+                                </div>
+                                <div class="product-card__body d-flex flex-column h-100">
+                                    <div class="mb-2">
+                                        <span class="badge rounded-pill product-card__category bg-pink-100 text-pink-600">
+                                            {{ $product->category->name ?? 'Produk Bakery' }}
                                         </span>
-                                        <a href="{{ route('products.show', $product->slug) }}" class="btn btn-strawberry rounded-pill product-card__button">
-                                            Detail
-                                        </a>
+                                    </div>
+                                    <a href="{{ route('products.show', $product->slug) }}" class="text-decoration-none">
+                                        <h3 class="product-card__title fw-bold text-dark hover-text-primary">{{ $product->name }}</h3>
+                                    </a>
+                                    <p class="product-card__description text-muted mb-3" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">
+                                        {{ Str::limit($product->description ?? 'Produk segar pilihan Strawberry Cake & Bakery Tegal.', 80) }}
+                                    </p>
+                                    
+                                    <div class="mt-auto">
+                                        <div class="mb-3">
+                                            @if($product->is_promo && $product->original_price)
+                                                <small class="text-muted text-decoration-line-through d-block" style="font-size: 0.75rem;">Rp {{ number_format($product->original_price, 0, ',', '.') }}</small>
+                                            @endif
+                                            <div class="product-card__price fw-bold" style="color: #d63384; font-size: 1.1rem;">
+                                                Rp {{ number_format($product->price, 0, ',', '.') }}
+                                            </div>
+                                        </div>
+                                        <div class="d-flex gap-2 w-100">
+                                            <a href="{{ route('products.show', $product->slug) }}" class="btn btn-outline-primary rounded-pill d-flex align-items-center justify-content-center shadow-sm flex-grow-1" style="height: 38px; font-size: 0.85rem;" title="Detail Produk">
+                                                Detail
+                                            </a>
+                                            @auth
+                                            <form action="{{ route('cart.store') }}" method="POST" class="m-0 flex-shrink-0">
+                                                @csrf
+                                                <input type="hidden" name="product_id" value="{{ $product->id }}">
+                                                <input type="hidden" name="quantity" value="1">
+                                                <button type="submit" class="btn btn-strawberry rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px; padding: 0;" title="Tambah ke Keranjang">
+                                                    <i class="fa-solid fa-cart-plus"></i>
+                                                </button>
+                                            </form>
+                                            @else
+                                            <a href="{{ route('login') }}" class="btn btn-strawberry rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 38px; height: 38px; padding: 0;" title="Login untuk beli">
+                                                <i class="fa-solid fa-cart-plus"></i>
+                                            </a>
+                                            @endauth
+                                        </div>
                                     </div>
                                 </div>
                             </article>
@@ -370,3 +454,27 @@
         </section>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('search-input');
+        const searchForm = document.getElementById('search-form');
+        let debounceTimer;
+
+        if (searchInput && searchForm) {
+            // Pindahkan kursor ke akhir teks setelah reload
+            const end = searchInput.value.length;
+            searchInput.setSelectionRange(end, end);
+            searchInput.focus();
+
+            searchInput.addEventListener('input', function() {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(function() {
+                    searchForm.submit();
+                }, 600); // Tunggu 600ms setelah user berhenti mengetik
+            });
+        }
+    });
+</script>
+@endpush

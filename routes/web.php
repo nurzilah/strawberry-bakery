@@ -27,8 +27,7 @@ Route::get('/terms', [PageController::class, 'terms'])->name('terms');
 Route::get('/track-order', [PageController::class, 'trackOrder'])->name('order.track');
 Route::post('/track-order', [PageController::class, 'searchOrder'])->name('order.search');
 
-// Webhook Midtrans
-Route::post('/checkout/callback', [CheckoutController::class, 'callback'])->name('checkout.callback');
+// Webhook Midtrans dipindah ke api.php
 
 // Products
 Route::get('/products', [ProductController::class, 'index'])->name('products.index');
@@ -64,9 +63,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('checkout')->name('checkout.')->group(function () {
         Route::get('/', [CheckoutController::class, 'index'])->name('index');
         Route::post('/', [CheckoutController::class, 'process'])->name('process');
-        Route::get('/success', [CheckoutController::class, 'success'])->name('success');
-        Route::get('/pending', [CheckoutController::class, 'pending'])->name('pending');
-        Route::get('/failed', [CheckoutController::class, 'failed'])->name('failed');
+        Route::get('/status/{order}', [CheckoutController::class, 'status'])->name('status');
     });
 
     // Reviews
@@ -106,6 +103,12 @@ Route::middleware(['auth', 'role:owner,admin,superadmin'])->prefix('admin')->nam
     
     Route::resource('products', \App\Http\Controllers\Admin\ProductController::class)->except(['show']);
     Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class)->except(['show']);
+    
+    // Stock Management
+    Route::get('/stock', [\App\Http\Controllers\Admin\StockController::class, 'index'])->name('stock.index');
+    Route::get('/stock/{product}/add', [\App\Http\Controllers\Admin\StockController::class, 'create'])->name('stock.create');
+    Route::post('/stock/{product}/add', [\App\Http\Controllers\Admin\StockController::class, 'store'])->name('stock.store');
+    Route::get('/stock/{product}/history', [\App\Http\Controllers\Admin\StockController::class, 'history'])->name('stock.history');
 });
 
 // ['role:owner,admin,superadmin,kasir']

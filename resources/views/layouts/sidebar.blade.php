@@ -22,6 +22,10 @@
                 <i class="fas fa-tags w-5 text-center"></i>
                 <span class="font-medium">Kelola Kategori</span>
             </a>
+            <a href="{{ route('admin.stock.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 {{ request()->routeIs('admin.stock.*') ? 'bg-pink-500/20 text-pink-400' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                <i class="fas fa-boxes-stacking w-5 text-center"></i>
+                <span class="font-medium">Manajemen Stok</span>
+            </a>
             <a href="{{ route('kasir.pos') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 {{ request()->routeIs('kasir.pos') ? 'bg-pink-500/20 text-pink-400' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                 <i class="fas fa-cash-register w-5 text-center"></i>
                 <span class="font-medium">Mesin POS Kasir</span>
@@ -48,6 +52,10 @@
             <a href="{{ route('admin.categories.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 {{ request()->routeIs('admin.categories.*') ? 'bg-pink-500/20 text-pink-400' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
                 <i class="fas fa-tags w-5 text-center"></i>
                 <span class="font-medium">Kelola Kategori</span>
+            </a>
+            <a href="{{ route('admin.stock.index') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 {{ request()->routeIs('admin.stock.*') ? 'bg-pink-500/20 text-pink-400' : 'text-slate-300 hover:bg-slate-800 hover:text-white' }}">
+                <i class="fas fa-boxes-stacking w-5 text-center"></i>
+                <span class="font-medium">Manajemen Stok</span>
             </a>
 
         {{-- Kasir ONLY Sees POS & Riwayat --}}

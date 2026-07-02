@@ -118,9 +118,11 @@
     </div>
 </div>
 
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
 <script>
 const pickupInput = document.getElementById('pickupDateInput');
 const pickupWarning = document.getElementById('pickupDateWarning');
+const paymentForm = document.getElementById('paymentForm');
 
 if (pickupInput) {
     const minDate = pickupInput.dataset.min;
@@ -140,6 +142,64 @@ if (pickupInput) {
     pickupInput.addEventListener('focus', () => {
         if (!pickupInput.value && minDate) {
             pickupInput.value = minDate;
+        }
+    });
+}
+
+if (paymentForm) {
+    paymentForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Memproses...';
+        submitBtn.disabled = true;
+
+        try {
+            const formData = new FormData(this);
+            // Tambahkan pickup date dari input di luar form
+            if (pickupInput) {
+                formData.append('pickup_date', pickupInput.value);
+            }
+
+            const response = await fetch(this.action, {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.status === 'success' && result.snap_token) {
+                // Trigger Snap popup
+                snap.pay(result.snap_token, {
+                    onSuccess: function(snapResult) {
+                        window.location.href = `/checkout/status/${result.order_id}`;
+                    },
+                    onPending: function(snapResult) {
+                        window.location.href = `/checkout/status/${result.order_id}`;
+                    },
+                    onError: function(snapResult) {
+                        window.location.href = `/checkout/status/${result.order_id}`;
+                    },
+                    onClose: function() {
+                        window.location.href = `/checkout/status/${result.order_id}`;
+                    }
+                });
+            } else {
+                alert(result.message || 'Terjadi kesalahan saat memproses pembayaran.');
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        } catch (error) {
+            alert('Terjadi kesalahan pada server. Silakan coba lagi.');
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            console.error(error);
         }
     });
 }

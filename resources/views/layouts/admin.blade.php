@@ -227,6 +227,11 @@
                 <i class="fas fa-tags me-2"></i> Kelola Kategori
             </a>
         </li>
+        <li class="{{ request()->routeIs('admin.stock.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.stock.index') }}">
+                <i class="fas fa-boxes me-2"></i> Manajemen Stok
+            </a>
+        </li>
         <li class="{{ request()->routeIs('kasir.pos') ? 'active' : '' }}">
             <a href="{{ route('kasir.pos') }}">
                 <i class="fas fa-cash-register me-2"></i> Mesin POS / Kasir
@@ -264,6 +269,11 @@
         <li class="{{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
             <a href="{{ route('admin.categories.index') }}">
                 <i class="fas fa-tags me-2"></i> Kelola Kategori
+            </a>
+        </li>
+        <li class="{{ request()->routeIs('admin.stock.*') ? 'active' : '' }}">
+            <a href="{{ route('admin.stock.index') }}">
+                <i class="fas fa-boxes me-2"></i> Manajemen Stok
             </a>
         </li>
         <li class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">

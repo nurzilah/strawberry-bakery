@@ -148,6 +148,10 @@
                             </td>
                             <td class="actions-cell">
                                 <div class="d-flex align-items-center justify-content-end gap-2">
+                                    <a href="{{ route('admin.stock.create', $product) }}" class="btn btn-sm btn-info text-white rounded-pill px-3">
+                                        <i class="fas fa-boxes me-1"></i> Stok
+                                    </a>
+
                                     <a href="{{ route('admin.products.edit', $product) }}" class="btn btn-sm btn-outline-primary rounded-pill px-3">
                                         Edit
                                     </a>
