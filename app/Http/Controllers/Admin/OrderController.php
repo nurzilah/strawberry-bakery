@@ -26,6 +26,39 @@ class OrderController extends Controller
 
         $orders = $query->paginate(15)->withQueryString();
 
+        // Sync status with Midtrans API if pending
+        try {
+            \Midtrans\Config::$serverKey = config('midtrans.server_key');
+            \Midtrans\Config::$isProduction = config('midtrans.is_production');
+            foreach ($orders as $order) {
+                if ($order->payment_status === 'pending' && $order->midtrans_order_id) {
+                    try {
+                        $status = \Midtrans\Transaction::status($order->midtrans_order_id);
+                        $transactionStatus = $status->transaction_status;
+                        
+                        if ($transactionStatus == 'capture' || $transactionStatus == 'settlement') {
+                            $order->update([
+                                'payment_status' => 'paid',
+                                'status' => 'waiting_verification',
+                                'paid_at' => now(),
+                                'payment_type' => $status->payment_type ?? $order->payment_type,
+                                'midtrans_transaction_id' => $status->transaction_id ?? $order->midtrans_transaction_id
+                            ]);
+                        } else if ($transactionStatus == 'deny' || $transactionStatus == 'cancel' || $transactionStatus == 'expire') {
+                            $order->update([
+                                'payment_status' => $transactionStatus === 'expire' ? 'expired' : ($transactionStatus === 'cancel' ? 'cancelled' : 'failed'),
+                                'status' => 'cancelled'
+                            ]);
+                        }
+                    } catch (\Exception $e) {
+                        // Ignore
+                    }
+                }
+            }
+        } catch (\Exception $e) {
+            // Ignore Config error
+        }
+
         if (request()->routeIs('kasir.*')) {
             return view('kasir.orders.index', compact('orders'));
         }
@@ -39,6 +72,35 @@ class OrderController extends Controller
     public function show(Order $order)
     {
         $order->load(['user', 'items.product']);
+        
+        // Sync status with Midtrans API if pending
+        if ($order->payment_status === 'pending' && $order->midtrans_order_id) {
+            try {
+                \Midtrans\Config::$serverKey = config('midtrans.server_key');
+                \Midtrans\Config::$isProduction = config('midtrans.is_production');
+                
+                $status = \Midtrans\Transaction::status($order->midtrans_order_id);
+                $transactionStatus = $status->transaction_status;
+                
+                if ($transactionStatus == 'capture' || $transactionStatus == 'settlement') {
+                    $order->update([
+                        'payment_status' => 'paid',
+                        'status' => 'waiting_verification',
+                        'paid_at' => now(),
+                        'payment_type' => $status->payment_type ?? $order->payment_type,
+                        'midtrans_transaction_id' => $status->transaction_id ?? $order->midtrans_transaction_id
+                    ]);
+                } else if ($transactionStatus == 'deny' || $transactionStatus == 'cancel' || $transactionStatus == 'expire') {
+                    $order->update([
+                        'payment_status' => $transactionStatus === 'expire' ? 'expired' : ($transactionStatus === 'cancel' ? 'cancelled' : 'failed'),
+                        'status' => 'cancelled'
+                    ]);
+                }
+            } catch (\Exception $e) {
+                // Biarkan saja jika error/belum ada di Midtrans
+            }
+        }
+        
         return view('admin.orders.show', compact('order'));
     }
 

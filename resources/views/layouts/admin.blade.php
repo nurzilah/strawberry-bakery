@@ -281,9 +281,24 @@
                 <i class="fas fa-shopping-cart me-2"></i> Pesanan Online
             </a>
         </li>
+        <li class="{{ request()->routeIs('kasir.pos') ? 'active' : '' }}">
+            <a href="{{ route('kasir.pos') }}">
+                <i class="fas fa-cash-register me-2"></i> Mesin POS / Kasir
+            </a>
+        </li>
+        <li class="{{ request()->routeIs('kasir.transactions.*') ? 'active' : '' }}">
+            <a href="{{ route('kasir.transactions.index') }}">
+                <i class="fas fa-history me-2"></i> Riwayat Transaksi POS
+            </a>
+        </li>
         <li class="{{ request()->routeIs('owner.users.*') ? 'active' : '' }}">
             <a href="{{ route('owner.users.index') }}">
                 <i class="fas fa-users me-2"></i> Manajemen Akun
+            </a>
+        </li>
+        <li class="{{ request()->routeIs('owner.reports.*') ? 'active' : '' }}">
+            <a href="{{ route('owner.reports.index') }}">
+                <i class="fas fa-file-invoice-dollar me-2"></i> Laporan Penjualan
             </a>
         </li>
 

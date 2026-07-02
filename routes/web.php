@@ -119,8 +119,8 @@ Route::middleware(['auth', 'role:owner,admin,superadmin,kasir'])->prefix('admin'
     Route::patch('orders/{order}/status', [\App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('orders.status');
 });
 
-// ['role:owner,kasir,superadmin']
-Route::middleware(['auth', 'role:owner,kasir,superadmin'])->prefix('admin/kasir')->name('kasir.')->group(function () {
+// ['role:owner,kasir,superadmin,admin']
+Route::middleware(['auth', 'role:owner,kasir,superadmin,admin'])->prefix('admin/kasir')->name('kasir.')->group(function () {
     Route::get('/', fn () => redirect()->route('kasir.pos'));
     Route::get('/pos', [\App\Http\Controllers\Kasir\KasirController::class, 'index'])->name('pos');
     Route::post('/pos/store', [\App\Http\Controllers\Kasir\KasirController::class, 'store'])->name('store');
@@ -129,16 +129,14 @@ Route::middleware(['auth', 'role:owner,kasir,superadmin'])->prefix('admin/kasir'
     // Transactions History
     Route::get('/transactions', [\App\Http\Controllers\Kasir\TransactionHistoryController::class, 'index'])->name('transactions.index');
     Route::get('/transactions/{id}', [\App\Http\Controllers\Kasir\TransactionHistoryController::class, 'show'])->name('transactions.show');
+    Route::delete('/transactions/{id}', [\App\Http\Controllers\Kasir\TransactionHistoryController::class, 'destroy'])->name('transactions.destroy');
 });
 
 // ['role:owner,superadmin,admin']
 Route::middleware(['auth', 'role:owner,superadmin,admin'])->prefix('admin/owner')->name('owner.')->group(function () {
     Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->only(['index', 'update']);
     Route::post('users/{user}/role', [\App\Http\Controllers\Admin\UserController::class, 'updateRole'])->name('users.role');
-});
 
-// ['role:owner,superadmin']
-Route::middleware(['auth', 'role:owner,superadmin'])->prefix('admin/owner')->name('owner.')->group(function () {
     // Financial reports
     Route::get('reports', [\App\Http\Controllers\Owner\ReportController::class, 'index'])->name('reports.index');
     Route::get('reports/export-pdf', [\App\Http\Controllers\Owner\ReportController::class, 'exportPdf'])->name('reports.pdf');

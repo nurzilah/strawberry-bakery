@@ -43,4 +43,32 @@ class TransactionHistoryController extends Controller
 
         return view('kasir.transactions.show', compact('transaction'));
     }
+
+    public function destroy($id)
+    {
+        if (!in_array(auth()->user()->role, ['owner', 'superadmin', 'admin'])) {
+            abort(403, 'Akses Ditolak. Hanya admin/owner yang dapat menghapus transaksi kasir.');
+        }
+
+        try {
+            \Illuminate\Support\Facades\DB::transaction(function () use ($id) {
+                $transaction = Transaction::with('items')->findOrFail($id);
+                
+                // Kembalikan stok produk
+                foreach ($transaction->items as $item) {
+                    $product = \App\Models\Product::where('id', $item->product_id)->lockForUpdate()->first();
+                    if ($product) {
+                        $product->increment('stock', $item->qty);
+                    }
+                }
+                
+                $transaction->items()->delete();
+                $transaction->delete();
+            });
+
+            return redirect()->route('kasir.transactions.index')->with('success', 'Data transaksi berhasil dihapus dan stok dikembalikan.');
+        } catch (\Exception $e) {
+            return redirect()->route('kasir.transactions.index')->with('error', 'Gagal menghapus transaksi: ' . $e->getMessage());
+        }
+    }
 }

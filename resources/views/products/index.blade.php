@@ -262,14 +262,8 @@
 
                                 @if($product)
                                     <article class="product-card">
-                                        <a href="{{ route('products.show', $product->slug) }}" class="d-block bg-light" style="aspect-ratio: 4/3; overflow: hidden;" onclick="logRecommendationClick({{ $product->id }})">
-                                            @if($product->image)
-                                                <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-100 h-100" style="object-fit: cover;">
-                                            @else
-                                                <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
-                                                    <i class="fas fa-image fa-3x"></i>
-                                                </div>
-                                            @endif
+                                        <a href="{{ route('products.show', $product->slug) }}" onclick="logRecommendationClick({{ $product->id }})">
+                                            <img src="{{ $product->image ? asset('storage/' . $product->image) : asset('images/logo.png') }}" alt="{{ $product->name }}" class="product-card__image">
                                         </a>
                                         <div class="position-absolute top-0 start-0 p-2 d-flex flex-column gap-2">
                                             @if($product->is_new)
@@ -374,14 +368,8 @@
                     @forelse($paginatedProducts ?? [] as $product)
                         <div class="col">
                             <article class="product-card">
-                                <a href="{{ route('products.show', $product->slug) }}" class="d-block bg-light" style="aspect-ratio: 4/3; overflow: hidden;">
-                                    @if($product->image)
-                                        <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-100 h-100" style="object-fit: cover;">
-                                    @else
-                                        <div class="w-100 h-100 d-flex align-items-center justify-content-center text-muted">
-                                            <i class="fas fa-image fa-3x"></i>
-                                        </div>
-                                    @endif
+                                <a href="{{ route('products.show', $product->slug) }}">
+                                    <img src="{{ $product->image ? asset('storage/' . $product->image) : asset('images/logo.png') }}" alt="{{ $product->name }}" class="product-card__image">
                                 </a>
                                 <div class="position-absolute top-0 start-0 p-2 d-flex flex-column gap-2">
                                     @if($product->is_new)

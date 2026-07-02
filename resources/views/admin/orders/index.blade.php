@@ -128,7 +128,7 @@
                                 </td>
                                 <td class="text-center">
                                     @if($order->payment_status === 'paid')
-                                        <span class="badge rounded-pill bg-success-subtle text-success">Lunas</span>
+                                        <span class="badge rounded-pill bg-success-subtle text-success">Lunas (Settlement)</span>
                                     @elseif($order->payment_status === 'pending')
                                         <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis">Pending</span>
                                     @elseif(in_array($order->payment_status, ['failed', 'expired', 'cancelled']))

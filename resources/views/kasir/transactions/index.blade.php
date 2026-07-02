@@ -67,12 +67,23 @@
                         </td>
                         <td class="fw-bold text-primary">Rp {{ number_format($trx->grand_total, 0, ',', '.') }}</td>
                         <td>
-                            <a href="{{ route('kasir.transactions.show', $trx->id) }}" class="btn btn-sm btn-info text-white" title="Detail">
-                                <i class="fas fa-eye"></i> Detail
-                            </a>
-                            <button onclick="window.open('{{ route('kasir.receipt', $trx->id) }}', '_blank', 'width=400,height=600')" class="btn btn-sm btn-secondary" title="Cetak Struk">
-                                <i class="fas fa-print"></i> Struk
-                            </button>
+                            <div class="d-flex gap-1">
+                                <a href="{{ route('kasir.transactions.show', $trx->id) }}" class="btn btn-sm btn-info text-white" title="Detail">
+                                    <i class="fas fa-eye"></i> Detail
+                                </a>
+                                <button onclick="window.open('{{ route('kasir.receipt', $trx->id) }}', '_blank', 'width=400,height=600')" class="btn btn-sm btn-secondary" title="Cetak Struk">
+                                    <i class="fas fa-print"></i> Struk
+                                </button>
+                                @if(in_array(auth()->user()->role, ['admin', 'owner', 'superadmin']))
+                                <form action="{{ route('kasir.transactions.destroy', $trx->id) }}" method="POST" class="m-0" onsubmit="return confirm('Apakah Anda yakin ingin menghapus transaksi ini? Stok produk akan dikembalikan.');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger" title="Hapus">
+                                        <i class="fas fa-trash"></i> Hapus
+                                    </button>
+                                </form>
+                                @endif
+                            </div>
                         </td>
                     </tr>
                     @empty

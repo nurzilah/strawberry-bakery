@@ -18,6 +18,12 @@ class Order extends Model
         'payment_proof_path',
         'qris_expires_at',
         'pickup_date',
+        'payment_status',
+        'midtrans_order_id',
+        'midtrans_transaction_id',
+        'payment_type',
+        'paid_at',
+        'snap_token',
     ];
 
     protected $casts = [
