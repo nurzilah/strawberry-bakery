@@ -34,7 +34,7 @@
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
-    <div class="w-full max-w-4xl glass-card rounded-2xl shadow-lg overflow-hidden flex flex-col md:flex-row" style="max-height: 90vh;">
+    <div class="w-full max-w-4xl glass-card rounded-[24px] shadow-[0_12px_40px_rgba(0,0,0,0.08)] overflow-hidden flex flex-col md:flex-row" style="max-height: 90vh;">
         <!-- Left Side - Info Section -->
         <div class="hidden md:flex w-full md:w-5/12 bg-login-image p-6 lg:p-8 text-white flex-col justify-between relative">
             <div class="relative z-10">
@@ -72,9 +72,9 @@
         <div class="w-full md:w-7/12 p-5 md:p-6 lg:p-8 bg-white flex flex-col overflow-y-auto" style="max-height: 90vh;">
             
             <!-- Segmented Control for Tabs -->
-            <div class="flex p-1 mb-5 bg-gray-50 border border-gray-100 rounded-lg shadow-inner">
-                <div class="flex-1 text-center py-2 text-sm font-semibold rounded-md bg-white text-pink-600 shadow-sm cursor-default transition-all">Login</div>
-                <a href="{{ route('register') }}" class="flex-1 text-center py-2 text-sm font-medium rounded-md text-gray-500 hover:text-gray-800 hover:bg-gray-100/50 transition-all">Register</a>
+            <div class="flex p-1 mb-6 bg-gray-100/80 border border-gray-200/60 rounded-xl shadow-inner">
+                <div class="flex-1 text-center py-2.5 text-sm font-semibold rounded-lg bg-white text-pink-600 shadow-[0_2px_8px_rgba(0,0,0,0.04)] cursor-default transition-all duration-300">Login</div>
+                <a href="{{ route('register') }}" class="flex-1 text-center py-2.5 text-sm font-medium rounded-lg text-gray-500 hover:text-gray-800 hover:bg-gray-50 transition-all duration-300">Register</a>
             </div>
 
             <div class="mb-3 hidden md:block">
@@ -97,7 +97,7 @@
 
                 <!-- Email -->
                 <div>
-                    <label for="email" class="block text-xs font-semibold text-gray-700 mb-1">Email Address</label>
+                    <label for="email" class="block text-sm font-semibold text-gray-700 mb-1.5">Email Address</label>
                     <input type="email"
                            id="email"
                            name="email"
@@ -105,19 +105,19 @@
                            placeholder="contoh@email.com"
                            required
                            autofocus
-                           class="w-full px-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg focus:bg-white focus:ring-1 focus:ring-pink-500 focus:border-transparent transition shadow-sm">
+                           class="w-full px-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-pink-400/50 focus:border-pink-400 placeholder-gray-400 transition-all duration-300 shadow-sm">
                 </div>
 
                 <!-- Password -->
                 <div>
-                    <label for="password" class="block text-xs font-semibold text-gray-700 mb-1">Password</label>
+                    <label for="password" class="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>
                     <div class="relative">
                         <input type="password"
                                id="password"
                                name="password"
                                placeholder="Masukkan password Anda"
                                required
-                               class="w-full px-3 py-1.5 text-xs bg-gray-50 border border-gray-200 rounded-lg pr-8 focus:bg-white focus:ring-1 focus:ring-pink-500 focus:border-transparent transition shadow-sm">
+                               class="w-full px-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl pr-10 focus:bg-white focus:ring-2 focus:ring-pink-400/50 focus:border-pink-400 placeholder-gray-400 transition-all duration-300 shadow-sm">
                         <button type="button"
                                 class="password-toggle absolute inset-y-0 right-0 px-2 text-gray-400 hover:text-gray-600 focus:outline-none"
                                 data-target="password"
@@ -134,18 +134,18 @@
                 </div>
 
                 <!-- Remember & Forgot Password -->
-                <div class="flex items-center justify-between">
+                <div class="flex items-center justify-between py-1">
                     <label class="flex items-center cursor-pointer group">
-                        <input type="checkbox" name="remember" class="w-3 h-3 text-pink-500 border-gray-300 rounded focus:ring-pink-500 cursor-pointer">
-                        <span class="ml-1.5 text-xs text-gray-600 group-hover:text-gray-800 transition">Ingat saya</span>
+                        <input type="checkbox" name="remember" class="w-4 h-4 text-pink-500 border-gray-300 rounded focus:ring-pink-500 focus:ring-offset-1 cursor-pointer transition-all">
+                        <span class="ml-2 text-sm text-gray-600 group-hover:text-gray-800 transition-colors">Ingat saya</span>
                     </label>
                     @if (Route::has('password.request'))
-                        <a href="{{ route('password.request') }}" class="text-[11px] text-pink-600 hover:text-pink-700 font-semibold transition">Lupa Password?</a>
+                        <a href="{{ route('password.request') }}" class="text-[13px] text-pink-600 hover:text-pink-700 font-semibold transition-colors">Lupa Password?</a>
                     @endif
                 </div>
 
                 <!-- Submit Button -->
-                <button type="submit" class="w-full bg-gradient-to-r from-pink-500 to-red-500 hover:from-pink-600 hover:to-red-600 text-white py-1.5 rounded-lg font-semibold text-sm shadow hover:shadow-md transform hover:-translate-y-0.5 transition-all duration-200">
+                <button type="submit" class="w-full bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white py-2.5 rounded-xl font-semibold text-sm shadow-[0_4px_14px_rgba(236,72,153,0.3)] hover:shadow-[0_6px_20px_rgba(236,72,153,0.4)] transform hover:-translate-y-0.5 transition-all duration-300 mt-2">
                     Masuk Sekarang
                 </button>
 
@@ -161,20 +161,20 @@
 
                 <!-- Social Login -->
                 <div>
-                    <a href="{{ route('auth.google') }}" class="flex items-center justify-center gap-2 w-full py-1.5 px-4 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
-                        <svg class="w-4 h-4" viewBox="0 0 24 24">
+                    <a href="{{ route('auth.google') }}" class="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-300 shadow-sm">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24">
                             <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
                             <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
                             <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                             <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                         </svg>
-                        <span class="text-gray-700 font-semibold text-xs">Login dengan Google</span>
+                        <span class="text-gray-700 font-semibold text-sm">Masuk dengan Google</span>
                     </a>
                 </div>
 
                 <!-- Register Link -->
-                <p class="text-center text-[11px] text-gray-500 mt-2">
-                    Belum punya akun? <a href="{{ route('register') }}" class="text-pink-600 hover:text-pink-700 font-bold transition">Daftar</a>
+                <p class="text-center text-sm text-gray-500 mt-4">
+                    Belum punya akun? <a href="{{ route('register') }}" class="text-pink-600 hover:text-pink-700 font-bold transition-colors">Daftar</a>
                 </p>
             </form>
         </div>

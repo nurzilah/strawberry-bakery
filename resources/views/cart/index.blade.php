@@ -8,12 +8,14 @@
         background-color: transparent;
     }
     .cart-item-card {
-        border-radius: 1.25rem;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
+        border-radius: 20px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04) !important;
+        border: 1px solid rgba(226, 232, 240, 0.8) !important;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .cart-item-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.08) !important;
+        transform: translateY(-4px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08) !important;
     }
     .cart-img-wrap {
         background-color: var(--sb-primary-soft);
@@ -54,8 +56,10 @@
         outline: none;
     }
     .summary-card {
-        border-radius: 1.25rem;
+        border-radius: 20px;
         background: linear-gradient(145deg, #ffffff, #fcfcfc);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04) !important;
+        border: 1px solid rgba(226, 232, 240, 0.8) !important;
     }
     .product-title {
         font-family: 'Playfair Display', serif;
@@ -134,12 +138,19 @@
                                     </div>
 
                                     <div class="d-flex justify-content-between align-items-end mt-4">
-                                        <div class="fw-bold fs-5" style="color: var(--sb-primary)">
-                                            Rp {{ number_format($product->price, 0, ',', '.') }}
+                                        <div>
+                                            @if($quantity > 1)
+                                            <div class="text-muted small mb-1">
+                                                Rp {{ number_format($product->price, 0, ',', '.') }} / item
+                                            </div>
+                                            @endif
+                                            <div class="fw-bold fs-5" style="color: var(--sb-primary)">
+                                                Rp {{ number_format($cart->subtotal, 0, ',', '.') }}
+                                            </div>
                                         </div>
 
                                         <!-- Qty Control -->
-                                        <div class="d-flex align-items-center bg-light rounded-pill p-1 border">
+                                        <div class="d-flex align-items-center bg-light rounded-pill p-1 border shadow-sm" style="transition: all 0.3s ease;">
                                             <form action="{{ route('cart.update', $cart->id) }}" method="POST" class="m-0 d-flex align-items-center">
                                                 @csrf
                                                 @method('PATCH')
@@ -162,8 +173,8 @@
                 @empty
                     <div class="card border-0 shadow-sm cart-item-card text-center p-5 bg-white">
                         <div class="mb-4">
-                            <div class="bg-primary-subtle rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px; color: var(--sb-primary)">
-                                <i class="fa-solid fa-cart-arrow-down fs-1"></i>
+                            <div class="bg-primary-subtle rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 120px; height: 120px; color: var(--sb-primary); opacity: 0.9;">
+                                <i class="fa-solid fa-basket-shopping" style="font-size: 3.5rem;"></i>
                             </div>
                         </div>
                         <h3 class="product-title mb-3">Keranjang Anda Masih Kosong</h3>
@@ -216,7 +227,7 @@
                             <span class="fs-4 fw-bold" style="color: var(--sb-primary)">Rp {{ number_format(collect($carts)->sum(fn ($cart) => $cart->subtotal), 0, ',', '.') }}</span>
                         </div>
 
-                        <a href="{{ route('checkout.index') }}" class="btn btn-primary w-100 rounded-pill py-3 fw-bold shadow-sm d-flex justify-content-between align-items-center px-4">
+                        <a href="{{ route('checkout.index') }}" class="btn btn-primary w-100 rounded-pill py-3 fw-bold d-flex justify-content-between align-items-center px-4" style="transition: all 0.3s ease;">
                             <span>Bayar Sekarang</span>
                             <i class="fa-solid fa-arrow-right"></i>
                         </a>

@@ -74,14 +74,51 @@
 
         .footer { margin-top: 15px; font-size: 11px; }
 
+        .no-print {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .btn-print {
+            background-color: #d63384;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: 0.2s;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-print:hover {
+            background-color: #b02a6c;
+            transform: translateY(-2px);
+        }
+
         @media print {
             body { background: #fff; padding: 0; margin: 0; }
             .receipt-container { width: 300px; box-shadow: none; margin: 0; padding: 0; }
+            .no-print { display: none !important; }
             @page { margin: 0; size: 80mm 297mm; }
         }
     </style>
 </head>
 <body>
+
+<div class="no-print">
+    <button onclick="window.print()" class="btn-print">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+        Cetak Struk
+    </button>
+</div>
 
 <div class="receipt-container">
     <div class="header text-center">

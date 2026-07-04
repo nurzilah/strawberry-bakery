@@ -417,24 +417,36 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
                     },
+                    credentials: 'same-origin',
                     body: JSON.stringify(payload)
                 });
 
-                const data = await response.json();
-                if (data.success) {
+                const responseText = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    console.error("Invalid JSON response:", responseText);
+                    alert("Error dari server: " + response.status + " " + response.statusText + "\nCek console untuk detail.");
+                    throw new Error("Invalid JSON");
+                }
+
+                if (response.ok && data.success) {
                     alert('Pembayaran Berhasil Diproses!');
-                    window.open(`{{ url('admin/kasir/pos/receipt') }}/${data.transaction_id}`, '_blank');
+                    const baseUrl = window.location.origin;
+                    window.open(`${baseUrl}/admin/kasir/pos/receipt/${data.transaction_id}`, '_blank');
                     window.location.reload();
                 } else {
-                    alert('Gagal Memproses Transaksi: ' + data.message);
+                    alert('Gagal Memproses Transaksi: ' + (data.message || 'Unknown error'));
                     btnSubmit.disabled = false;
                     btnSubmit.innerHTML = '<i class="fas fa-check-circle"></i> Selesaikan Pembayaran';
                 }
             } catch (error) {
-                console.error(error);
-                alert('Terjadi kesalahan komunikasi data ke server.');
+                console.error("Checkout Error:", error);
+                alert('Terjadi kesalahan komunikasi data ke server. Cek console log.');
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = '<i class="fas fa-check-circle"></i> Selesaikan Pembayaran';
             }

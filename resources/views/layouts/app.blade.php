@@ -121,14 +121,15 @@
             background-color: var(--sb-primary);
             border-color: var(--sb-primary);
             color: white;
-            box-shadow: 0 4px 15px rgba(233, 79, 112, 0.2);
+            box-shadow: 0 4px 14px rgba(233, 79, 112, 0.25);
+            transition: all 0.3s ease;
         }
 
         .btn-primary:hover, .btn-strawberry:hover {
             background-color: var(--sb-primary-dark);
             border-color: var(--sb-primary-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(233, 79, 112, 0.3);
+            transform: translateY(-1.5px);
+            box-shadow: 0 6px 20px rgba(233, 79, 112, 0.4);
         }
 
         .btn-outline-secondary {
@@ -344,6 +345,11 @@
                     <p class="mb-4 text-white-50" style="line-height: 1.8;">
                         Menghadirkan kreasi roti dan kue premium berkualitas tinggi untuk setiap momen spesial Anda. Dibuat dengan bahan pilihan dan dedikasi penuh.
                     </p>
+                    <div class="mb-4">
+                        <span class="badge rounded-pill px-3 py-1.5 fw-medium tracking-wide shadow-sm" style="background-color: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #fbcfe8; font-family: 'Poppins', sans-serif;">
+                            ✨ Fresh Every Morning
+                        </span>
+                    </div>
                     <div class="d-flex gap-3">
                         <a href="https://instagram.com/strawberrycaketegal" target="_blank" class="footer-icon-circle text-decoration-none">
                             <i class="fa-brands fa-instagram"></i>

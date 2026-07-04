@@ -30,7 +30,7 @@
                 </table>
                 <hr>
                 <div class="d-grid gap-2">
-                    <button onclick="window.open('{{ route('kasir.receipt', $transaction->id) }}', '_blank', 'width=400,height=600')" class="btn btn-outline-primary">
+                    <button onclick="window.open(window.location.origin + '/admin/kasir/pos/receipt/{{ $transaction->id }}', '_blank', 'width=400,height=600')" class="btn btn-outline-primary">
                         <i class="fas fa-print me-1"></i> Cetak Ulang Struk
                     </button>
                     <a href="{{ route('kasir.transactions.index') }}" class="btn btn-light">Kembali</a>

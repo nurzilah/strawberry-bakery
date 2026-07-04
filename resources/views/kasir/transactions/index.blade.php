@@ -71,7 +71,7 @@
                                 <a href="{{ route('kasir.transactions.show', $trx->id) }}" class="btn btn-sm btn-info text-white" title="Detail">
                                     <i class="fas fa-eye"></i> Detail
                                 </a>
-                                <button onclick="window.open('{{ route('kasir.receipt', $trx->id) }}', '_blank', 'width=400,height=600')" class="btn btn-sm btn-secondary" title="Cetak Struk">
+                                <button onclick="window.open(window.location.origin + '/admin/kasir/pos/receipt/{{ $trx->id }}', '_blank', 'width=400,height=600')" class="btn btn-sm btn-secondary" title="Cetak Struk">
                                     <i class="fas fa-print"></i> Struk
                                 </button>
                                 @if(in_array(auth()->user()->role, ['admin', 'owner', 'superadmin']))

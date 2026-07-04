@@ -86,25 +86,25 @@
 
         .product-card {
             background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.04);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
             display: flex;
             flex-direction: column;
             height: 100%;
             overflow: hidden;
-            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .product-card:hover {
-            box-shadow: 0 14px 35px rgba(15, 23, 42, 0.08);
-            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+            transform: translateY(-6px);
         }
 
         .product-card__image {
             aspect-ratio: 1 / 1;
             background-color: #fff1f4;
-            border-radius: 16px 16px 0 0;
+            border-radius: 20px 20px 0 0;
             object-fit: cover;
             width: 100%;
         }
@@ -176,11 +176,11 @@
 
         .catalog-empty {
             background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px rgba(15, 23, 42, 0.04);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            border-radius: 20px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.04);
             color: #64748b;
-            padding: 2rem;
+            padding: 4rem 2rem;
             text-align: center;
         }
 
@@ -272,6 +272,12 @@
                                             @if($product->is_promo)
                                                 <span class="badge bg-danger text-white px-2 py-1 rounded-pill shadow-sm" style="font-size: 0.7rem;">🏷 Promo</span>
                                             @endif
+                                            @if($product->is_featured)
+                                                <span class="badge bg-success text-white px-2 py-1 rounded-pill shadow-sm" style="font-size: 0.7rem;">🌟 Best Seller</span>
+                                            @endif
+                                            @if($product->pickup_date && \Carbon\Carbon::parse($product->pickup_date)->isFuture())
+                                                <span class="badge bg-warning text-dark px-2 py-1 rounded-pill shadow-sm" style="font-size: 0.7rem;">⏳ Pre-order</span>
+                                            @endif
                                         </div>
                                         <div class="product-card__body d-flex flex-column h-100">
                                             <div class="mb-2">
@@ -296,7 +302,7 @@
                                                     </div>
                                                 </div>
                                                 <div class="d-flex gap-2 w-100">
-                                                    <a href="{{ route('products.show', $product->slug) }}" class="btn btn-outline-primary rounded-pill d-flex align-items-center justify-content-center shadow-sm flex-grow-1" style="height: 38px; font-size: 0.85rem;" title="Detail Produk" onclick="logRecommendationClick({{ $product->id }})">
+                                                    <a href="{{ route('products.show', $product->slug) }}" class="btn btn-outline-primary rounded-pill d-flex align-items-center justify-content-center shadow-sm flex-grow-1" style="height: 40px; font-size: 0.85rem; transition: all 0.3s ease;" title="Detail Produk" onclick="logRecommendationClick({{ $product->id }})">
                                                         Detail
                                                     </a>
                                                     @auth
@@ -304,12 +310,12 @@
                                                         @csrf
                                                         <input type="hidden" name="product_id" value="{{ $product->id }}">
                                                         <input type="hidden" name="quantity" value="1">
-                                                        <button type="submit" class="btn btn-strawberry rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px; padding: 0;" title="Tambah ke Keranjang">
+                                                        <button type="submit" class="btn btn-strawberry rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; padding: 0; transition: all 0.3s ease;" title="Tambah ke Keranjang">
                                                             <i class="fa-solid fa-cart-plus"></i>
                                                         </button>
                                                     </form>
                                                     @else
-                                                    <a href="{{ route('login') }}" class="btn btn-strawberry rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 38px; height: 38px; padding: 0;" title="Login untuk beli">
+                                                    <a href="{{ route('login') }}" class="btn btn-strawberry rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 40px; height: 40px; padding: 0; transition: all 0.3s ease;" title="Login untuk beli">
                                                         <i class="fa-solid fa-cart-plus"></i>
                                                     </a>
                                                     @endauth
@@ -378,6 +384,12 @@
                                     @if($product->is_promo)
                                         <span class="badge bg-danger text-white px-2 py-1 rounded-pill shadow-sm" style="font-size: 0.7rem;">🏷 Promo</span>
                                     @endif
+                                    @if($product->is_featured)
+                                        <span class="badge bg-success text-white px-2 py-1 rounded-pill shadow-sm" style="font-size: 0.7rem;">🌟 Best Seller</span>
+                                    @endif
+                                    @if($product->pickup_date && \Carbon\Carbon::parse($product->pickup_date)->isFuture())
+                                        <span class="badge bg-warning text-dark px-2 py-1 rounded-pill shadow-sm" style="font-size: 0.7rem;">⏳ Pre-order</span>
+                                    @endif
                                 </div>
                                 <div class="product-card__body d-flex flex-column h-100">
                                     <div class="mb-2">
@@ -402,7 +414,7 @@
                                             </div>
                                         </div>
                                         <div class="d-flex gap-2 w-100">
-                                            <a href="{{ route('products.show', $product->slug) }}" class="btn btn-outline-primary rounded-pill d-flex align-items-center justify-content-center shadow-sm flex-grow-1" style="height: 38px; font-size: 0.85rem;" title="Detail Produk">
+                                            <a href="{{ route('products.show', $product->slug) }}" class="btn btn-outline-primary rounded-pill d-flex align-items-center justify-content-center shadow-sm flex-grow-1" style="height: 40px; font-size: 0.85rem; transition: all 0.3s ease;" title="Detail Produk">
                                                 Detail
                                             </a>
                                             @auth
@@ -410,12 +422,12 @@
                                                 @csrf
                                                 <input type="hidden" name="product_id" value="{{ $product->id }}">
                                                 <input type="hidden" name="quantity" value="1">
-                                                <button type="submit" class="btn btn-strawberry rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 38px; height: 38px; padding: 0;" title="Tambah ke Keranjang">
+                                                <button type="submit" class="btn btn-strawberry rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 40px; height: 40px; padding: 0; transition: all 0.3s ease;" title="Tambah ke Keranjang">
                                                     <i class="fa-solid fa-cart-plus"></i>
                                                 </button>
                                             </form>
                                             @else
-                                            <a href="{{ route('login') }}" class="btn btn-strawberry rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 38px; height: 38px; padding: 0;" title="Login untuk beli">
+                                            <a href="{{ route('login') }}" class="btn btn-strawberry rounded-circle d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 40px; height: 40px; padding: 0; transition: all 0.3s ease;" title="Login untuk beli">
                                                 <i class="fa-solid fa-cart-plus"></i>
                                             </a>
                                             @endauth
@@ -427,7 +439,13 @@
                     @empty
                         <div class="col-12">
                             <div class="catalog-empty">
-                                Produk belum tersedia.
+                                <div class="mb-4 text-pink-300" style="opacity: 0.8;">
+                                    <svg class="mx-auto" style="width: 100px; height: 100px;" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                    </svg>
+                                </div>
+                                <h3 class="h4 text-dark fw-bold mb-2">Produk Belum Tersedia</h3>
+                                <p class="text-muted mx-auto" style="max-width: 400px; font-size: 0.95rem;">Maaf, sepertinya produk yang Anda cari sedang kosong atau belum ditambahkan ke katalog kami.</p>
                             </div>
                         </div>
                     @endforelse
