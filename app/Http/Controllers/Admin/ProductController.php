@@ -107,7 +107,7 @@ class ProductController extends Controller
     {
         $imageRule = $isUpdate
             ? 'nullable|file|mimes:jpg,jpeg,png,webp,heic,heif|max:5120'
-            : 'required|file|mimes:jpg,jpeg,png,webp,heic,heif|max:5120';
+            : 'required_without:cropped_image|file|mimes:jpg,jpeg,png,webp,heic,heif|max:5120';
 
         return $request->validate([
             'name'        => 'required|string|max:255',
@@ -117,6 +117,7 @@ class ProductController extends Controller
             'stock'       => 'required|integer|min:0',
             'category_id' => 'required|exists:categories,id',
             'image'       => $imageRule,
+            'cropped_image'=> 'nullable|string',
             'is_featured' => 'nullable|boolean',
             'is_new'      => 'nullable|boolean',
             'is_promo'    => 'nullable|boolean',
@@ -132,17 +133,45 @@ class ProductController extends Controller
 
     protected function handleUpload(Request $request, array $data, ?string $oldImage = null): array
     {
-        if ($request->hasFile('image')) {
+        $fileToProcess = null;
+
+        if (!empty($data['cropped_image'])) {
+            $base64Image = $data['cropped_image'];
+            
+            if (preg_match('/^data:image\/(\w+);base64,/', $base64Image, $type)) {
+                $base64Image = substr($base64Image, strpos($base64Image, ',') + 1);
+            }
+            
+            $imageBytes = base64_decode($base64Image);
+            if ($imageBytes === false) {
+                throw new RuntimeException('Data gambar crop tidak valid.');
+            }
+
+            $tmpFilePath = sys_get_temp_dir() . '/' . Str::uuid()->toString() . '.png';
+            file_put_contents($tmpFilePath, $imageBytes);
+            
+            $fileToProcess = new \Illuminate\Http\UploadedFile(
+                $tmpFilePath,
+                'cropped_image.png',
+                'image/png',
+                null,
+                true
+            );
+        } elseif ($request->hasFile('image')) {
+            $fileToProcess = $request->file('image');
+        }
+
+        if ($fileToProcess) {
             if ($request->boolean('ai_enhance')) {
                 $imageBytes = $this->productImageAi->enhance(
-                    $request->file('image'),
+                    $fileToProcess,
                     $data,
                     $request->input('ai_prompt')
                 );
                 $data['image'] = 'products/ai-' . Str::uuid() . '.png';
                 Storage::disk('public')->put($data['image'], $imageBytes);
             } else {
-                $data['image'] = $request->file('image')->store('products', 'public');
+                $data['image'] = $fileToProcess->store('products', 'public');
             }
 
             if ($oldImage) {
@@ -152,7 +181,7 @@ class ProductController extends Controller
             unset($data['image']);
         }
 
-        unset($data['ai_enhance'], $data['ai_prompt']);
+        unset($data['ai_enhance'], $data['ai_prompt'], $data['cropped_image']);
 
         $data['is_featured'] = (bool) ($data['is_featured'] ?? false);
         $data['is_new'] = (bool) ($data['is_new'] ?? false);

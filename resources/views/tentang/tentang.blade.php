@@ -177,19 +177,19 @@
     <div class="container py-4">
         <div class="row g-4 text-center justify-content-center">
             <div class="col-6 col-md-3">
-                <h3 class="display-5 fw-bold text-primary mb-2">10+</h3>
+                <h3 class="display-5 fw-bold text-primary mb-2">{{ date('Y') - 2020 }}+</h3>
                 <p class="text-muted fw-medium mb-0">Tahun Pengalaman</p>
             </div>
             <div class="col-6 col-md-3">
-                <h3 class="display-5 fw-bold text-primary mb-2">50K+</h3>
+                <h3 class="display-5 fw-bold text-primary mb-2">{{ $totalCustomers }}+</h3>
                 <p class="text-muted fw-medium mb-0">Pelanggan Puas</p>
             </div>
             <div class="col-6 col-md-3">
-                <h3 class="display-5 fw-bold text-primary mb-2">100+</h3>
+                <h3 class="display-5 fw-bold text-primary mb-2">{{ $totalProducts }}+</h3>
                 <p class="text-muted fw-medium mb-0">Varian Produk</p>
             </div>
             <div class="col-6 col-md-3">
-                <h3 class="display-5 fw-bold text-primary mb-2">4.9</h3>
+                <h3 class="display-5 fw-bold text-primary mb-2">{{ number_format($averageRating, 1) }}</h3>
                 <p class="text-muted fw-medium mb-0">Rating Pelanggan</p>
             </div>
         </div>

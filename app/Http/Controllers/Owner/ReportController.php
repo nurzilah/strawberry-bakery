@@ -31,7 +31,7 @@ class ReportController extends Controller
             $endDate = Carbon::parse($request->end_date)->endOfDay();
         }
 
-        $totalOnline = Order::where('status', 'completed')
+        $totalOnline = Order::where('payment_status', 'paid')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->sum('total_amount');
 
@@ -40,7 +40,7 @@ class ReportController extends Controller
 
         $totalCombined = $totalOnline + $totalPos;
 
-        $dailyOnline = Order::where('status', 'completed')
+        $dailyOnline = Order::where('payment_status', 'paid')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(total_amount) as total'))
             ->groupBy('date')
@@ -91,7 +91,7 @@ class ReportController extends Controller
             $endDate   = Carbon::parse($request->end_date)->endOfDay();
         }
 
-        $dailyOnline = Order::where('status', 'completed')
+        $dailyOnline = Order::where('payment_status', 'paid')
             ->whereBetween('created_at', [$startDate, $endDate])
             ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(total_amount) as total'))
             ->groupBy('date')->get()->keyBy('date');

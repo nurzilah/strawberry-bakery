@@ -229,7 +229,7 @@
         </li>
         <li class="{{ request()->routeIs('admin.stock.*') ? 'active' : '' }}">
             <a href="{{ route('admin.stock.index') }}">
-                <i class="fas fa-boxes me-2"></i> Manajemen Stok
+                <i class="fas fa-boxes me-2"></i> Riwayat Penambahan Stok
             </a>
         </li>
         <li class="{{ request()->routeIs('kasir.pos') ? 'active' : '' }}">
@@ -273,7 +273,7 @@
         </li>
         <li class="{{ request()->routeIs('admin.stock.*') ? 'active' : '' }}">
             <a href="{{ route('admin.stock.index') }}">
-                <i class="fas fa-boxes me-2"></i> Manajemen Stok
+                <i class="fas fa-boxes me-2"></i> Riwayat Penambahan Stok
             </a>
         </li>
         <li class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">

@@ -10,68 +10,41 @@ class ProductImageAiService
 {
     public function enhance(UploadedFile $image, array $productData, ?string $customPrompt = null): string
     {
-        $apiKey = config('services.openai.api_key');
+        $apiKey = env('STABILITY_API_KEY');
 
         if (!$apiKey) {
-            throw new RuntimeException('OPENAI_API_KEY belum diatur di file .env.');
+            throw new RuntimeException('STABILITY_API_KEY belum diatur di file .env. Dapatkan key di platform.stability.ai');
         }
 
-        $prompt = $this->buildPrompt($productData, $customPrompt);
-
         $response = Http::withToken($apiKey)
-            ->timeout((int) config('services.openai.timeout', 120))
+            ->timeout(120)
             ->attach(
-                'image[]',
+                'image',
                 fopen($image->getRealPath(), 'r'),
-                $image->getClientOriginalName(),
-                ['Content-Type' => $image->getMimeType()]
+                $image->getClientOriginalName()
             )
-            ->post('https://api.openai.com/v1/images/edits', [
-                'model' => config('services.openai.image_model', 'gpt-image-1.5'),
-                'prompt' => $prompt,
-                'size' => config('services.openai.image_size', '1024x1024'),
-                'quality' => config('services.openai.image_quality', 'medium'),
-                'output_format' => 'png',
+            ->withHeaders(['Accept' => 'application/json'])
+            ->post('https://api.stability.ai/v2beta/stable-image/upscale/fast', [
+                // Fast upscaler doesn't need extra parameters, just image
             ]);
 
         if ($response->failed()) {
-            $message = data_get($response->json(), 'error.message', 'Gagal membuat foto produk dengan AI.');
+            $message = data_get($response->json(), 'message', 'Gagal melakukan upscaling foto produk (HD).');
             throw new RuntimeException($message);
         }
 
-        $base64Image = data_get($response->json(), 'data.0.b64_json');
+        $base64Image = data_get($response->json(), 'image');
 
         if (!$base64Image) {
-            throw new RuntimeException('Respons AI tidak berisi gambar.');
+            throw new RuntimeException('Respons AI tidak berisi gambar HD. Pastikan resolusi asli tidak terlalu besar.');
         }
 
         $imageBytes = base64_decode($base64Image, true);
 
         if ($imageBytes === false) {
-            throw new RuntimeException('Gambar AI tidak bisa diproses.');
+            throw new RuntimeException('Gambar AI HD tidak bisa diproses.');
         }
 
         return $imageBytes;
-    }
-
-    protected function buildPrompt(array $productData, ?string $customPrompt = null): string
-    {
-        $name = $productData['name'] ?? 'produk bakery';
-        $description = $productData['description'] ?? '';
-
-        $basePrompt = <<<PROMPT
-Enhance this bakery product photo for an online catalog.
-Keep the product recognizable and do not change its core shape, flavor, label, or toppings.
-Create a clean, appetizing, photorealistic product photo with soft natural lighting, sharper detail, balanced color, and a premium bakery display style.
-Use an uncluttered background suitable for e-commerce.
-Product name: {$name}
-Product description: {$description}
-PROMPT;
-
-        if ($customPrompt) {
-            $basePrompt .= "\nAdditional direction: {$customPrompt}";
-        }
-
-        return $basePrompt;
     }
 }

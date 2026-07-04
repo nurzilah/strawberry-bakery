@@ -39,6 +39,12 @@ class HomeController extends Controller
             $isRecommendation = false;
         }
 
-        return view('home', compact('products', 'recommendedProducts', 'isRecommendation', 'hasOrders'));
+        $totalReviews = \App\Models\ProductReview::where('is_approved', true)->count();
+        $averageRating = \App\Models\ProductReview::where('is_approved', true)->avg('rating') ?? 5.0;
+        $latestReviews = \App\Models\ProductReview::with('user')->where('is_approved', true)->latest()->take(3)->get();
+        $totalProducts = \App\Models\Product::where('is_available', true)->count();
+        $totalCustomers = \App\Models\User::where('role', 'customer')->count();
+
+        return view('home', compact('products', 'recommendedProducts', 'isRecommendation', 'hasOrders', 'totalReviews', 'averageRating', 'latestReviews', 'totalProducts', 'totalCustomers'));
     }
 }

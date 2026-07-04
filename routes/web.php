@@ -106,8 +106,8 @@ Route::middleware(['auth', 'role:owner,admin,superadmin'])->prefix('admin')->nam
     
     // Stock Management
     Route::get('/stock', [\App\Http\Controllers\Admin\StockController::class, 'index'])->name('stock.index');
-    Route::get('/stock/{product}/add', [\App\Http\Controllers\Admin\StockController::class, 'create'])->name('stock.create');
-    Route::post('/stock/{product}/add', [\App\Http\Controllers\Admin\StockController::class, 'store'])->name('stock.store');
+    Route::get('/stock/add', [\App\Http\Controllers\Admin\StockController::class, 'create'])->name('stock.create');
+    Route::post('/stock/add', [\App\Http\Controllers\Admin\StockController::class, 'store'])->name('stock.store');
     Route::get('/stock/{product}/history', [\App\Http\Controllers\Admin\StockController::class, 'history'])->name('stock.history');
 });
 

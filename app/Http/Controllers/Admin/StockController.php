@@ -51,29 +51,27 @@ class StockController extends Controller
     /**
      * Show the form for creating a new stock addition.
      */
-    public function create(Product $product)
+    public function create(Request $request)
     {
-        return view('admin.stock.add', compact('product'));
+        $products = Product::orderBy('name')->get();
+        $selectedProductId = $request->product_id ?? old('product_id');
+        return view('admin.stock.add', compact('products', 'selectedProductId'));
     }
 
     /**
      * Store a newly created stock addition in storage.
      */
-    public function store(Request $request, Product $product)
+    public function store(Request $request)
     {
         $request->validate([
-            'quantity_added' => [
-                'required',
-                'integer',
-                'not_in:0',
-                function ($attribute, $value, $fail) use ($product) {
-                    if ($product->stock + $value < 0) {
-                        $fail('Stok akhir tidak boleh kurang dari 0. Stok saat ini: ' . $product->stock);
-                    }
-                }
-            ],
+            'product_id' => 'required|exists:products,id',
+            'quantity_added' => 'required|integer|min:1',
             'notes' => 'nullable|string|max:255',
+        ], [
+            'quantity_added.min' => 'Jumlah penambahan minimal adalah 1.',
         ]);
+
+        $product = Product::findOrFail($request->product_id);
 
         $product->addStock(
             $request->quantity_added,
@@ -81,9 +79,8 @@ class StockController extends Controller
             auth()->id()
         );
 
-        $action = $request->quantity_added > 0 ? 'ditambahkan' : 'dikurangi';
-        return redirect()->route('admin.products.index')
-                         ->with('success', 'Stok untuk produk ' . $product->name . ' berhasil ' . $action . '.');
+        return redirect()->route('admin.stock.index')
+                         ->with('success', 'Stok untuk produk ' . $product->name . ' berhasil ditambahkan.');
     }
 
     /**

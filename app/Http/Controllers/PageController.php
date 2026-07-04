@@ -18,7 +18,12 @@ class PageController extends Controller
 
     public function about()
     {
-        return view('tentang.tentang');
+        $totalReviews = \App\Models\ProductReview::where('is_approved', true)->count();
+        $averageRating = \App\Models\ProductReview::where('is_approved', true)->avg('rating') ?? 5.0;
+        $totalProducts = \App\Models\Product::where('is_available', true)->count();
+        $totalCustomers = \App\Models\User::where('role', 'customer')->count();
+
+        return view('tentang.tentang', compact('totalReviews', 'averageRating', 'totalProducts', 'totalCustomers'));
     }
 
     public function contact()

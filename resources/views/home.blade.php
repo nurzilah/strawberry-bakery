@@ -422,20 +422,20 @@
     <div class="container mx-auto px-4">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
             <div>
-                <h3 class="text-5xl font-bold mb-2"><span class="count-up" data-target="10">0</span>+</h3>
+                <h3 class="text-5xl font-bold mb-2"><span class="count-up" data-target="{{ date('Y') - 2020 }}">0</span>+</h3>
                 <p class="text-pink-100">Tahun Pengalaman</p>
             </div>
             <div>
-                <h3 class="text-5xl font-bold mb-2"><span class="count-up" data-target="50">0</span>K+</h3>
+                <h3 class="text-5xl font-bold mb-2"><span class="count-up" data-target="{{ $totalCustomers }}">0</span>+</h3>
                 <p class="text-pink-100">Pelanggan Puas</p>
             </div>
             <div>
-                <h3 class="text-5xl font-bold mb-2"><span class="count-up" data-target="100">0</span>+</h3>
+                <h3 class="text-5xl font-bold mb-2"><span class="count-up" data-target="{{ $totalProducts }}">0</span>+</h3>
                 <p class="text-pink-100">Varian Produk</p>
             </div>
             <div>
-                <h3 class="text-5xl font-bold mb-2">4.9</h3>
-                <p class="text-pink-100">Rating Pelanggan</p>
+                <h3 class="text-5xl font-bold mb-2">{{ number_format($averageRating, 1) }}</h3>
+                <p class="text-pink-100">Rating Pelanggan ({{ $totalReviews }} ulasan)</p>
             </div>
         </div>
     </div>
@@ -450,53 +450,35 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            @forelse($latestReviews as $review)
             <div class="home-soft-card bg-pink-50 p-8 rounded-2xl border border-pink-100 shadow-sm">
                 <div class="flex text-yellow-400 mb-4">
-                    @for($i = 0; $i < 5; $i++)
-                        <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                    @for($i = 1; $i <= 5; $i++)
+                        @if($i <= $review->rating)
+                            <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        @else
+                            <svg class="w-5 h-5 text-gray-300 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                        @endif
                     @endfor
                 </div>
-                <p class="text-gray-600 mb-6 italic leading-relaxed">"Rotinya enak banget! Teksturnya lembut dan aromanya harum. Sistem pre-order juga memudahkan untuk pesan jauh-jauh hari."</p>
+                @if($review->comment)
+                <p class="text-gray-600 mb-6 italic leading-relaxed">"{{ $review->comment }}"</p>
+                @else
+                <p class="text-gray-500 mb-6 italic leading-relaxed text-sm">Memberikan rating bintang {{ $review->rating }} tanpa ulasan teks.</p>
+                @endif
                 <div class="flex items-center">
-                    <div class="avatar-placeholder mr-4">SN</div>
+                    <div class="avatar-placeholder mr-4">{{ strtoupper(substr($review->user->name ?? 'User', 0, 2)) }}</div>
                     <div>
-                        <h4 class="font-bold text-gray-800">Siti Nurhaliza</h4>
-                        <p class="text-sm text-gray-500">Ibu Rumah Tangga</p>
+                        <h4 class="font-bold text-gray-800">{{ $review->user->name ?? 'Pelanggan' }}</h4>
+                        <p class="text-sm text-gray-500">Pelanggan</p>
                     </div>
                 </div>
             </div>
-
-            <div class="home-soft-card bg-pink-50 p-8 rounded-2xl border border-pink-100 shadow-sm">
-                <div class="flex text-yellow-400 mb-4">
-                    @for($i = 0; $i < 5; $i++)
-                        <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                    @endfor
-                </div>
-                <p class="text-gray-600 mb-6 italic leading-relaxed">"Pelayanan ramah, pengiriman tepat waktu. Croissant-nya juara! Ga nyesel deh langganan di sini buat acara kantor."</p>
-                <div class="flex items-center">
-                    <div class="avatar-placeholder mr-4">BS</div>
-                    <div>
-                        <h4 class="font-bold text-gray-800">Budi Santoso</h4>
-                        <p class="text-sm text-gray-500">Pengusaha</p>
-                    </div>
-                </div>
+            @empty
+            <div class="col-span-3 text-center py-8">
+                <p class="text-gray-500 italic">Belum ada ulasan pelanggan.</p>
             </div>
-
-            <div class="home-soft-card bg-pink-50 p-8 rounded-2xl border border-pink-100 shadow-sm">
-                <div class="flex text-yellow-400 mb-4">
-                    @for($i = 0; $i < 5; $i++)
-                        <svg class="w-5 h-5 fill-current" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                    @endfor
-                </div>
-                <p class="text-gray-600 mb-6 italic leading-relaxed">"Kualitas terjamin, harga terjangkau. Cocok untuk acara keluarga atau sekadar jadi cemilan sore sambil ngopi. Recommended!"</p>
-                <div class="flex items-center">
-                    <div class="avatar-placeholder mr-4">RW</div>
-                    <div>
-                        <h4 class="font-bold text-gray-800">Rina Wijaya</h4>
-                        <p class="text-sm text-gray-500">Karyawan Swasta</p>
-                    </div>
-                </div>
-            </div>
+            @endforelse
         </div>
     </div>
 </section>

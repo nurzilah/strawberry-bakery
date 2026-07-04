@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('title', 'Riwayat Manajemen Stok')
+@section('title', 'Riwayat Penambahan Stok')
 
 @push('styles')
 <style>
@@ -38,12 +38,17 @@
 <div class="container-fluid py-4">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>
-            <h1 class="h3 fw-bold text-dark mb-1">Riwayat Manajemen Stok</h1>
+            <h1 class="h3 fw-bold text-dark mb-1">Riwayat Penambahan Stok</h1>
             <p class="text-muted mb-0">Pantau riwayat penambahan stok produk.</p>
         </div>
-        <a href="{{ route('admin.products.index') }}" class="btn btn-outline-secondary rounded-pill px-4">
-            <i class="fas fa-arrow-left me-2"></i>Kembali ke Produk
-        </a>
+        <div class="d-flex gap-2">
+            <a href="{{ route('admin.stock.create') }}" class="btn btn-primary rounded-pill px-4">
+                <i class="fas fa-plus me-2"></i>Tambah Stok
+            </a>
+            <a href="{{ route('admin.products.index') }}" class="btn btn-outline-secondary rounded-pill px-4">
+                <i class="fas fa-arrow-left me-2"></i>Kembali ke Produk
+            </a>
+        </div>
     </div>
 
     <!-- Filter Form -->
