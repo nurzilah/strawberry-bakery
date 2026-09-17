@@ -25,6 +25,7 @@ class AuthenticationTest extends TestCase
         $response = $this->post('/login', [
             'email' => $user->email,
             'password' => 'password',
+            'remember' => 'on',
         ]);
 
         $this->assertAuthenticated();
@@ -40,6 +41,18 @@ class AuthenticationTest extends TestCase
             'password' => 'wrong-password',
         ]);
 
+        $this->assertGuest();
+    }
+
+    public function test_authenticated_user_can_logout_without_a_page_expired_response(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)->post(route('logout'), [
+            '_token' => csrf_token(),
+        ]);
+
+        $response->assertRedirect('/');
         $this->assertGuest();
     }
 }

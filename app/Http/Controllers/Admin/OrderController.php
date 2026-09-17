@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
-use App\Notifications\PaymentConfirmed;
+use App\Services\ReceiptDeliveryService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -142,9 +142,7 @@ class OrderController extends Controller
             ]);
         }
 
-        if ($result['order']->user) {
-            $result['order']->user->notify(new PaymentConfirmed($result['order']));
-        }
+        app(ReceiptDeliveryService::class)->sendOnce($result['order']);
 
         return redirect()->back()->with('success', 'Pembayaran berhasil dikonfirmasi.');
     }

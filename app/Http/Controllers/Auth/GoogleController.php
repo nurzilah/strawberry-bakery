@@ -59,6 +59,7 @@ class GoogleController extends Controller
                 'google_id' => $googleId,
                 'avatar' => $googleUser->getAvatar(),
                 'role' => 'customer',
+                'is_verified' => true,
                 'password' => Hash::make(Str::random(64)),
             ]);
         }

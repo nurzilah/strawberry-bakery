@@ -12,6 +12,7 @@ use App\Http\Controllers\{
     RecommendationController
 };
 use App\Http\Controllers\Auth\GoogleController;
+use App\Http\Controllers\ShortLinkController;
 use App\Http\Controllers\Kasir\TransactionController as KasirTransactionController;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Route;
@@ -39,6 +40,13 @@ Route::get('/faq', [PageController::class, 'faq'])->name('faq');
 Route::get('/terms', [PageController::class, 'terms'])->name('terms');
 Route::get('/track-order', [PageController::class, 'trackOrder'])->name('order.track');
 Route::post('/track-order', [PageController::class, 'searchOrder'])->name('order.search');
+Route::get('/r/{code}', [ShortLinkController::class, 'redirect'])->name('short.redirect');
+// Tautan ini dipakai pada WhatsApp; signature dan masa berlaku menjaga struk
+// tetap tidak bisa diakses hanya dengan menebak ID pesanan.
+Route::get('/r/{code}', [ShortLinkController::class, 'redirect'])->name('short.redirect');
+Route::get('/receipt/{order}', [OrderController::class, 'sharedReceipt'])
+    ->middleware('signed')
+    ->name('orders.receipt.shared');
 
 // Webhook Midtrans dipindah ke api.php
 
@@ -87,6 +95,7 @@ Route::middleware(['auth'])->group(function () {
     Route::prefix('orders')->name('orders.')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('index');
         Route::get('/{order}', [OrderController::class, 'show'])->name('show');
+        Route::get('/{order}/receipt', [OrderController::class, 'receipt'])->name('receipt');
     });
 
 });
@@ -108,15 +117,15 @@ Route::get('/dashboard-redirect', function () {
 Route::middleware(['auth', 'role:owner,admin,superadmin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', fn () => redirect()->route('admin.dashboard'));
     Route::get('/dashboard', [\App\Http\Controllers\Admin\AdminDashboardController::class, 'index'])->name('dashboard');
-    Route::get('/recommendation-visualization', [\App\Http\Controllers\Admin\RecommendationController::class, 'index'])->name('recommendation.visualization');    
+    Route::get('/recommendation-visualization', [\App\Http\Controllers\Admin\RecommendationController::class, 'index'])->name('recommendation.visualization');
     // Notifications
     Route::get('notifications/unread', [\App\Http\Controllers\Admin\NotificationController::class, 'unread'])->name('notifications.unread');
     Route::post('notifications/{id}/read', [\App\Http\Controllers\Admin\NotificationController::class, 'markRead'])->name('notifications.read');
     Route::post('notifications/read-all', [\App\Http\Controllers\Admin\NotificationController::class, 'markAllRead'])->name('notifications.read-all');
-    
+
     Route::resource('products', \App\Http\Controllers\Admin\ProductController::class)->except(['show']);
     Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class)->except(['show']);
-    
+
     // Stock Management
     Route::get('/stock', [\App\Http\Controllers\Admin\StockController::class, 'index'])->name('stock.index');
     Route::get('/stock/add', [\App\Http\Controllers\Admin\StockController::class, 'create'])->name('stock.create');
@@ -139,7 +148,7 @@ Route::middleware(['auth', 'role:owner,kasir,superadmin,admin'])->prefix('admin/
     Route::get('/pos', [\App\Http\Controllers\Kasir\KasirController::class, 'index'])->name('pos');
     Route::post('/pos/store', [\App\Http\Controllers\Kasir\KasirController::class, 'store'])->name('store');
     Route::get('/pos/receipt/{id}', [\App\Http\Controllers\Kasir\KasirController::class, 'printReceipt'])->name('receipt');
-    
+
     // Transactions History
     Route::get('/transactions', [\App\Http\Controllers\Kasir\TransactionHistoryController::class, 'index'])->name('transactions.index');
     Route::get('/transactions/{id}', [\App\Http\Controllers\Kasir\TransactionHistoryController::class, 'show'])->name('transactions.show');

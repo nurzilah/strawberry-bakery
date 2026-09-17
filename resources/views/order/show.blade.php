@@ -80,6 +80,14 @@
             </div>
         @endif
 
+        @if(in_array($order->payment_status, ['paid', 'success'], true))
+            <div class="mt-6">
+                <a href="{{ route('orders.receipt', $order) }}" target="_blank" class="btn btn-outline-primary w-full rounded-pill py-3 font-bold text-lg">
+                    <i class="fas fa-receipt me-2"></i> Lihat / Unduh Struk
+                </a>
+            </div>
+        @endif
+
         @if($order->payment_status === 'pending' && $order->snap_token)
             <div class="mt-6">
                 <button id="pay-button" class="btn btn-strawberry w-full rounded-pill py-3 bg-pink-600 hover:bg-pink-700 text-white font-bold text-lg">

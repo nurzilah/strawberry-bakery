@@ -23,6 +23,7 @@ class Order extends Model
         'midtrans_transaction_id',
         'payment_type',
         'paid_at',
+        'receipt_sent_at',
         'snap_token',
     ];
 
@@ -30,6 +31,8 @@ class Order extends Model
         'total_amount' => 'integer',
         'qris_expires_at' => 'datetime',
         'pickup_date' => 'date',
+        'paid_at' => 'datetime',
+        'receipt_sent_at' => 'datetime',
     ];
 
     public function user()

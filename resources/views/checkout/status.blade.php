@@ -61,6 +61,11 @@
             <a href="{{ route('orders.show', $order->id) }}" class="btn btn-outline-primary rounded-pill py-2 px-6 font-semibold">
                 Lihat Detail Pesanan
             </a>
+            @if(in_array($order->payment_status, ['paid', 'success'], true))
+                <a href="{{ route('orders.receipt', $order) }}" target="_blank" class="btn btn-outline-primary rounded-pill py-2 px-6 font-semibold">
+                    Unduh Struk
+                </a>
+            @endif
             <a href="{{ route('products.index') }}" class="btn btn-light rounded-pill py-2 px-6 font-semibold border">
                 Kembali Belanja
             </a>

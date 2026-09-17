@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Order;
 use Illuminate\Support\Facades\Log;
+use App\Services\ReceiptDeliveryService;
 
 class MidtransNotificationController extends Controller
 {
@@ -70,6 +71,10 @@ class MidtransNotificationController extends Controller
         }
 
         $order->save();
+
+        if (in_array($transactionStatus, ['capture', 'settlement'], true)) {
+            app(ReceiptDeliveryService::class)->sendOnce($order);
+        }
 
         // Kembalikan respon sukses ke Midtrans dengan menyertakan header bypass Ngrok
         return response(['message' => 'Success'], 200)

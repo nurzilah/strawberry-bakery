@@ -11,13 +11,13 @@
     <div class="card shadow mb-4 border-0">
         <div class="card-body">
             <p class="text-muted">Halaman ini menunjukkan bagaimana algoritma K-Nearest Neighbors dan Collaborative Filtering bekerja dalam menemukan produk yang direkomendasikan untuk user berdasarkan kemiripan histori transaksi.</p>
-            
+
             <div class="accordion" id="accordionRecommendations">
                 @forelse($visualizations as $index => $vis)
                     <div class="accordion-item mb-3 border rounded">
                         <h2 class="accordion-header" id="heading{{ $index }}">
                             <button class="accordion-button {{ $index == 0 ? '' : 'collapsed' }} fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ $index }}" aria-expanded="{{ $index == 0 ? 'true' : 'false' }}" aria-controls="collapse{{ $index }}">
-                                <i class="fas fa-user-circle fa-lg me-2 text-primary"></i> Target User: {{ $vis['target_user']->name }} 
+                                <i class="fas fa-user-circle fa-lg me-2 text-primary"></i> Target User: {{ $vis['target_user']->name }}
                                 <span class="badge bg-secondary ms-2">{{ count($vis['purchased_products']) }} Produk Dibeli</span>
                             </button>
                         </h2>
@@ -42,7 +42,7 @@
                                     <div class="col-md-4 mb-3">
                                         <div class="card h-100 border-warning">
                                             <div class="card-header bg-warning text-dark fw-bold">
-                                                <i class="fas fa-users me-1"></i> Tetangga Terdekat (KNN)
+                                                <i class="fas fa-users me-1"></i> (KNN)
                                             </div>
                                             <ul class="list-group list-group-flush">
                                                 @forelse($vis['neighbors'] as $neighbor)

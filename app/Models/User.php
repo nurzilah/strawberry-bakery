@@ -26,6 +26,7 @@ class User extends Authenticatable
         'role',
         'google_id',
         'avatar',
+        'is_verified',
     ];
 
     protected $hidden = [
@@ -35,6 +36,7 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
+        'is_verified' => 'boolean',
     ];
 
     public function carts()

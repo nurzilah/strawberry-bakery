@@ -132,6 +132,22 @@
                            class="w-full px-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-pink-400/50 focus:border-pink-400 placeholder-gray-400 transition-all duration-300 shadow-sm">
                 </div>
 
+                <!-- Verification Method -->
+                <div>
+                    <p class="block text-sm font-semibold text-gray-700 mb-1.5">Metode Verifikasi</p>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="flex items-center gap-2 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:border-pink-300 transition-colors">
+                            <input type="radio" name="verification_method" value="email" {{ old('verification_method', 'email') === 'email' ? 'checked' : '' }} required class="text-pink-500 focus:ring-pink-500">
+                            <span class="text-sm font-medium text-gray-700">Email</span>
+                        </label>
+                        <label class="flex items-center gap-2 px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:border-pink-300 transition-colors">
+                            <input type="radio" name="verification_method" value="whatsapp" {{ old('verification_method') === 'whatsapp' ? 'checked' : '' }} required class="text-pink-500 focus:ring-pink-500">
+                            <span class="text-sm font-medium text-gray-700">WhatsApp</span>
+                        </label>
+                    </div>
+                    <p class="mt-1.5 text-xs text-gray-500">Kode OTP akan dikirim ke email atau nomor WhatsApp yang Anda pilih.</p>
+                </div>
+
                 <!-- Password -->
                 <div>
                     <label for="password" class="block text-sm font-semibold text-gray-700 mb-1.5">Password</label>

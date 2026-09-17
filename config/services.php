@@ -36,4 +36,10 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI'),
     ],
 
+    'fonnte' => [
+        'token' => env('FONNTE_TOKEN'),
+        'url' => env('FONNTE_URL', 'https://api.fonnte.com/send'),
+        'otp_expiry_minutes' => env('REGISTRATION_OTP_EXPIRY_MINUTES', 5),
+    ],
+
 ];

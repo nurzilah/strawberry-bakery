@@ -7,6 +7,7 @@ use App\Models\Order;
 use Midtrans\Config;
 use Midtrans\Snap;
 use Midtrans\Notification;
+use App\Services\ReceiptDeliveryService;
 
 class CheckoutController extends Controller
 {
@@ -215,6 +216,10 @@ class CheckoutController extends Controller
             } catch (\Exception $e) {
                 // Biarkan lolos jika gagal
             }
+        }
+
+        if ($order->payment_status === 'paid') {
+            app(ReceiptDeliveryService::class)->sendOnce($order);
         }
 
         return view('checkout.status', compact('order'));
