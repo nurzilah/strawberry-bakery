@@ -33,10 +33,19 @@
                     <span class="text-gray-600">Total Tagihan</span>
                     <span class="font-bold text-pink-600">Rp {{ number_format($order->total_amount, 0, ',', '.') }}</span>
                 </div>
+                @if($order->requested_date)
                 <div class="flex justify-between">
-                    <span class="text-gray-600">Tanggal Pengambilan</span>
-                    <span class="font-semibold text-gray-800">{{ $order->pickup_date ? \Carbon\Carbon::parse($order->pickup_date)->format('d M Y') : '-' }}</span>
+                    <span class="text-gray-600">
+                        {{ $order->delivery_method === 'pickup' ? 'Tanggal Pengambilan' : 'Tanggal Pengantaran' }}
+                    </span>
+                    <span class="font-semibold text-gray-800">
+                        {{ \Carbon\Carbon::parse($order->requested_date)->format('d M Y') }}
+                        @if($order->requested_time)
+                            — pukul {{ \Carbon\Carbon::parse($order->requested_time)->format('H:i') }} WIB
+                        @endif
+                    </span>
                 </div>
+                @endif
                 @if($order->payment_type)
                 <div class="flex justify-between">
                     <span class="text-gray-600">Metode Pembayaran</span>
@@ -50,6 +59,35 @@
                 </div>
                 @endif
             </div>
+
+            {{-- Pickup deadline notice --}}
+            @if($order->delivery_method === 'pickup' && $order->pickup_deadline_at)
+            @php
+                $deadlinePassed = now()->gt($order->pickup_deadline_at);
+                $boxClass = $deadlinePassed ? 'border-red-400 bg-red-50' : 'border-orange-300 bg-orange-50';
+                $textClass = $deadlinePassed ? 'text-red-700' : 'text-orange-700';
+            @endphp
+            <div class="mt-4 rounded-xl border {{ $boxClass }} p-4">
+                <p class="font-bold {{ $textClass }} mb-1">
+                    ⚠ {{ $deadlinePassed ? 'Batas Waktu Pengambilan Sudah Lewat!' : 'Batas Waktu Pengambilan' }}
+                </p>
+                <p class="text-sm {{ $textClass }}">
+                    Pesanan ini <strong>wajib diambil sebelum</strong>
+                    <strong>pukul {{ \Carbon\Carbon::parse($order->pickup_deadline_at)->format('H:i') }} WIB,
+                    {{ \Carbon\Carbon::parse($order->pickup_deadline_at)->format('d M Y') }}</strong>.
+                </p>
+                @if($deadlinePassed)
+                    <p class="text-sm text-red-600 mt-1 font-medium">
+                        Batas waktu sudah terlewat. Segera hubungi toko kami di
+                        <a href="tel:+6281571730118" class="underline">+62 815-7173-118</a>.
+                    </p>
+                @else
+                    <p class="text-sm {{ $textClass }} mt-1">
+                        Lewat batas waktu tersebut, toko tidak bertanggung jawab atas pesanan yang tidak diambil.
+                    </p>
+                @endif
+            </div>
+            @endif
         </div>
 
         <div class="flex flex-col sm:flex-row gap-4 justify-center">

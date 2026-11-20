@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\QueryException;
 use Illuminate\View\View;
 
 class RegistrationOtpController extends Controller
@@ -49,21 +50,45 @@ class RegistrationOtpController extends Controller
         }
 
         // Check again because another registration may have completed while OTP was entered.
-        if (User::where('email', $pending['email'])->exists()) {
+        $emailExists = User::where('email', $pending['email'])->exists();
+        $phoneExists = User::where('phone', $pending['phone'])->exists();
+        if ($emailExists || $phoneExists) {
             $request->session()->forget('pending_registration');
-            return redirect()->route('login')->withErrors(['email' => 'Email ini sudah terdaftar.']);
+            $field = $emailExists ? 'email' : 'phone';
+            $message = $emailExists
+                ? 'Email ini sudah terdaftar. Silakan masuk atau gunakan email lain.'
+                : 'Nomor HP ini sudah terdaftar. Silakan gunakan nomor lain.';
+
+            return redirect()->route('register')->withErrors([$field => $message]);
         }
 
-        $user = User::create([
-            'name' => $pending['name'],
-            'email' => $pending['email'],
-            'phone' => $pending['phone'],
-            'password' => $pending['password'],
-            'role' => 'customer',
-            'is_verified' => true,
-            // A registration OTP (email or WhatsApp) has validated ownership of the selected contact method.
-            'email_verified_at' => $pending['method'] === 'email' ? now() : null,
-        ]);
+        try {
+            $user = User::create([
+                'name' => $pending['name'],
+                'email' => $pending['email'],
+                'phone' => $pending['phone'],
+                'password' => $pending['password'],
+                'role' => 'customer',
+                'is_verified' => true,
+                // A registration OTP (email or WhatsApp) has validated ownership of the selected contact method.
+                'email_verified_at' => $pending['method'] === 'email' ? now() : null,
+            ]);
+        } catch (QueryException $exception) {
+            // Unique indexes also protect against simultaneous registration attempts.
+            $emailExists = User::where('email', $pending['email'])->exists();
+            $phoneExists = User::where('phone', $pending['phone'])->exists();
+            if (! $emailExists && ! $phoneExists) {
+                throw $exception;
+            }
+
+            $request->session()->forget('pending_registration');
+            $field = $emailExists ? 'email' : 'phone';
+            $message = $emailExists
+                ? 'Email ini sudah terdaftar. Silakan masuk atau gunakan email lain.'
+                : 'Nomor HP ini sudah terdaftar. Silakan gunakan nomor lain.';
+
+            return redirect()->route('register')->withErrors([$field => $message]);
+        }
 
         $otp->update(['is_used' => true, 'user_id' => $user->id]);
         OtpVerification::where('temp_identifier', $pending['identifier'])->where('id', '!=', $otp->id)->update(['is_used' => true]);

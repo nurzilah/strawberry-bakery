@@ -57,10 +57,17 @@
 <div class="container-fluid py-4">
     <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-4">
         <div>
-            <h1 class="h3 fw-bold text-dark mb-1">Konfirmasi Pembayaran</h1>
-            <p class="text-muted mb-0">Verifikasi bukti pembayaran dan kelola status pesanan pelanggan.</p>
+            <h1 class="h3 fw-bold text-dark mb-1">Konfirmasi Pembayaran & Pesanan</h1>
+            <p class="text-muted mb-0">Verifikasi pembayaran, penugasan kurir, dan kelola status pesanan pelanggan.</p>
         </div>
     </div>
+
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show rounded-3 mb-4" role="alert">
+            <i class="fas fa-check-circle me-2"></i> {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
 
     <div class="card mb-4 border-0 shadow-sm rounded-4">
         <div class="card-body">
@@ -71,7 +78,7 @@
                         <option value="">Semua Status</option>
                         <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                         <option value="waiting_verification" {{ request('status') == 'waiting_verification' ? 'selected' : '' }}>Menunggu Konfirmasi</option>
-                        <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>Siap Diambil</option>
+                        <option value="processing" {{ request('status') == 'processing' ? 'selected' : '' }}>Siap Diambil / Diproses</option>
                         <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Selesai</option>
                         <option value="cancelled" {{ request('status') == 'cancelled' ? 'selected' : '' }}>Dibatalkan</option>
                     </select>
@@ -99,6 +106,7 @@
                         <th scope="col" class="text-end">Total Uang</th>
                         <th scope="col" class="text-center">Status Pembayaran</th>
                         <th scope="col" class="text-center">Status Pesanan</th>
+                        <th scope="col" class="text-center">Pengiriman & Kurir</th>
                         <th scope="col" class="text-center">Bukti Bayar</th>
                         <th scope="col" class="text-end">Tindakan</th>
                     </tr>
@@ -106,7 +114,7 @@
                 <tbody>
                     @if($orders->isEmpty())
                         <tr>
-                            <td colspan="7" class="text-center py-5 text-muted">Belum ada data pembayaran masuk.</td>
+                            <td colspan="9" class="text-center py-5 text-muted">Belum ada data pembayaran/pesanan masuk.</td>
                         </tr>
                     @else
                         @foreach($orders as $order)
@@ -141,13 +149,68 @@
                                     @if($order->status === 'waiting_verification')
                                         <span class="badge rounded-pill bg-warning-subtle text-warning-emphasis">Menunggu Konfirmasi</span>
                                     @elseif($order->status === 'processing')
-                                        <span class="badge rounded-pill bg-primary-subtle text-primary">Siap Diambil</span>
+                                        <span class="badge rounded-pill bg-primary-subtle text-primary">Diproses / Dipanggang</span>
                                     @elseif($order->status === 'completed')
-                                        <span class="badge rounded-pill bg-success-subtle text-success">Selesai Diambil</span>
+                                        <span class="badge rounded-pill bg-success-subtle text-success">Selesai</span>
                                     @elseif($order->status === 'cancelled')
                                         <span class="badge rounded-pill bg-danger-subtle text-danger">Dibatalkan</span>
                                     @else
                                         <span class="badge rounded-pill bg-secondary-subtle text-secondary">Pending</span>
+                                    @endif
+                                    @php
+                                        $isOverduePickup = $order->delivery_method === 'pickup'
+                                            && $order->pickup_deadline_at
+                                            && now()->gt($order->pickup_deadline_at)
+                                            && !in_array($order->status, ['completed', 'cancelled']);
+                                    @endphp
+                                    @if($isOverduePickup)
+                                        <span class="badge rounded-pill bg-danger text-white mt-1 d-block"
+                                              title="Deadline: {{ \Carbon\Carbon::parse($order->pickup_deadline_at)->format('d M Y H:i') }}">
+                                            ⚠ Pickup Lewat Deadline
+                                        </span>
+                                    @endif
+                                </td>
+                                <td class="text-center">
+                                    @if($order->delivery_method === 'delivery')
+                                        <div class="mb-1">
+                                            <span class="badge bg-primary text-white rounded-pill px-2 py-1" style="font-size: 0.7rem;">
+                                                <i class="fas fa-truck me-1"></i> Delivery
+                                            </span>
+                                        </div>
+                                        
+                                        <!-- Status Delivery Badge -->
+                                        <div class="mb-2">
+                                            @if($order->delivery_status === 'dalam_pengantaran' || $order->delivery_status === 'dalam_perjalanan' || $order->delivery_status === 'diambil_kurir' || $order->delivery_status === 'ditugaskan')
+                                                <span class="badge bg-primary-subtle text-primary rounded-pill px-2 py-1">Dalam Pengantaran</span>
+                                            @elseif($order->delivery_status === 'terkirim')
+                                                <span class="badge bg-success-subtle text-success rounded-pill px-2 py-1">Terkirim</span>
+                                            @elseif($order->delivery_status === 'gagal_kirim')
+                                                <span class="badge bg-danger-subtle text-danger rounded-pill px-2 py-1">Gagal Kirim</span>
+                                            @else
+                                                <span class="badge bg-warning-subtle text-warning-emphasis rounded-pill px-2 py-1">Menunggu Kurir</span>
+                                            @endif
+                                        </div>
+
+                                        <!-- Assign Courier Dropdown -->
+                                        <form action="{{ route('admin.orders.assign-courier', $order) }}" method="POST" class="m-0">
+                                            @csrf
+                                            @method('PATCH')
+                                            <select name="courier_id" class="form-select form-select-sm rounded-pill px-2 py-1 shadow-sm" onchange="this.form.submit()" style="font-size: 0.75rem; min-width: 160px;">
+                                                <option value="">-- Tugaskan Kurir --</option>
+                                                @foreach($couriers as $courier)
+                                                    <option value="{{ $courier->id }}" {{ $order->courier_id == $courier->id ? 'selected' : '' }}>
+                                                        {{ $courier->name }} ({{ $courier->phone ?? '-' }})
+                                                    </option>
+                                                @endforeach
+                                                <option value="external" {{ (!$order->courier_id && $order->courier_name) ? 'selected' : '' }}>
+                                                    Kurir Eksternal / Ojek Online
+                                                </option>
+                                            </select>
+                                        </form>
+                                    @else
+                                        <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2 py-1" style="font-size: 0.75rem;">
+                                            <i class="fas fa-store me-1"></i> Pickup (Ambil Sendiri)
+                                        </span>
                                     @endif
                                 </td>
                                 <td class="text-center">
@@ -160,6 +223,7 @@
                                     @endif
                                 </td>
                                 <td>
+                                    <div class="d-flex gap-1 justify-content-end">
                                         <a href="{{ route('admin.orders.show', $order) }}" class="btn btn-sm btn-outline-info rounded-pill px-3">
                                             Detail
                                         </a>

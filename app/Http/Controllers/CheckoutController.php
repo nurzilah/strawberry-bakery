@@ -41,7 +41,22 @@ class CheckoutController extends Controller
             $total += $product->price * $qty;
         }
 
-        return view('checkout.index', compact('carts', 'total'));
+        $vouchers = \App\Models\Voucher::where('is_active', true)->get();
+        $isFirstOrder = !\App\Models\Order::where('user_id', $user->id)
+            ->where('status', '!=', 'cancelled')
+            ->exists();
+
+        $totalQty = 0;
+        foreach ($carts as $cart) {
+            $qty = \Illuminate\Support\Facades\Schema::hasColumn('carts', 'quantity') 
+                ? $cart->quantity 
+                : $cart->detailCart->quantity;
+            $totalQty += $qty;
+        }
+        $promoService = app(\App\Services\PromoCalculatorService::class);
+        $orderPromo = $promoService->calculate('order', $totalQty, $total);
+
+        return view('checkout.index', compact('carts', 'total', 'totalQty', 'vouchers', 'isFirstOrder', 'orderPromo'));
     }
 
     public function process(Request $request)
@@ -79,14 +94,190 @@ class CheckoutController extends Controller
             $total += $product->price * $qty;
         }
 
+        // Total qty for delivery validation
+        $totalQty = 0;
+        foreach ($carts as $cart) {
+            $qty = \Illuminate\Support\Facades\Schema::hasColumn('carts', 'quantity') 
+                ? $cart->quantity 
+                : $cart->detailCart->quantity;
+            $totalQty += $qty;
+        }
+
+        $minDeliveryQty = config('store.delivery_min_qty', 12);
+        $deliveryMethod = $request->delivery_method === 'delivery' ? 'delivery' : 'pickup';
+        
+        if ($deliveryMethod === 'delivery' && $totalQty < $minDeliveryQty) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Delivery hanya tersedia untuk pemesanan minimal ' . $minDeliveryQty . ' item.'
+                ], 400);
+            }
+            return redirect()->back()->with('error', 'Delivery hanya tersedia untuk pemesanan minimal ' . $minDeliveryQty . ' item.');
+        }
+
+        // Validate requested date
+        $request->validate([
+            'requested_date' => 'required|date|after_or_equal:today|before_or_equal:+2 days',
+        ], [
+            'requested_date.after_or_equal' => 'Tanggal pengambilan/pengantaran tidak boleh di masa lalu.',
+            'requested_date.before_or_equal' => 'Tanggal pengambilan/pengantaran maksimal H+2 (2 hari ke depan).',
+        ]);
+
+        $requestedDate = $request->requested_date ?? \Carbon\Carbon::today()->format('Y-m-d');
+        $minPickupDate = \Carbon\Carbon::today()->format('Y-m-d');
+        $maxPickupDate = \Carbon\Carbon::today()->addDays(2)->format('Y-m-d');
+
+        if ($requestedDate < $minPickupDate) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Tanggal pengambilan/pengantaran tidak boleh di masa lalu.'
+                ], 400);
+            }
+            return redirect()->back()->with('error', 'Tanggal pengambilan/pengantaran tidak boleh di masa lalu.');
+        }
+
+        if ($requestedDate > $maxPickupDate) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Tanggal pengambilan/pengantaran maksimal H+2 (2 hari ke depan).'
+                ], 400);
+            }
+            return redirect()->back()->with('error', 'Tanggal pengambilan/pengantaran maksimal H+2 (2 hari ke depan).');
+        }
+
+        // Validate requested time
+        $requestedTime = $request->requested_time;
+        if (! $requestedTime || ! \App\Helpers\StoreHoursHelper::isValidTimeSlot($requestedDate, $requestedTime)) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Jam yang Anda pilih tidak valid atau sudah lewat untuk tanggal tersebut.'
+                ], 400);
+            }
+            return redirect()->back()->with('error', 'Jam yang Anda pilih tidak valid atau sudah lewat untuk tanggal tersebut.');
+        }
+
+
+        // Validate pickup disclaimer checkbox (only for pickup orders)
+        if ($deliveryMethod === 'pickup') {
+            if (! $request->boolean('pickup_disclaimer_agreed')) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Anda wajib menyetujui ketentuan pengambilan pesanan sebelum checkout.'
+                    ], 400);
+                }
+                return redirect()->back()->with('error', 'Anda wajib menyetujui ketentuan pengambilan pesanan sebelum checkout.');
+            }
+        }
+
+        // Hitung pickup deadline (hanya untuk pickup)
+        $pickupDeadlineAt = null;
+        if ($deliveryMethod === 'pickup') {
+            $deadlineHours = config('store.pickup_deadline_hours', 2);
+            $pickupDeadlineAt = \Carbon\Carbon::parse("{$requestedDate} {$requestedTime}")
+                ->addHours($deadlineHours);
+        }
+
+        // Hitung promo
+        $promoService = app(\App\Services\PromoCalculatorService::class);
+        $promoResult = $promoService->calculate('order', $totalQty, $total);
+        
+        $discountAmount = $promoResult['discount_amount'];
+        $freeQtyApplied = $promoResult['free_qty'];
+        
+        // Shipping & Location calculation logic
+        $shippingCost = 0;
+        $distanceKm = null;
+        $deliveryLat = null;
+        $deliveryLng = null;
+
+        if ($deliveryMethod === 'delivery') {
+            $request->validate([
+                'delivery_address' => 'required|string',
+                'delivery_lat'     => 'required|numeric',
+                'delivery_lng'     => 'required|numeric',
+            ], [
+                'delivery_address.required' => 'Alamat pengiriman wajib diisi.',
+                'delivery_lat.required'     => 'Titik lokasi pengiriman pada peta wajib ditentukan.',
+                'delivery_lng.required'     => 'Titik lokasi pengiriman pada peta wajib ditentukan.',
+            ]);
+
+            $deliveryLat = (float) $request->delivery_lat;
+            $deliveryLng = (float) $request->delivery_lng;
+
+            $shippingService = app(\App\Services\ShippingCalculatorService::class);
+            $distanceKm = $shippingService->calculateDistance($deliveryLat, $deliveryLng);
+
+            if (!$shippingService->isWithinRadius($distanceKm)) {
+                $maxRadius = config('store.max_delivery_radius_km', 25.0);
+                $msg = "Lokasi pengiriman ({$distanceKm} km) di luar batas jangkauan pengantaran toko (maksimal {$maxRadius} km). Silakan pilih metode Ambil di Toko.";
+                if ($request->ajax()) {
+                    return response()->json(['status' => 'error', 'message' => $msg], 422);
+                }
+                return redirect()->back()->with('error', $msg);
+            }
+
+            $shippingCost = $shippingService->calculateCost($distanceKm);
+        }
+
+        // Voucher logic
+        $voucherCode = $request->input('voucher_code');
+        $voucherDiscount = 0;
+        $appliedVoucherCode = null;
+
+        if (!empty($voucherCode)) {
+            $voucher = \App\Models\Voucher::where('code', $voucherCode)->where('is_active', true)->first();
+            if (!$voucher) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => 'Kode voucher tidak valid atau sudah tidak aktif.'
+                    ], 422);
+                }
+                return redirect()->back()->with('error', 'Kode voucher tidak valid atau sudah tidak aktif.');
+            }
+
+            $eligibility = $voucher->checkEligibility($user, $total, $deliveryMethod, $distanceKm);
+            if (!$eligibility['eligible']) {
+                if ($request->ajax()) {
+                    return response()->json([
+                        'status' => 'error',
+                        'message' => $eligibility['message']
+                    ], 422);
+                }
+                return redirect()->back()->with('error', $eligibility['message']);
+            }
+
+            $voucherDiscount = $voucher->calculateDiscount($total, $shippingCost, $user, $deliveryMethod, $distanceKm);
+            $appliedVoucherCode = $voucher->code;
+        }
+        
+        $finalTotal = max(0, $total - $discountAmount + $shippingCost - $voucherDiscount);
+
         // Create Order
         $order = \App\Models\Order::create([
-            'user_id' => $user->id,
-            'total_amount' => $total,
-            'status' => 'pending',
-            'payment_status' => 'pending',
-            'payment_method' => $request->payment_method ?? 'midtrans',
-            'pickup_date' => $request->pickup_date ?? \Carbon\Carbon::now()->addDays(2)->format('Y-m-d')
+            'user_id'            => $user->id,
+            'total_amount'       => $finalTotal,
+            'status'             => 'pending',
+            'payment_status'     => 'pending',
+            'payment_method'     => $request->payment_method ?? 'midtrans',
+            'requested_date'     => $requestedDate,
+            'requested_time'     => $requestedTime,
+            'pickup_deadline_at' => $pickupDeadlineAt,
+            'delivery_method'    => $deliveryMethod,
+            'delivery_address'   => $deliveryMethod === 'delivery' ? $request->delivery_address : null,
+            'delivery_lat'       => $deliveryLat,
+            'delivery_lng'       => $deliveryLng,
+            'distance_km'        => $distanceKm,
+            'shipping_cost'      => $shippingCost,
+            'voucher_code'       => $appliedVoucherCode,
+            'voucher_discount'   => $voucherDiscount,
+            'discount_amount'    => $discountAmount,
+            'free_qty_applied'   => $freeQtyApplied,
         ]);
 
         // Create Order Items
@@ -106,27 +297,15 @@ class CheckoutController extends Controller
                 'quantity' => $qty,
                 'subtotal' => $product->price * $qty
             ]);
-
-            // Kurangi stok dan tambah purchase_count sejak pesanan dibuat
-            $product->decrement('stock', (int) $qty);
-            $product->increment('purchase_count', (int) $qty);
-
-            $updatedProduct = \App\Models\Product::find($product->id);
-            if ($updatedProduct && $updatedProduct->stock < 5) {
-                \App\Models\Notification::create([
-                    'type' => 'system',
-                    'title' => 'Stok Hampir Habis',
-                    'message' => "Stok produk {$updatedProduct->name} tersisa {$updatedProduct->stock}.",
-                    'data' => ['product_id' => $updatedProduct->id]
-                ]);
-            }
+            
+            // Note: Stok TIDAK dikurangi di sini (dipindah ke MidtransNotificationController/status)
         }
 
         // Notifikasi untuk Admin/Owner
         \App\Models\Notification::create([
             'type' => 'order',
             'title' => 'Pesanan Baru',
-            'message' => "Pesanan #{$order->id} dari {$user->name} sebesar Rp " . number_format($total, 0, ',', '.'),
+            'message' => "Pesanan #{$order->id} dari {$user->name} sebesar Rp " . number_format($finalTotal, 0, ',', '.'),
             'data' => ['order_id' => $order->id]
         ]);
 
@@ -134,7 +313,7 @@ class CheckoutController extends Controller
         $params = array(
             'transaction_details' => array(
                 'order_id' => 'TRX-' . $order->id . '-' . time(),
-                'gross_amount' => $total,
+                'gross_amount' => $finalTotal,
             ),
             'customer_details' => array(
                 'first_name' => $user->name,
@@ -200,6 +379,22 @@ class CheckoutController extends Controller
                 $transactionStatus = $status->transaction_status;
                 
                 if ($transactionStatus == 'capture' || $transactionStatus == 'settlement') {
+                    if ($order->payment_status !== 'paid') {
+                        // Kurangi stok reguler
+                        foreach ($order->items as $item) {
+                            if ($item->product_id) {
+                                $product = \App\Models\Product::find($item->product_id);
+                                if ($product) {
+                                    $product->decrement('stock', (int) $item->quantity);
+                                    $product->increment('purchase_count', (int) $item->quantity);
+                                }
+                            }
+                        }
+                        
+                        // Kurangi stok paket
+                        app(\App\Services\PackageOrderService::class)->decrementStock($order);
+                    }
+
                     $order->update([
                         'payment_status' => 'paid',
                         'status' => 'waiting_verification',

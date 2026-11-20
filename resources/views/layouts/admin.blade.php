@@ -359,6 +359,9 @@
                             } elseif($role === 'kasir') {
                                 $bg = '#198754';
                                 $label = 'KASIR';
+                            } elseif($role === 'kurir') {
+                                $bg = '#0dcaf0';
+                                $label = 'KURIR';
                             } else {
                                 $bg = '#6c757d';
                                 $label = strtoupper($role);
@@ -409,6 +412,11 @@
                     <li class="{{ request()->routeIs('kasir.transactions.*') ? 'active' : '' }}">
                         <a href="{{ route('kasir.transactions.index') }}" title="Riwayat Transaksi">
                             <i class="fas fa-history"></i> <span>Riwayat Transaksi</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.kurir.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.kurir.index') }}" title="Kelola Kurir">
+                            <i class="fas fa-motorcycle"></i> <span>Kelola Kurir</span>
                         </a>
                     </li>
                     <li class="{{ request()->routeIs('owner.users.*') ? 'active' : '' }}">
@@ -465,6 +473,11 @@
                             <i class="fas fa-history"></i> <span>Riwayat Transaksi POS</span>
                         </a>
                     </li>
+                    <li class="{{ request()->routeIs('admin.kurir.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.kurir.index') }}" title="Kelola Kurir">
+                            <i class="fas fa-motorcycle"></i> <span>Kelola Kurir</span>
+                        </a>
+                    </li>
                     <li class="{{ request()->routeIs('owner.users.*') ? 'active' : '' }}">
                         <a href="{{ route('owner.users.index') }}" title="Manajemen Akun">
                             <i class="fas fa-users"></i> <span>Manajemen Akun</span>
@@ -492,6 +505,15 @@
                     <li class="{{ request()->routeIs('kasir.transactions.*') ? 'active' : '' }}">
                         <a href="{{ route('kasir.transactions.index') }}" title="Riwayat Transaksi">
                             <i class="fas fa-history"></i> <span>Riwayat Transaksi</span>
+                        </a>
+                    </li>
+
+                {{-- ===== KURIR ===== --}}
+                @elseif(auth()->user()->role === 'kurir')
+
+                    <li class="{{ request()->routeIs('kurir.dashboard') ? 'active' : '' }}">
+                        <a href="{{ route('kurir.dashboard') }}" title="Dashboard Pengantaran">
+                            <i class="fas fa-motorcycle"></i> <span>Dashboard Pengantaran</span>
                         </a>
                     </li>
 

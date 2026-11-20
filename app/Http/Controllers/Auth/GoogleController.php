@@ -31,7 +31,7 @@ class GoogleController extends Controller
         }
 
         $googleId = $googleUser->getId();
-        $email = $googleUser->getEmail();
+        $email = mb_strtolower(trim((string) $googleUser->getEmail()));
 
         if (!$googleId || !$email) {
             return redirect()->route('login')->withErrors([

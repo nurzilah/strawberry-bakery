@@ -229,12 +229,15 @@
                             Pilih roti, pastry, dan cake pre-order dengan tampilan grid yang rapi, lembut, dan mudah dipindai.
                         </p>
                     </div>
-                    <div class="col-12 col-lg-4 text-center text-lg-end">
+                    <div class="col-12 col-lg-4 text-center text-lg-end d-flex flex-column flex-sm-row flex-lg-column align-items-center align-items-lg-end justify-content-center justify-content-lg-end gap-2">
                         @if(isset($paginatedProducts))
                             <span class="badge bg-white text-dark rounded-pill px-4 py-3 shadow fs-6 fw-bold border border-light">
                                 <i class="fa-solid fa-boxes-stacked text-primary me-2"></i> {{ $paginatedProducts->total() }} produk tersedia
                             </span>
                         @endif
+                        <a href="{{ route('custom-box.index') }}" class="btn btn-light text-primary rounded-pill px-4 py-2.5 shadow fw-bold border border-white transition">
+                            <i class="fa-solid fa-box-open text-primary me-1"></i> Buat Paket Custom
+                        </a>
                     </div>
                 </div>
             </div>
@@ -330,6 +333,27 @@
                     </section>
                 @endif
 
+                <!-- Banner Promosi Custom Box -->
+                <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden" style="background: linear-gradient(135deg, #fff1f4 0%, #ffe4e8 100%); border-left: 5px solid var(--sb-primary) !important;">
+                    <div class="card-body p-3 p-md-4 d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3">
+                        <div class="d-flex align-items-center gap-3">
+                            <div class="rounded-circle bg-white text-primary d-flex align-items-center justify-content-center shadow-sm flex-shrink-0" style="width: 48px; height: 48px; font-size: 1.25rem;">
+                                <i class="fa-solid fa-box-open"></i>
+                            </div>
+                            <div>
+                                <h5 class="fw-bold text-dark mb-1" style="font-family: 'Poppins', sans-serif;">Ingin Paket Roti Sesuai Selera Anda?</h5>
+                                <p class="text-muted small mb-0">Bebas pilih dan racik sendiri varian roti & pastry pilihanmu dalam satu dus custom untuk acara atau hadiah.</p>
+                            </div>
+                        </div>
+                        <div class="flex-shrink-0">
+                            <a href="{{ route('custom-box.index') }}" class="btn btn-primary rounded-pill px-4 py-2 font-semibold shadow-sm d-inline-flex align-items-center gap-2">
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                <span>Buat Paket Custom</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="d-flex flex-column flex-md-row align-items-md-center justify-content-between gap-3 mb-4">
                     <div>
                         <h2 class="catalog-title">
@@ -373,6 +397,32 @@
                 </div>
 
                 <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
+                    <!-- Card Khusus Custom Box di Grid Produk -->
+                    <div class="col">
+                        <article class="product-card h-100 text-center d-flex flex-column justify-content-between p-4" style="background: linear-gradient(180deg, #fff1f4 0%, #ffffff 100%); border: 2px dashed var(--sb-primary);">
+                            <div>
+                                <div class="rounded-circle bg-white text-primary d-flex align-items-center justify-content-center mx-auto shadow-sm mb-3" style="width: 72px; height: 72px; font-size: 2rem;">
+                                    <i class="fa-solid fa-box-open"></i>
+                                </div>
+                                <span class="badge bg-primary text-white rounded-pill px-3 py-1 shadow-sm font-semibold mb-2" style="font-size: 0.72rem;">
+                                    ✨ Paket Custom
+                                </span>
+                                <h3 class="product-card__title fw-bold text-dark fs-5 mt-2 mb-2" style="font-family: 'Playfair Display', serif;">
+                                    Buat Paket Roti Sendiri
+                                </h3>
+                                <p class="product-card__description text-muted small mb-3" style="line-height: 1.5; min-height: auto;">
+                                    Bebas racik varian roti favorit ke dalam box impianmu untuk acara atau hampers.
+                                </p>
+                            </div>
+                            <div class="mt-auto pt-3">
+                                <a href="{{ route('custom-box.index') }}" class="btn btn-primary rounded-pill w-100 py-2 font-semibold shadow-sm d-flex align-items-center justify-content-center gap-2" style="font-size: 0.85rem;">
+                                    <span>Racik Custom Box</span>
+                                    <i class="fa-solid fa-arrow-right"></i>
+                                </a>
+                            </div>
+                        </article>
+                    </div>
+
                     @forelse($paginatedProducts ?? [] as $product)
                         <div class="col">
                             <article class="product-card">

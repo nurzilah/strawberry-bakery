@@ -5,7 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
+use App\Models\User;
+use App\Models\StockHistory;
 use App\Services\ReceiptDeliveryService;
+use App\Services\PackageReceiptGrouper;
+use App\Services\CourierNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -14,7 +18,7 @@ class OrderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Order::with(['user', 'items.product'])->latest();
+        $query = Order::with(['user', 'courier', 'items.product'])->latest();
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
@@ -25,6 +29,7 @@ class OrderController extends Controller
         }
 
         $orders = $query->paginate(15)->withQueryString();
+        $couriers = User::where('role', 'kurir')->orderBy('name')->get();
 
         // Sync status with Midtrans API if pending
         try {
@@ -60,18 +65,20 @@ class OrderController extends Controller
         }
 
         if (request()->routeIs('kasir.*')) {
-            return view('kasir.orders.index', compact('orders'));
+            return view('kasir.orders.index', compact('orders', 'couriers'));
         }
 
         return view('admin.orders.index', [
             'orders' => $orders,
+            'couriers' => $couriers,
             'confirmRoute' => 'admin.orders.confirm',
         ]);
     }
 
     public function show(Order $order)
     {
-        $order->load(['user', 'items.product']);
+        $order->load(['user', 'courier', 'items.product', 'packages.items.product']);
+        $couriers = User::where('role', 'kurir')->orderBy('name')->get();
         
         // Sync status with Midtrans API if pending
         if ($order->payment_status === 'pending' && $order->midtrans_order_id) {
@@ -101,7 +108,88 @@ class OrderController extends Controller
             }
         }
         
-        return view('admin.orders.show', compact('order'));
+        return view('admin.orders.show', compact('order', 'couriers'));
+    }
+
+    public function assignCourier(Request $request, Order $order, CourierNotificationService $notificationService)
+    {
+        $request->validate([
+            'courier_id' => 'nullable',
+            'courier_name' => 'nullable|string|max:255',
+            'courier_phone' => 'nullable|string|max:20',
+            'delivery_status' => 'nullable|in:menunggu_kurir,dalam_pengantaran,terkirim',
+        ]);
+
+        $previousDeliveryStatus = $order->delivery_status;
+        $courier = null;
+
+        if ($request->courier_id && $request->courier_id !== 'external') {
+            $courier = User::where('role', 'kurir')->findOrFail($request->courier_id);
+            $targetDeliveryStatus = $request->input('delivery_status', 'dalam_pengantaran');
+            $updateData = [
+                'courier_id' => $courier->id,
+                'courier_name' => $courier->name,
+                'courier_phone' => $courier->phone,
+                'delivery_status' => $targetDeliveryStatus,
+            ];
+            $courierLabel = $courier->name;
+        } elseif ($request->courier_id === 'external' || filled($request->courier_name)) {
+            $targetDeliveryStatus = $request->input('delivery_status', 'dalam_pengantaran');
+            $updateData = [
+                'courier_id' => null,
+                'courier_name' => $request->courier_name ?: 'Kurir Eksternal / Ojek Online',
+                'courier_phone' => $request->courier_phone,
+                'delivery_status' => $targetDeliveryStatus,
+            ];
+            $courierLabel = $updateData['courier_name'];
+        } else {
+            $targetDeliveryStatus = $request->input('delivery_status', 'menunggu_kurir');
+            $updateData = [
+                'courier_id' => null,
+                'courier_name' => null,
+                'courier_phone' => null,
+                'delivery_status' => $targetDeliveryStatus,
+            ];
+            $courierLabel = 'Belum Ditugaskan';
+        }
+
+        // Sinkronisasi status utama pesanan & delivered_at
+        if ($targetDeliveryStatus === 'dalam_pengantaran') {
+            if (in_array($order->status, ['pending', 'waiting_verification'], true)) {
+                $updateData['status'] = 'processing';
+            }
+            $updateData['delivered_at'] = null;
+        } elseif ($targetDeliveryStatus === 'terkirim') {
+            $updateData['status'] = 'completed';
+            $updateData['delivered_at'] = now();
+        } else {
+            // Menunggu kurir
+            $updateData['delivered_at'] = null;
+        }
+
+        $order->update($updateData);
+
+        // Notifikasi WhatsApp
+        if ($targetDeliveryStatus === 'dalam_pengantaran') {
+            // 1. Kirim notifikasi WA ke kurir internal dengan link Google Maps
+            if ($courier) {
+                $notificationService->sendAssignmentNotificationToCourier($order, $courier);
+            }
+            // 2. Kirim notifikasi WA ke pelanggan
+            if ($previousDeliveryStatus !== 'dalam_pengantaran') {
+                $notificationService->sendStatusUpdateNotification($order, 'dalam_pengantaran');
+            }
+        } elseif ($targetDeliveryStatus === 'terkirim' && $previousDeliveryStatus !== 'terkirim') {
+            $notificationService->sendStatusUpdateNotification($order, 'terkirim');
+        }
+
+        $statusText = [
+            'menunggu_kurir' => 'Menunggu Kurir',
+            'dalam_pengantaran' => 'Dalam Pengantaran',
+            'terkirim' => 'Terkirim',
+        ][$targetDeliveryStatus] ?? $targetDeliveryStatus;
+
+        return redirect()->back()->with('success', "Informasi penugasan kurir ({$courierLabel}) dan status pengantaran ({$statusText}) berhasil diperbarui.");
     }
 
     public function confirm(Order $order)
@@ -118,9 +206,6 @@ class OrderController extends Controller
                     'message' => 'Pesanan ini tidak berada dalam status menunggu verifikasi.',
                 ];
             }
-
-            // Stok sudah dikurangi pada saat pesanan dibuat (CheckoutController).
-            // Bagian pengecekan dan pengurangan stok dihapus dari sini.
 
             $updateData = ['status' => 'processing'];
 
@@ -179,32 +264,88 @@ class OrderController extends Controller
 
         // Return stock if cancelled
         if ($order->status !== 'cancelled' && $targetStatus === 'cancelled') {
+            $adminId = auth()->id() ?? $order->user_id;
+
+            // 1. Restock regular items
             foreach ($order->items as $item) {
                 if ($item->product_id) {
-                    \App\Models\Product::whereKey($item->product_id)->update([
-                        'stock' => DB::raw('stock + ' . (int) $item->quantity),
-                        'purchase_count' => DB::raw('GREATEST(0, purchase_count - ' . (int) $item->quantity . ')')
-                    ]);
+                    $product = Product::find($item->product_id);
+                    if ($product) {
+                        $stockBefore = (int) $product->stock;
+                        $qty = (int) $item->quantity;
+                        $product->increment('stock', $qty);
+                        $product->update([
+                            'purchase_count' => DB::raw('GREATEST(0, purchase_count - ' . $qty . ')')
+                        ]);
+
+                        StockHistory::create([
+                            'product_id' => $product->id,
+                            'user_id' => $adminId,
+                            'quantity_added' => $qty,
+                            'stock_before' => $stockBefore,
+                            'stock_after' => $stockBefore + $qty,
+                            'notes' => "Pengembalian stok: Pembatalan pesanan #{$order->id} (Item Reguler)",
+                        ]);
+                    }
+                }
+            }
+
+            // 2. Restock package items (Custom Box)
+            $order->loadMissing('packages.items.product');
+            foreach ($order->packages as $package) {
+                foreach ($package->items as $item) {
+                    if ($item->product) {
+                        $product = $item->product;
+                        $stockBefore = (int) $product->stock;
+                        $qty = (int) $item->quantity;
+                        $product->increment('stock', $qty);
+                        $product->update([
+                            'purchase_count' => DB::raw('GREATEST(0, purchase_count - ' . $qty . ')')
+                        ]);
+
+                        StockHistory::create([
+                            'product_id' => $product->id,
+                            'user_id' => $adminId,
+                            'quantity_added' => $qty,
+                            'stock_before' => $stockBefore,
+                            'stock_after' => $stockBefore + $qty,
+                            'notes' => "Pengembalian stok: Pembatalan pesanan #{$order->id} (Paket Custom Box)",
+                        ]);
+                    }
                 }
             }
         }
 
-        $order->update(['status' => $targetStatus]);
+        $updateData = ['status' => $targetStatus];
 
-        $message = $targetStatus === 'completed'
-            ? 'Pesanan selesai diambil.'
-            : 'Status pesanan berhasil diperbarui.';
+        if ($targetStatus === 'completed') {
+            if ($order->delivery_method === 'delivery') {
+                $updateData['delivery_status'] = 'terkirim';
+                $updateData['delivered_at'] = now();
+                $message = 'Pesanan selesai diantar.';
+            } else {
+                $message = 'Pesanan selesai diambil.';
+            }
+        } else {
+            $message = 'Status pesanan berhasil diperbarui.';
+        }
+
+        $order->update($updateData);
+
+        // Jika pesanan delivery selesai diantar, kirim notifikasi WA ke pelanggan
+        if ($targetStatus === 'completed' && $order->delivery_method === 'delivery') {
+            app(CourierNotificationService::class)->sendStatusUpdateNotification($order, 'terkirim');
+        }
 
         return redirect()->back()->with('success', $message);
     }
 
     public function printReceipt($id)
     {
-        $order = Order::with('items')->findOrFail($id);
+        $order = Order::with(['items', 'packages.items.product'])->findOrFail($id);
+        $packageGroups = app(PackageReceiptGrouper::class)->group($order->packages);
         
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.orders.receipt_pdf', compact('order'));
-        // Menggunakan ukuran kertas custom (80mm width) menyerupai struk printer thermal
-        // 80mm ~ 226.77 pt. Tinggi 600 pt (adjustable)
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.orders.receipt_pdf', compact('order', 'packageGroups'));
         $pdf->setPaper(array(0, 0, 226.77, 800), 'portrait');
         
         return $pdf->stream('Struk_Pesanan_' . $order->id . '.pdf');

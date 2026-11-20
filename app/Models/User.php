@@ -74,4 +74,14 @@ class User extends Authenticatable
     {
         return $this->role === 'owner';
     }
+
+    public function isKurir()
+    {
+        return $this->role === 'kurir';
+    }
+
+    public function courierOrders()
+    {
+        return $this->hasMany(Order::class, 'courier_id');
+    }
 }

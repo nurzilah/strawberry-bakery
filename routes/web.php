@@ -60,6 +60,8 @@ Route::get('/products/{slug}', [ProductController::class, 'show'])->name('produc
 Route::middleware('guest')->group(function () {
     Route::get('/auth/google', [GoogleController::class, 'redirectToGoogle'])->name('auth.google');
     Route::get('/auth/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+    Route::get('/google/login', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+    Route::get('/google/callback', [GoogleController::class, 'handleGoogleCallback'])->name('google.callback');
 });
 
 
@@ -98,6 +100,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/{order}/receipt', [OrderController::class, 'receipt'])->name('receipt');
     });
 
+    // Custom Box
+    Route::get('/custom-box', [\App\Http\Controllers\CustomBoxController::class, 'index'])->name('custom-box.index');
+    Route::post('/custom-box/checkout', [\App\Http\Controllers\CustomBoxController::class, 'checkout'])->name('custom-box.checkout');
+
 });
 
 // ============================================
@@ -109,6 +115,8 @@ Route::get('/dashboard-redirect', function () {
         return redirect()->route('admin.dashboard');
     } elseif ($role === 'kasir') {
         return redirect()->route('kasir.pos');
+    } elseif ($role === 'kurir') {
+        return redirect()->route('kurir.dashboard');
     }
     return redirect()->route('dashboard');
 })->middleware('auth')->name('dashboard-redirect');
@@ -125,6 +133,8 @@ Route::middleware(['auth', 'role:owner,admin,superadmin'])->prefix('admin')->nam
 
     Route::resource('products', \App\Http\Controllers\Admin\ProductController::class)->except(['show']);
     Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class)->except(['show']);
+    Route::resource('promos', \App\Http\Controllers\Admin\PromoRuleController::class)->except(['show']);
+    Route::resource('kurir', \App\Http\Controllers\Admin\CourierController::class)->except(['show']);
 
     // Stock Management
     Route::get('/stock', [\App\Http\Controllers\Admin\StockController::class, 'index'])->name('stock.index');
@@ -140,6 +150,14 @@ Route::middleware(['auth', 'role:owner,admin,superadmin,kasir'])->prefix('admin'
     Route::get('orders/{order}/receipt', [\App\Http\Controllers\Admin\OrderController::class, 'printReceipt'])->name('orders.receipt');
     Route::patch('orders/{order}/confirm', [\App\Http\Controllers\Admin\OrderController::class, 'confirm'])->name('orders.confirm');
     Route::patch('orders/{order}/status', [\App\Http\Controllers\Admin\OrderController::class, 'updateStatus'])->name('orders.status');
+    Route::patch('orders/{order}/assign-courier', [\App\Http\Controllers\Admin\OrderController::class, 'assignCourier'])->name('orders.assign-courier');
+});
+
+// ['role:kurir']
+Route::middleware(['auth', 'role:kurir'])->prefix('kurir')->name('kurir.')->group(function () {
+    Route::get('/', fn () => redirect()->route('kurir.dashboard'));
+    Route::get('/dashboard', [\App\Http\Controllers\Kurir\KurirDashboardController::class, 'index'])->name('dashboard');
+    Route::patch('/orders/{order}/delivery-status', [\App\Http\Controllers\Kurir\KurirDashboardController::class, 'updateDeliveryStatus'])->name('orders.update-status');
 });
 
 // ['role:owner,kasir,superadmin,admin']

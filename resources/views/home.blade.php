@@ -417,6 +417,89 @@
     </div>
 </section>
 
+<!-- Custom Box Promo Banner Section -->
+<section class="py-16 fade-up" style="background: linear-gradient(135deg, #fff1f4 0%, #ffe4e8 100%); border-top: 1px solid rgba(233, 79, 112, 0.15); border-bottom: 1px solid rgba(233, 79, 112, 0.15);">
+    <div class="container mx-auto px-4">
+        <div class="row align-items-center g-5">
+            <div class="col-12 col-lg-7 text-center text-lg-start">
+                <span class="badge bg-primary text-white rounded-pill px-3 py-2 mb-3 shadow-sm fw-bold">
+                    <i class="fa-solid fa-gift me-1"></i> SPESIAL PAKET CUSTOM
+                </span>
+                <h2 class="text-4xl font-bold text-gray-800 mb-4" style="font-family: 'Playfair Display', serif;">
+                    Buat Paket Roti & Pastry Impianmu Sendiri!
+                </h2>
+                <p class="text-gray-600 text-lg mb-6" style="line-height: 1.7;">
+                    Bebas racik varian roti dan pastry favorit ke dalam kotak custom khas <strong>Strawberry Cake & Bakery</strong>. Cocok untuk acara keluarga, hampers ulang tahun, atau snack box kantor!
+                </p>
+
+                <!-- Features Grid -->
+                <div class="row row-cols-1 row-cols-sm-3 g-3 mb-6 text-start">
+                    <div class="col">
+                        <div class="d-flex align-items-center bg-white p-3 rounded-2xl shadow-sm border border-pink-100">
+                            <div class="w-10 h-10 rounded-full bg-pink-100 text-primary d-flex align-items-center justify-content-center me-3 flex-shrink-0">
+                                <i class="fa-solid fa-boxes-packing"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800 text-sm mb-0">Bebas Racik</h4>
+                                <small class="text-gray-500 text-xs">Pilih varian favorit</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="d-flex align-items-center bg-white p-3 rounded-2xl shadow-sm border border-pink-100">
+                            <div class="w-10 h-10 rounded-full bg-pink-100 text-primary d-flex align-items-center justify-content-center me-3 flex-shrink-0">
+                                <i class="fa-solid fa-tags"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800 text-sm mb-0">Harga Hemat</h4>
+                                <small class="text-gray-500 text-xs">Perhitungan otomatis</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="d-flex align-items-center bg-white p-3 rounded-2xl shadow-sm border border-pink-100">
+                            <div class="w-10 h-10 rounded-full bg-pink-100 text-primary d-flex align-items-center justify-content-center me-3 flex-shrink-0">
+                                <i class="fa-solid fa-ribbon"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-gray-800 text-sm mb-0">Spesial Acara</h4>
+                                <small class="text-gray-500 text-xs">Hampers & event</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column flex-sm-row gap-3 justify-content-center justify-content-lg-start">
+                    <a href="{{ route('custom-box.index') }}" class="btn btn-primary rounded-pill px-8 py-3 font-semibold shadow-md hover:shadow-lg transition d-inline-flex align-items-center justify-content-center">
+                        <i class="fa-solid fa-box-open me-2"></i> Buat Paket Roti Sendiri <i class="fa-solid fa-arrow-right ms-2"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="col-12 col-lg-5 text-center">
+                <div class="position-relative d-inline-block w-100" style="max-width: 380px;">
+                    <div class="bg-white p-4 rounded-3xl shadow-xl border-2 border-pink-200" style="transform: rotate(-1.5deg);">
+                        <div class="p-6 rounded-2xl bg-gradient-to-br from-pink-50 to-pink-100 text-center border border-pink-200">
+                            <div class="w-16 h-16 bg-white rounded-full d-flex align-items-center justify-content-center mx-auto mb-4 shadow-sm text-primary">
+                                <i class="fa-solid fa-cubes-stacked text-3xl"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gray-800 mb-2" style="font-family: 'Playfair Display', serif;">Custom Box Bakery</h3>
+                            <p class="text-gray-600 text-sm mb-4">Atur jumlah box, pilih isi roti favorit, dan buat racikan kotaknya sendiri!</p>
+                            <a href="{{ route('custom-box.index') }}" class="btn btn-outline-primary rounded-pill px-6 py-2 text-sm font-semibold shadow-sm transition">
+                                <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Mulai Racik Box
+                            </a>
+                        </div>
+                    </div>
+                    <!-- Floating badge -->
+                    <div class="position-absolute bg-white text-primary px-4 py-2 rounded-full font-bold shadow-lg border border-pink-100 d-none d-sm-block" style="top: -12px; right: -10px; transform: rotate(5deg); font-size: 0.85rem;">
+                        <i class="fa-solid fa-star text-warning me-1"></i> Pre-Order Custom
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
 <!-- Statistics -->
 <section class="py-16 bg-gradient-to-r from-pink-400 to-red-400 text-white fade-up" id="statistics-section">
     <div class="container mx-auto px-4">

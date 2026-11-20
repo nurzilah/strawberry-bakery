@@ -29,10 +29,15 @@ class RegisteredUserController extends Controller
      */
     public function store(Request $request, RegistrationOtpService $otpService): RedirectResponse
     {
+        $request->merge([
+            'email' => mb_strtolower(trim((string) $request->input('email'))),
+            'phone' => trim((string) $request->input('phone')),
+        ]);
+
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:'.User::class],
-            'phone' => ['required', 'regex:/^08[0-9]{8,13}$/'],
+            'phone' => ['required', 'regex:/^08[0-9]{8,13}$/', 'unique:'.User::class],
             'verification_method' => ['required', 'in:email,whatsapp'],
             'password' => ['required', 'confirmed', Rules\Password::min(8)->mixedCase()->numbers()->symbols()],
             'terms' => ['accepted'],
@@ -42,6 +47,8 @@ class RegisteredUserController extends Controller
             'password.symbols' => 'Password harus memakai simbol.',
             'terms.accepted' => 'Syarat & Ketentuan harus dicentang sebelum mendaftar.',
             'phone.regex' => 'Nomor HP harus menggunakan format Indonesia, misalnya 081234567890.',
+            'email.unique' => 'Email ini sudah terdaftar. Gunakan email lain.',
+            'phone.unique' => 'Nomor HP ini sudah terdaftar. Gunakan nomor lain.',
         ]);
 
         $identifier = (string) Str::uuid();

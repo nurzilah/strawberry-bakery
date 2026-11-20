@@ -548,8 +548,11 @@
     </header>
 
     <main class="app-main">
-        @yield('content')
-        {{ $slot ?? '' }}
+        @hasSection('content')
+            @yield('content')
+        @else
+            {{ $slot ?? '' }}
+        @endif
     </main>
 
     <footer class="site-footer">

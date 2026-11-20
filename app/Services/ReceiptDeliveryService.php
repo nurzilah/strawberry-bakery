@@ -102,6 +102,15 @@ class ReceiptDeliveryService
         $tanggal = $order->created_at->format('d/m/Y H:i');
         $metode = strtoupper($order->payment_method ?? '-');
 
+        // Tanggal & jam ambil
+        $tglAmbil = '';
+        if ($order->requested_date) {
+            $tglAmbil = \Carbon\Carbon::parse($order->requested_date)->format('d/m/Y');
+            if ($order->requested_time) {
+                $tglAmbil .= ' ' . \Carbon\Carbon::parse($order->requested_time)->format('H:i') . ' WIB';
+            }
+        }
+
         $message = "*STRAWBERRY CAKE & BAKERY*\n";
         $message .= "Jl. AR. Hakim No.149, Mangkukusuman\n";
         $message .= "Kota Tegal\n";
@@ -111,17 +120,65 @@ class ReceiptDeliveryService
         $message .= "Tanggal  : {$tanggal}\n";
         $message .= "Pemesan  : {$order->user->name}\n";
         $message .= "Metode   : {$metode}\n";
+        if ($tglAmbil) {
+            $message .= "Tgl Ambil: {$tglAmbil}\n";
+        }
+        if ($order->delivery_method === 'pickup' && $order->pickup_deadline_at) {
+            $deadlineStr = \Carbon\Carbon::parse($order->pickup_deadline_at)->format('d/m/Y H:i');
+            $message .= "Batas Ambil: *{$deadlineStr} WIB*\n";
+        }
         $message .= "------------------------------\n";
 
-        foreach ($order->items as $item) {
-            $subtotal = number_format((int) $item->price * $item->quantity, 0, ',', '.');
-            $message .= "{$item->product_name}\n";
-            $message .= "{$item->quantity} x " . number_format((int) $item->price, 0, ',', '.') . "   Rp {$subtotal}\n";
+        if ($order->packages && $order->packages->isNotEmpty()) {
+            $packageGroups = app(PackageReceiptGrouper::class)->group($order->packages);
+            foreach ($packageGroups as $group) {
+                $message .= $group['is_free']
+                    ? "*BOX GRATIS PROMO x {$group['quantity']}*\n"
+                    : "*BOX CUSTOM x {$group['quantity']}*\n";
+
+                foreach ($group['items'] as $item) {
+                    $message .= "- {$item['quantity']} x {$item['name']} (Rp "
+                        . number_format($item['unit_price'], 0, ',', '.') . ")\n";
+                }
+
+                if (! empty($group['beverage_type'])) {
+                    $beverageName = $group['beverage_type'] === 'gelas' ? 'Air Mineral Gelas' : 'Air Mineral Botol';
+                    $message .= "- {$beverageName} x {$group['quantity']} box (Rp "
+                        . number_format($group['beverage_price'], 0, ',', '.') . " / box)\n";
+                }
+
+                if ($group['is_free']) {
+                    $message .= "Promo: *GRATIS x {$group['quantity']} box*\n";
+                } else {
+                    $message .= 'Harga per box: Rp ' . number_format($group['unit_price'], 0, ',', '.') . "\n";
+                    $message .= 'Subtotal ' . $group['quantity'] . ' box: Rp '
+                        . number_format($group['total_price'], 0, ',', '.') . "\n";
+                }
+
+                $message .= "\n";
+            }
+        } else {
+            foreach ($order->items as $item) {
+                $subtotal = number_format((int) $item->price * $item->quantity, 0, ',', '.');
+                $message .= "{$item->product_name}\n";
+                $message .= "{$item->quantity} x " . number_format((int) $item->price, 0, ',', '.') . "   Rp {$subtotal}\n";
+            }
         }
+
 
         $message .= "------------------------------\n";
         $message .= "*TOTAL*   Rp {$total}\n";
+        if (filled($order->bonus_item_name) && (int) $order->bonus_item_qty > 0) {
+            $message .= "Bonus    : {$order->bonus_item_qty} {$order->bonus_item_name}\n";
+        }
         $message .= "------------------------------\n\n";
+
+        if ($order->delivery_method === 'pickup' && $order->pickup_deadline_at) {
+            $deadlineStr = \Carbon\Carbon::parse($order->pickup_deadline_at)->format('H:i d/m/Y');
+            $message .= "⚠ *PERHATIAN:* Pesanan pickup wajib diambil sebelum *{$deadlineStr} WIB*. ";
+            $message .= "Lewat batas waktu, toko tidak bertanggung jawab atas pesanan yang tidak diambil.\n\n";
+        }
+
         $message .= "Terima Kasih Atas Kunjungan Anda!\n";
         $message .= "Tumbuh bersama rasa manis.";
 
