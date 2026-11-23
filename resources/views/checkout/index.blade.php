@@ -148,8 +148,8 @@
                                 <span>Titik Koordinat Antar:</span>
                                 <span class="font-mono text-gray-600" id="infoCoords">-</span>
                             </div>
-                            <div id="deliveryRadiusAlert" class="mt-2 p-2 rounded-lg bg-red-100 border border-red-300 text-red-700 font-semibold text-xs hidden">
-                                <i class="fas fa-exclamation-triangle me-1"></i> Lokasi pengiriman di luar batas jangkauan pengantaran toko (maksimal 25 km). Silakan pilih metode <strong>Ambil di Toko (Pickup)</strong> atau tentukan titik antar lain.
+                            <div id="deliveryRadiusAlert" class="mt-2.5 p-3 rounded-xl bg-red-100 border border-red-300 text-red-700 font-semibold text-xs hidden">
+                                <i class="fas fa-exclamation-triangle me-1"></i> Maaf, jarak pengiriman melebihi batas maksimal 25 km. Silakan pilih titik alamat yang lebih dekat atau gunakan metode <strong>Ambil di Toko (Pick Up)</strong>.
                             </div>
                         </div>
                     </div>
@@ -221,6 +221,17 @@
                     <p id="noTimeSlotWarning" class="text-sm text-red-600 mt-2 hidden">
                         ⚠ Tidak ada slot jam yang tersedia untuk hari ini (sudah melebihi jam operasional / batas persiapan toko). Silakan pilih tanggal besok atau hari berikutnya.
                     </p>
+
+                    {{-- Estimasi Lama Perjalanan Kurir (Delivery) --}}
+                    <div id="deliveryTravelEstimationInfo" class="mt-2.5 p-3 rounded-xl bg-blue-50 border border-blue-200 text-xs text-blue-900 hidden space-y-1">
+                        <div class="flex items-center gap-1.5 font-bold text-blue-800">
+                            <i class="fas fa-shipping-fast text-blue-600"></i>
+                            <span>Estimasi Waktu Tempuh &amp; Keberangkatan Kurir:</span>
+                        </div>
+                        <p id="travelEstimationText" class="text-blue-700 leading-relaxed mb-0">
+                            Estimasi perjalanan ± 0 menit.
+                        </p>
+                    </div>
 
 
                     {{-- === DISCLAIMER PICKUP === --}}
@@ -322,7 +333,7 @@
                         <input type="hidden" name="delivery_lat" id="hiddenDeliveryLat" value="">
                         <input type="hidden" name="delivery_lng" id="hiddenDeliveryLng" value="">
                         <input type="hidden" name="distance_km" id="hiddenDistanceKm" value="">
-                        <button type="submit" class="btn btn-strawberry w-100 rounded-pill py-3 font-bold text-base shadow-sm">
+                        <button type="submit" id="btnSubmitOrder" class="btn btn-strawberry w-100 rounded-pill py-3 font-bold text-base shadow-sm">
                             Lanjutkan Pembayaran
                         </button>
                         <p class="text-sm text-gray-500 mt-3 text-center">
@@ -462,6 +473,9 @@ function calculateShippingCost(distKm) {
 function checkVoucherEligibility(v) {
     if (!v.is_active) {
         return { eligible: false, message: 'Voucher tidak aktif' };
+    }
+    if (v.quota !== null && v.quota !== undefined && v.used_count !== undefined && v.used_count >= v.quota) {
+        return { eligible: false, message: 'Kuota pemakaian voucher sudah habis' };
     }
     if (v.first_order_only && !isFirstOrder) {
         return { eligible: false, message: 'Khusus pesanan pertama Anda' };
@@ -740,6 +754,9 @@ function setDestination(lat, lng, panTo = true) {
         showVoucherFeedback(`Voucher ONGKIR10KM dilepas karena jarak pengiriman (${deliveryDistanceKm} km) melebihi 10 km.`, 'warning');
     }
 
+    updateOrderSubmitButtonState();
+    updateAvailableTimeSlots();
+    updateDeliveryTravelEstimationInfo();
     updateVouchersState();
     recalculateSummary();
 }
@@ -1107,8 +1124,53 @@ function toggleDeliveryAddress(show) {
         if (disclaimerCheck) disclaimerCheck.setAttribute('required', 'required');
         currentDeliveryMethod = 'pickup';
     }
+    updateOrderSubmitButtonState();
+    updateAvailableTimeSlots();
+    updateDeliveryTravelEstimationInfo();
     updateVouchersState();
     recalculateSummary();
+}
+
+function updateOrderSubmitButtonState() {
+    const btn = document.getElementById('btnSubmitOrder');
+    if (!btn) return;
+
+    if (currentDeliveryMethod === 'delivery' && (isOutsideRadius || (deliveryDistanceKm !== null && deliveryDistanceKm > STORE_MAX_RADIUS))) {
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+        btn.title = `Jarak pengiriman (${deliveryDistanceKm} km) melebihi batas maksimal 25 km.`;
+    } else {
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        btn.removeAttribute('title');
+    }
+}
+
+function updateDeliveryTravelEstimationInfo() {
+    const box = document.getElementById('deliveryTravelEstimationInfo');
+    const textEl = document.getElementById('travelEstimationText');
+    if (!box || !textEl) return;
+
+    if (currentDeliveryMethod === 'delivery' && deliveryDistanceKm !== null && deliveryDistanceKm > 0 && !isOutsideRadius) {
+        const travelMins = Math.ceil((deliveryDistanceKm / 30.0) * 60);
+        const prepMins = 15;
+        const totalBuffer = travelMins + prepMins;
+        
+        let targetDetail = '';
+        if (timeSelect && timeSelect.value) {
+            const [th, tm] = timeSelect.value.split(':').map(Number);
+            let depTotalMins = th * 60 + tm - totalBuffer;
+            if (depTotalMins < 0) depTotalMins += 24 * 60;
+            const dh = String(Math.floor(depTotalMins / 60) % 24).padStart(2, '0');
+            const dm = String(depTotalMins % 60).padStart(2, '0');
+            targetDetail = ` Untuk target tiba pukul <strong>${timeSelect.value} WIB</strong>, kurir toko akan berangkat maksimal pukul <strong>${dh}:${dm} WIB</strong>.`;
+        }
+
+        textEl.innerHTML = `Estimasi perjalanan kurir motor ± <strong>${travelMins} menit</strong> (${deliveryDistanceKm} km) + persiapan <strong>15 menit</strong>.${targetDetail} Kurir akan berangkat lebih awal agar tiba tepat waktu.`;
+        box.classList.remove('hidden');
+    } else {
+        box.classList.add('hidden');
+    }
 }
 
 const pickupInput   = document.getElementById('pickupDateInput');
@@ -1128,7 +1190,14 @@ function updateAvailableTimeSlots() {
     let minTimeStr = null;
     if (selectedDate && selectedDate === minDate) {
         const now = new Date();
-        now.setHours(now.getHours() + ORDER_LEAD_TIME_HOURS);
+        if (currentDeliveryMethod === 'delivery') {
+            const travelMins = (deliveryDistanceKm !== null && deliveryDistanceKm > 0) ? Math.ceil((deliveryDistanceKm / 30.0) * 60) : 15;
+            const prepMins = 15;
+            now.setMinutes(now.getMinutes() + travelMins + prepMins);
+        } else {
+            now.setHours(now.getHours() + ORDER_LEAD_TIME_HOURS);
+        }
+
         const h = String(now.getHours()).padStart(2, '0');
         const m = String(now.getMinutes()).padStart(2, '0');
         minTimeStr = `${h}:${m}`;
@@ -1166,6 +1235,9 @@ function updateAvailableTimeSlots() {
             noSlotWarning.classList.add('hidden');
         }
     }
+
+    updateDeliveryTravelEstimationInfo();
+    updateOrderSubmitButtonState();
 }
 
 // Show disclaimer on load & init time slots
@@ -1188,6 +1260,7 @@ function updateAvailableTimeSlots() {
 
 // Update example deadline text when time changes
 function updateDeadlineExample() {
+    updateDeliveryTravelEstimationInfo();
     if (!timeSelect || !timeSelect.value) return;
     const exampleTime     = document.getElementById('exampleTime');
     const exampleDeadline = document.getElementById('exampleDeadline');

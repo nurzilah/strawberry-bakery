@@ -211,6 +211,41 @@
                         <i class="fas fa-truck-fast me-2"></i> Informasi Pengiriman & Penugasan Kurir
                     </h5>
                     
+                    {{-- Jadwal Target Tiba & Batas Jam Berangkat --}}
+                    <div class="p-3 bg-white rounded-3 mb-3 border border-warning-subtle shadow-sm">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="small fw-bold text-dark text-uppercase">
+                                <i class="far fa-calendar-alt text-primary me-1"></i> Jadwal Pengantaran
+                            </span>
+                            <span class="badge bg-primary text-white rounded-pill px-2.5 py-1">Delivery</span>
+                        </div>
+                        <div class="mb-2">
+                            <div class="small text-muted">Target Tiba (Pilihan Customer):</div>
+                            <div class="fs-6 fw-bold text-dark">
+                                <i class="far fa-clock text-primary me-1"></i> {{ $order->requested_date ? \Carbon\Carbon::parse($order->requested_date)->format('d M Y') : '-' }}, Pukul {{ $order->formatted_target_time }}
+                            </div>
+                        </div>
+                        @if($order->estimated_travel_minutes)
+                            <div class="small text-muted mb-2">
+                                <i class="fas fa-route text-muted me-1"></i> Estimasi Waktu Tempuh: <strong>{{ $order->estimated_travel_minutes }} menit</strong> ({{ $order->distance_km }} km) + persiapan <strong>15 menit</strong>
+                            </div>
+                        @endif
+                        @if($order->latest_departure_time)
+                            <div class="p-2.5 rounded-3 bg-danger-subtle border border-danger-subtle mt-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <i class="fas fa-exclamation-circle text-danger fs-5 flex-shrink-0"></i>
+                                    <div>
+                                        <div class="text-danger fw-bold small text-uppercase">Wajib Berangkat dari Toko Maksimal:</div>
+                                        <div class="text-danger fs-5 fw-bold">{{ $order->latest_departure_time }}</div>
+                                    </div>
+                                </div>
+                                <div class="small text-muted mt-1" style="font-size: 0.75rem;">
+                                    *Tugaskan kurir sebelum jam ini agar pesanan tidak terlambat sampai di lokasi pelanggan.
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+                    
                     {{-- Detail Alamat & Jarak Pelanggan --}}
                     <div class="p-3 bg-light rounded-3 mb-3 border">
                         <label class="text-muted small fw-bold text-uppercase d-block mb-1">Tujuan Pengantaran</label>
@@ -301,32 +336,12 @@
                             <label class="form-label small text-muted mb-1">Pilih Kurir:</label>
                             <select name="courier_id" id="courierSelect" class="form-select rounded-3">
                                 <option value="">-- Belum Ditugaskan / Lepas Kurir --</option>
-                                <optgroup label="Kurir Toko Internal">
-                                    @foreach($couriers as $courier)
-                                        <option value="{{ $courier->id }}" {{ $order->courier_id == $courier->id ? 'selected' : '' }}>
-                                            {{ $courier->name }} ({{ $courier->phone ?? '-' }})
-                                        </option>
-                                    @endforeach
-                                </optgroup>
-                                <optgroup label="Kurir Eksternal">
-                                    <option value="external" {{ (!$order->courier_id && $order->courier_name) ? 'selected' : '' }}>
-                                        -- Input Kurir Eksternal / Ojek Online --
+                                @foreach($couriers as $courier)
+                                    <option value="{{ $courier->id }}" {{ $order->courier_id == $courier->id ? 'selected' : '' }}>
+                                        {{ $courier->name }} ({{ $courier->phone ?? '-' }})
                                     </option>
-                                </optgroup>
+                                @endforeach
                             </select>
-                        </div>
-
-                        {{-- Input Manual Kurir Eksternal --}}
-                        <div id="externalCourierFields" class="{{ (!$order->courier_id && $order->courier_name) ? '' : 'd-none' }} mb-3 p-3 bg-light rounded-3 border">
-                            <p class="small fw-semibold text-dark mb-2">Data Kurir Eksternal / Ojol:</p>
-                            <div class="mb-2">
-                                <label class="small text-muted mb-1">Nama Kurir:</label>
-                                <input type="text" name="courier_name" value="{{ $order->courier_name }}" class="form-control form-control-sm rounded-2" placeholder="Nama driver / kurir">
-                            </div>
-                            <div>
-                                <label class="small text-muted mb-1">No. HP / WA Kurir:</label>
-                                <input type="text" name="courier_phone" value="{{ $order->courier_phone }}" class="form-control form-control-sm rounded-2" placeholder="Contoh: 081234567890">
-                            </div>
                         </div>
 
                         <div class="mb-3">
@@ -350,22 +365,6 @@
                     </form>
                 </div>
             </div>
-
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    const courierSelect = document.getElementById('courierSelect');
-                    const externalFields = document.getElementById('externalCourierFields');
-                    if (courierSelect && externalFields) {
-                        courierSelect.addEventListener('change', function() {
-                            if (this.value === 'external') {
-                                externalFields.classList.remove('d-none');
-                            } else {
-                                externalFields.classList.add('d-none');
-                            }
-                        });
-                    }
-                });
-            </script>
             @endif
         </div>
     </div>

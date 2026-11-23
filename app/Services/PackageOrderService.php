@@ -156,6 +156,10 @@ class PackageOrderService
                 'bonus_item_name'    => $promoResult['bonus_item_name'],
                 'bonus_item_qty'     => $promoResult['bonus_item_qty'],
             ]);
+
+            if (!empty($appliedVoucherCode) && isset($voucher) && $voucher) {
+                $voucher->increment('used_count');
+            }
         });
     }
 

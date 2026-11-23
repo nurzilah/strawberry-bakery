@@ -82,7 +82,7 @@
             @endif
             <div>
                 <p class="text-sm font-semibold text-white">{{ auth()->user()->name }}</p>
-                <p class="text-xs text-pink-400 uppercase tracking-wider">{{ auth()->user()->role }}</p>
+                <p class="text-xs text-pink-400 uppercase tracking-wider">{{ auth()->user()->role === 'admin' ? 'IT DEVELOPER' : strtoupper(auth()->user()->role) }}</p>
             </div>
         </div>
         <form method="POST" action="{{ route('logout') }}">

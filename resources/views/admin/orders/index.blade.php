@@ -177,6 +177,28 @@
                                                 <i class="fas fa-truck me-1"></i> Delivery
                                             </span>
                                         </div>
+
+                                        {{-- Target Tiba & Batas Jam Berangkat Kurir --}}
+                                        <div class="my-1 p-2 rounded-3 bg-light border border-light-subtle text-start" style="font-size: 0.72rem; line-height: 1.35; min-width: 175px;">
+                                            <div class="text-muted">
+                                                <i class="far fa-calendar-alt text-primary me-1"></i> {{ $order->requested_date ? $order->requested_date->format('d/m/Y') : '-' }}
+                                            </div>
+                                            <div class="fw-bold text-dark mt-0.5">
+                                                <i class="far fa-clock text-primary me-1"></i> Target Tiba: {{ $order->formatted_target_time }}
+                                            </div>
+                                            @if($order->latest_departure_time)
+                                                <div class="mt-1">
+                                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle rounded-pill px-2 py-1 fw-bold d-inline-block text-wrap" style="font-size: 0.68rem; line-height: 1.25;" title="Estimasi tempuh {{ $order->estimated_travel_minutes }} mnt ({{ $order->distance_km }} km) + persiapan 15 mnt">
+                                                        <i class="fas fa-motorcycle me-1"></i> Berangkat Maks: {{ $order->latest_departure_time }}
+                                                    </span>
+                                                </div>
+                                            @endif
+                                            @if($order->distance_km)
+                                                <div class="text-muted mt-1" style="font-size: 0.68rem;">
+                                                    Jarak: {{ $order->distance_km }} km (±{{ $order->estimated_travel_minutes }} mnt)
+                                                </div>
+                                            @endif
+                                        </div>
                                         
                                         <!-- Status Delivery Badge -->
                                         <div class="mb-2">
@@ -195,22 +217,24 @@
                                         <form action="{{ route('admin.orders.assign-courier', $order) }}" method="POST" class="m-0">
                                             @csrf
                                             @method('PATCH')
-                                            <select name="courier_id" class="form-select form-select-sm rounded-pill px-2 py-1 shadow-sm" onchange="this.form.submit()" style="font-size: 0.75rem; min-width: 160px;">
+                                            <select name="courier_id" class="form-select form-select-sm rounded-pill py-1 shadow-sm" onchange="this.form.submit()" style="font-size: 0.75rem; width: 100%; min-width: 200px; padding-left: 0.75rem; padding-right: 2.25rem; text-overflow: ellipsis; cursor: pointer;">
                                                 <option value="">-- Tugaskan Kurir --</option>
                                                 @foreach($couriers as $courier)
                                                     <option value="{{ $courier->id }}" {{ $order->courier_id == $courier->id ? 'selected' : '' }}>
                                                         {{ $courier->name }} ({{ $courier->phone ?? '-' }})
                                                     </option>
                                                 @endforeach
-                                                <option value="external" {{ (!$order->courier_id && $order->courier_name) ? 'selected' : '' }}>
-                                                    Kurir Eksternal / Ojek Online
-                                                </option>
                                             </select>
                                         </form>
                                     @else
                                         <span class="badge bg-secondary-subtle text-secondary rounded-pill px-2 py-1" style="font-size: 0.75rem;">
                                             <i class="fas fa-store me-1"></i> Pickup (Ambil Sendiri)
                                         </span>
+                                        @if($order->requested_date || $order->requested_time)
+                                            <div class="small text-muted mt-1" style="font-size: 0.7rem;">
+                                                {{ $order->requested_date ? $order->requested_date->format('d/m/Y') : '' }} {{ $order->formatted_target_time }}
+                                            </div>
+                                        @endif
                                     @endif
                                 </td>
                                 <td class="text-center">

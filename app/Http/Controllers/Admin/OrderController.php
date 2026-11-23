@@ -114,16 +114,14 @@ class OrderController extends Controller
     public function assignCourier(Request $request, Order $order, CourierNotificationService $notificationService)
     {
         $request->validate([
-            'courier_id' => 'nullable',
-            'courier_name' => 'nullable|string|max:255',
-            'courier_phone' => 'nullable|string|max:20',
+            'courier_id' => 'nullable|exists:users,id',
             'delivery_status' => 'nullable|in:menunggu_kurir,dalam_pengantaran,terkirim',
         ]);
 
         $previousDeliveryStatus = $order->delivery_status;
         $courier = null;
 
-        if ($request->courier_id && $request->courier_id !== 'external') {
+        if ($request->filled('courier_id')) {
             $courier = User::where('role', 'kurir')->findOrFail($request->courier_id);
             $targetDeliveryStatus = $request->input('delivery_status', 'dalam_pengantaran');
             $updateData = [
@@ -133,15 +131,6 @@ class OrderController extends Controller
                 'delivery_status' => $targetDeliveryStatus,
             ];
             $courierLabel = $courier->name;
-        } elseif ($request->courier_id === 'external' || filled($request->courier_name)) {
-            $targetDeliveryStatus = $request->input('delivery_status', 'dalam_pengantaran');
-            $updateData = [
-                'courier_id' => null,
-                'courier_name' => $request->courier_name ?: 'Kurir Eksternal / Ojek Online',
-                'courier_phone' => $request->courier_phone,
-                'delivery_status' => $targetDeliveryStatus,
-            ];
-            $courierLabel = $updateData['courier_name'];
         } else {
             $targetDeliveryStatus = $request->input('delivery_status', 'menunggu_kurir');
             $updateData = [

@@ -186,7 +186,7 @@ class CustomBoxController extends Controller
                 $maxRadius = config('store.max_delivery_radius_km', 25.0);
                 return response()->json([
                     'status' => 'error',
-                    'message' => "Lokasi pengiriman ({$distanceKm} km) di luar jangkauan pengantaran toko (maksimal {$maxRadius} km). Silakan pilih metode Ambil di Toko."
+                    'message' => "Maaf, jarak pengiriman ({$distanceKm} km) melebihi batas maksimal {$maxRadius} km. Silakan pilih titik alamat yang lebih dekat atau gunakan metode Ambil di Toko (Pick Up)."
                 ], 422);
             }
         }

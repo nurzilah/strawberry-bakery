@@ -87,6 +87,88 @@ class Order extends Model
         return $this->courier?->phone ?? $this->courier_phone ?? '-';
     }
 
+    /**
+     * Estimasi lama perjalanan kurir motor dalam menit (kecepatan 30 km/jam).
+     */
+    public function getEstimatedTravelMinutesAttribute(): ?int
+    {
+        if ($this->delivery_method !== 'delivery' || empty($this->distance_km) || (float) $this->distance_km <= 0) {
+            return null;
+        }
+
+        // Asumsi kecepatan motor 30 km/jam = 0.5 km/menit -> (jarak / 30) * 60 menit
+        return (int) ceil(((float) $this->distance_km / 30.0) * 60);
+    }
+
+    /**
+     * Waktu persiapan & packing pesanan di toko (dalam menit).
+     */
+    public function getPreparationMinutesAttribute(): int
+    {
+        return 15;
+    }
+
+    /**
+     * Total waktu jeda yang dibutuhkan (persiapan toko + waktu tempuh perjalanan).
+     */
+    public function getTotalDeliveryLeadMinutesAttribute(): ?int
+    {
+        $travelMinutes = $this->estimated_travel_minutes;
+        if ($travelMinutes === null) {
+            return null;
+        }
+
+        return $travelMinutes + $this->preparation_minutes;
+    }
+
+    /**
+     * Objek Carbon batas maksimal kurir harus berangkat dari toko.
+     */
+    public function getLatestDepartureDateTimeAttribute(): ?\Carbon\Carbon
+    {
+        if ($this->delivery_method !== 'delivery' || empty($this->requested_time)) {
+            return null;
+        }
+
+        $leadMinutes = $this->total_delivery_lead_minutes;
+        if ($leadMinutes === null) {
+            return null;
+        }
+
+        $dateStr = $this->requested_date ? $this->requested_date->format('Y-m-d') : now()->format('Y-m-d');
+        try {
+            $target = \Carbon\Carbon::parse("{$dateStr} {$this->requested_time}");
+            return $target->subMinutes($leadMinutes);
+        } catch (\Throwable $e) {
+            return null;
+        }
+    }
+
+    /**
+     * String format batas jam berangkat kurir (misal: "09:20 WIB").
+     */
+    public function getLatestDepartureTimeAttribute(): ?string
+    {
+        $departure = $this->latest_departure_date_time;
+        return $departure ? $departure->format('H:i') . ' WIB' : null;
+    }
+
+    /**
+     * String format target jam tiba pesanan yang dipilih customer (misal: "10:00 WIB").
+     */
+    public function getFormattedTargetTimeAttribute(): string
+    {
+        if (empty($this->requested_time)) {
+            return '-';
+        }
+
+        try {
+            return \Carbon\Carbon::parse($this->requested_time)->format('H:i') . ' WIB';
+        } catch (\Throwable $e) {
+            return $this->requested_time . ' WIB';
+        }
+    }
+
     public function items()
     {
         return $this->hasMany(OrderItem::class);

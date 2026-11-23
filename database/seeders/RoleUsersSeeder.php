@@ -10,46 +10,44 @@ class RoleUsersSeeder extends Seeder
 {
     public function run(): void
     {
+        $defaultPassword = env('DEFAULT_ADMIN_PASSWORD', 'Strawberry2026!');
+
         $users = [
             [
-                'email' => 'admin@gmail.com',
+                'email' => 'itdev@strawberrybakery.test',
                 'name' => 'IT Developer Strawberry Bakery',
-                'password' => 'password',
                 'role' => 'admin',
-                'phone' => '081234567890',
+                'phone' => '081200000010',
                 'address' => 'Toko Strawberry Bakery Kota Tegal',
             ],
             [
-                'email' => 'owner@gmail.com',
+                'email' => 'owner@strawberrybakery.test',
                 'name' => 'Owner Strawberry Bakery',
-                'password' => 'password',
                 'role' => 'owner',
-                'phone' => '081234567891',
+                'phone' => '081200000020',
                 'address' => 'Kota Tegal, Jawa Tengah',
             ],
             [
-                'email' => 'kasir@gmail.com',
+                'email' => 'kasir@strawberrybakery.test',
                 'name' => 'Kasir Strawberry Bakery',
-                'password' => 'password',
                 'role' => 'kasir',
-                'phone' => '081234567892',
+                'phone' => '081200000030',
                 'address' => 'Stand Kasir Strawberry Bakery',
             ],
         ];
 
         foreach ($users as $user) {
-            User::updateOrCreate(
+            User::firstOrCreate(
                 ['email' => $user['email']],
                 [
                     'name' => $user['name'],
-                    'password' => Hash::make($user['password']),
+                    'password' => Hash::make($defaultPassword),
                     'role' => $user['role'],
                     'phone' => $user['phone'],
                     'address' => $user['address'],
+                    'is_verified' => true,
                 ]
             );
         }
-
-        // Customer accounts are intentionally not seeded; they must be created dynamically via the frontend register form or Google OAuth Socialite sign-in callback flow.
     }
 }

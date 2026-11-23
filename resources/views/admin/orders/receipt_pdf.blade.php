@@ -113,7 +113,7 @@
             @endif
             @if($order->requested_date)
             <tr>
-                <td>Tgl Ambil</td>
+                <td>Tanggal Pemesanan</td>
                 <td>:</td>
                 <td>
                     {{ \Carbon\Carbon::parse($order->requested_date)->format('d/m/Y') }}

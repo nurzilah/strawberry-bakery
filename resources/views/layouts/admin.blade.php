@@ -109,15 +109,20 @@
         }
 
         #sidebar .sidebar-header {
-            padding: 1.25rem 1.5rem;
+            padding: 1.25rem 1.25rem;
             border-bottom: 1px solid rgba(0,0,0,0.05);
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.85rem;
             min-height: 72px;
             transition: all 0.3s ease;
             overflow: hidden;
-            white-space: nowrap;
+            white-space: normal;
+        }
+
+        .main-content-body {
+            padding-top: 1.75rem !important;
+            padding-bottom: 3rem !important;
         }
 
         #sidebar.compact .sidebar-header {
@@ -343,19 +348,19 @@
         <nav id="sidebar">
             <div class="sidebar-header">
                 <img src="{{ asset('images/logo.png') }}" alt="SB" style="width: 40px; height: 40px; object-fit: contain; flex-shrink: 0;">
-                <div class="d-flex flex-column text-start header-text" style="overflow: hidden;">
-                    <span class="fw-bold text-truncate" style="font-size: 1rem; line-height: 1.2;">
-                        {{ \Illuminate\Support\Str::limit(auth()->user()->name, 15) }}
+                <div class="d-flex flex-column text-start header-text" style="min-width: 0; flex: 1; white-space: normal; overflow: hidden;">
+                    <span class="fw-bold text-dark dark-text-light" style="font-size: 0.85rem; line-height: 1.25; white-space: normal; word-break: break-word;" title="{{ auth()->user()->name }}">
+                        {{ auth()->user()->name }}
                     </span>
                     <div class="mt-1">
                         @php
-                            $role = auth()->user()->role ?? 'guest';
+                            $role = strtolower(auth()->user()->role ?? 'guest');
                             if(in_array($role, ['owner', 'superadmin'])) {
                                 $bg = '#d63384';
                                 $label = 'OWNER';
                             } elseif($role === 'admin') {
                                 $bg = '#0d6efd';
-                                $label = 'ADMIN';
+                                $label = 'IT DEVELOPER';
                             } elseif($role === 'kasir') {
                                 $bg = '#198754';
                                 $label = 'KASIR';
@@ -399,9 +404,24 @@
                             <i class="fas fa-tags"></i> <span>Kelola Kategori</span>
                         </a>
                     </li>
+                    <li class="{{ request()->routeIs('admin.promos.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.promos.index') }}" title="Kelola Promo & Diskon">
+                            <i class="fas fa-percent"></i> <span>Kelola Promo & Diskon</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.vouchers.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.vouchers.index') }}" title="Kelola Voucher">
+                            <i class="fas fa-ticket-alt"></i> <span>Kelola Voucher</span>
+                        </a>
+                    </li>
                     <li class="{{ request()->routeIs('admin.stock.*') ? 'active' : '' }}">
                         <a href="{{ route('admin.stock.index') }}" title="Riwayat Penambahan Stok">
                             <i class="fas fa-boxes"></i> <span>Riwayat Penambahan Stok</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.orders.index') }}" title="Pesanan Online">
+                            <i class="fas fa-shopping-cart"></i> <span>Pesanan Online</span>
                         </a>
                     </li>
                     <li class="{{ request()->routeIs('kasir.pos') ? 'active' : '' }}">
@@ -410,8 +430,8 @@
                         </a>
                     </li>
                     <li class="{{ request()->routeIs('kasir.transactions.*') ? 'active' : '' }}">
-                        <a href="{{ route('kasir.transactions.index') }}" title="Riwayat Transaksi">
-                            <i class="fas fa-history"></i> <span>Riwayat Transaksi</span>
+                        <a href="{{ route('kasir.transactions.index') }}" title="Riwayat Transaksi POS">
+                            <i class="fas fa-history"></i> <span>Riwayat Transaksi POS</span>
                         </a>
                     </li>
                     <li class="{{ request()->routeIs('admin.kurir.*') ? 'active' : '' }}">
@@ -451,6 +471,16 @@
                     <li class="{{ request()->routeIs('admin.categories.*') ? 'active' : '' }}">
                         <a href="{{ route('admin.categories.index') }}" title="Kelola Kategori">
                             <i class="fas fa-tags"></i> <span>Kelola Kategori</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.promos.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.promos.index') }}" title="Kelola Promo & Diskon">
+                            <i class="fas fa-percent"></i> <span>Kelola Promo & Diskon</span>
+                        </a>
+                    </li>
+                    <li class="{{ request()->routeIs('admin.vouchers.*') ? 'active' : '' }}">
+                        <a href="{{ route('admin.vouchers.index') }}" title="Kelola Voucher">
+                            <i class="fas fa-ticket-alt"></i> <span>Kelola Voucher</span>
                         </a>
                     </li>
                     <li class="{{ request()->routeIs('admin.stock.*') ? 'active' : '' }}">
@@ -542,15 +572,25 @@
                         <!-- Notification Dropdown -->
                         @if(in_array(auth()->user()->role, ['admin', 'owner', 'superadmin']))
                         <div class="dropdown">
-                            <button class="btn btn-outline-secondary rounded-circle position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn btn-outline-secondary rounded-circle position-relative" type="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Notifikasi Pesanan">
                                 <i class="fas fa-bell"></i>
                                 <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notificationBadge">
                                     0
                                 </span>
                             </button>
-                            <ul class="dropdown-menu dropdown-menu-end shadow" aria-labelledby="notificationDropdown" id="notificationList" style="width: 320px; max-height: 400px; overflow-y: auto;">
-                                <li><span class="dropdown-item text-center text-muted py-2">Memuat notifikasi...</span></li>
-                            </ul>
+                            <div class="dropdown-menu dropdown-menu-end shadow border-0 rounded-4 p-0" aria-labelledby="notificationDropdown" style="width: 350px; overflow: hidden;">
+                                <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold text-dark small mb-0">
+                                        <i class="fas fa-bell me-1 text-primary"></i> Notifikasi
+                                    </span>
+                                    <button type="button" class="btn btn-link btn-sm text-decoration-none p-0 text-primary small fw-semibold" onclick="markAllAsRead(event)">
+                                        <i class="fas fa-check-double me-1"></i>Tandai semua dibaca
+                                    </button>
+                                </div>
+                                <div id="notificationList" style="max-height: 380px; overflow-y: auto;">
+                                    <div class="text-center text-muted py-4 small">Memuat notifikasi...</div>
+                                </div>
+                            </div>
                         </div>
                         @endif
 
@@ -564,7 +604,7 @@
                 </div>
             </nav>
 
-            <div class="container-fluid p-4">
+            <div class="container-fluid px-4 py-3 main-content-body">
                 @if(session('success'))
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         {{ session('success') }}
@@ -646,37 +686,36 @@
                         if (!badge || !list) return;
 
                         if (data.count > 0) {
-                            badge.textContent = data.count;
+                            badge.textContent = data.count > 99 ? '99+' : data.count;
                             badge.classList.remove('d-none');
                         } else {
                             badge.classList.add('d-none');
                         }
 
                         let html = '';
-                        if (data.notifications.length > 0) {
+                        if (data.notifications && data.notifications.length > 0) {
                             data.notifications.forEach(notif => {
                                 const date = new Date(notif.created_at).toLocaleString('id-ID', {day: 'numeric', month: 'short', hour: '2-digit', minute:'2-digit'});
+                                const orderId = (notif.data && notif.data.order_id) ? notif.data.order_id : null;
+                                const targetUrl = orderId ? `/admin/orders/${orderId}` : `/admin/orders`;
+
                                 html += `
-                                    <li>
-                                        <a class="dropdown-item py-2 border-bottom text-wrap" href="#" onclick="markAsRead(${notif.id}, event)">
+                                    <div class="p-3 border-bottom d-flex align-items-start justify-content-between gap-2" style="transition: background-color 0.2s;" onmouseover="this.style.backgroundColor='#f8f9fa'" onmouseout="this.style.backgroundColor='transparent'">
+                                        <a href="${targetUrl}" onclick="markAsReadAndNavigate(${notif.id}, '${targetUrl}', event)" class="text-decoration-none text-start flex-grow-1">
                                             <div class="d-flex justify-content-between align-items-center mb-1">
                                                 <small class="fw-bold text-primary">${notif.title}</small>
                                                 <small class="text-muted" style="font-size: 0.7rem">${date}</small>
                                             </div>
-                                            <div class="small text-muted" style="white-space: normal;">${notif.message}</div>
+                                            <div class="small text-dark" style="font-size: 0.8rem; line-height: 1.35;">${notif.message}</div>
                                         </a>
-                                    </li>
+                                        <button type="button" class="btn btn-sm btn-light border-0 rounded-circle text-muted p-1 ms-1" style="width: 28px; height: 28px;" title="Tandai dibaca" onclick="markAsRead(${notif.id}, event)">
+                                            <i class="fas fa-check text-success" style="font-size: 0.75rem;"></i>
+                                        </button>
+                                    </div>
                                 `;
                             });
-                            html += `
-                                <li>
-                                    <a class="dropdown-item text-center fw-bold text-primary py-2 bg-light" href="#" onclick="markAllAsRead(event)">
-                                        Tandai semua dibaca
-                                    </a>
-                                </li>
-                            `;
                         } else {
-                            html = '<li><span class="dropdown-item text-center text-muted py-3">Tidak ada notifikasi baru</span></li>';
+                            html = '<div class="text-center text-muted py-4 small"><i class="fas fa-bell-slash mb-2 d-block opacity-50" style="font-size: 1.5rem;"></i>Tidak ada notifikasi baru</div>';
                         }
                         list.innerHTML = html;
                     })
@@ -684,8 +723,10 @@
             }
 
             window.markAsRead = function(id, event) {
-                event.preventDefault();
-                event.stopPropagation();
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
                 fetch(`/admin/notifications/${id}/read`, {
                     method: 'POST',
                     headers: {
@@ -695,9 +736,24 @@
                 }).then(() => fetchNotifications());
             };
 
+            window.markAsReadAndNavigate = function(id, url, event) {
+                if (event) event.preventDefault();
+                fetch(`/admin/notifications/${id}/read`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    }
+                }).finally(() => {
+                    window.location.href = url;
+                });
+            };
+
             window.markAllAsRead = function(event) {
-                event.preventDefault();
-                event.stopPropagation();
+                if (event) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
                 fetch('/admin/notifications/read-all', {
                     method: 'POST',
                     headers: {

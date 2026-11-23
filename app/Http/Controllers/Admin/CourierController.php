@@ -35,21 +35,28 @@ class CourierController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users,email'],
             'phone' => ['required', 'string', 'max:20', 'unique:users,phone'],
+            'address' => ['nullable', 'string', 'max:500'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ], [
+            'email.unique' => 'Email ini sudah terdaftar di sistem. Silakan gunakan email lain.',
+            'phone.unique' => 'Nomor HP/WA ini sudah digunakan oleh akun lain.',
+            'password.confirmed' => 'Konfirmasi password tidak cocok.',
+            'password.min' => 'Password minimal harus 8 karakter.',
         ]);
 
         User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'],
+            'address' => $validated['address'] ?? null,
             'password' => Hash::make($validated['password']),
             'role' => 'kurir',
             'is_verified' => true,
         ]);
 
-        return redirect()->route('admin.kurir.index')->with('success', 'Akun kurir berhasil dibuat.');
+        return redirect()->route('admin.kurir.index')->with('success', 'Akun kurir baru berhasil dibuat.');
     }
 
     /**
@@ -75,15 +82,22 @@ class CourierController extends Controller
 
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users')->ignore($kurir->id)],
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->ignore($kurir->id)],
             'phone' => ['required', 'string', 'max:20', Rule::unique('users', 'phone')->ignore($kurir->id)],
+            'address' => ['nullable', 'string', 'max:500'],
             'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+        ], [
+            'email.unique' => 'Email ini sudah digunakan oleh akun lain.',
+            'phone.unique' => 'Nomor HP/WA ini sudah digunakan oleh akun lain.',
+            'password.confirmed' => 'Konfirmasi password baru tidak cocok.',
+            'password.min' => 'Password baru minimal harus 8 karakter.',
         ]);
 
         $data = [
             'name' => $validated['name'],
             'email' => $validated['email'],
             'phone' => $validated['phone'],
+            'address' => $validated['address'] ?? null,
         ];
 
         if (!empty($validated['password'])) {
@@ -92,7 +106,7 @@ class CourierController extends Controller
 
         $kurir->update($data);
 
-        return redirect()->route('admin.kurir.index')->with('success', 'Data kurir berhasil diperbarui.');
+        return redirect()->route('admin.kurir.index')->with('success', 'Data akun kurir berhasil diperbarui.');
     }
 
     /**

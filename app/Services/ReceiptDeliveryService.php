@@ -121,7 +121,7 @@ class ReceiptDeliveryService
         $message .= "Pemesan  : {$order->user->name}\n";
         $message .= "Metode   : {$metode}\n";
         if ($tglAmbil) {
-            $message .= "Tgl Ambil: {$tglAmbil}\n";
+            $message .= "Tanggal Pemesanan: {$tglAmbil}\n";
         }
         if ($order->delivery_method === 'pickup' && $order->pickup_deadline_at) {
             $deadlineStr = \Carbon\Carbon::parse($order->pickup_deadline_at)->format('d/m/Y H:i');

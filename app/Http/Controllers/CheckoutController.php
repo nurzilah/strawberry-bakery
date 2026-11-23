@@ -148,18 +148,53 @@ class CheckoutController extends Controller
             return redirect()->back()->with('error', 'Tanggal pengambilan/pengantaran maksimal H+2 (2 hari ke depan).');
         }
 
-        // Validate requested time
+        // Shipping & Location calculation logic
+        $shippingCost = 0;
+        $distanceKm = null;
+        $deliveryLat = null;
+        $deliveryLng = null;
+
+        if ($deliveryMethod === 'delivery') {
+            $request->validate([
+                'delivery_address' => 'required|string',
+                'delivery_lat'     => 'required|numeric',
+                'delivery_lng'     => 'required|numeric',
+            ], [
+                'delivery_address.required' => 'Alamat pengiriman wajib diisi.',
+                'delivery_lat.required'     => 'Titik lokasi pengiriman pada peta wajib ditentukan.',
+                'delivery_lng.required'     => 'Titik lokasi pengiriman pada peta wajib ditentukan.',
+            ]);
+
+            $deliveryLat = (float) $request->delivery_lat;
+            $deliveryLng = (float) $request->delivery_lng;
+
+            $shippingService = app(\App\Services\ShippingCalculatorService::class);
+            $distanceKm = $shippingService->calculateDistance($deliveryLat, $deliveryLng);
+
+            if (!$shippingService->isWithinRadius($distanceKm)) {
+                $maxRadius = config('store.max_delivery_radius_km', 25.0);
+                $msg = "Maaf, jarak pengiriman ({$distanceKm} km) melebihi batas maksimal {$maxRadius} km. Silakan pilih titik alamat yang lebih dekat atau gunakan metode Ambil di Toko (Pick Up).";
+                if ($request->ajax()) {
+                    return response()->json(['status' => 'error', 'message' => $msg], 422);
+                }
+                return redirect()->back()->with('error', $msg);
+            }
+
+            $shippingCost = $shippingService->calculateCost($distanceKm);
+        }
+
+        // Validate requested time (memperhitungkan jarak pengiriman dan waktu persiapan jika hari ini)
         $requestedTime = $request->requested_time;
-        if (! $requestedTime || ! \App\Helpers\StoreHoursHelper::isValidTimeSlot($requestedDate, $requestedTime)) {
+        if (! $requestedTime || ! \App\Helpers\StoreHoursHelper::isValidTimeSlot($requestedDate, $requestedTime, $deliveryMethod, $distanceKm)) {
+            $errMessage = 'Jam yang Anda pilih tidak valid atau waktu tidak mencukupi untuk persiapan dan pengantaran ke lokasi Anda.';
             if ($request->ajax()) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Jam yang Anda pilih tidak valid atau sudah lewat untuk tanggal tersebut.'
-                ], 400);
+                    'message' => $errMessage
+                ], 422);
             }
-            return redirect()->back()->with('error', 'Jam yang Anda pilih tidak valid atau sudah lewat untuk tanggal tersebut.');
+            return redirect()->back()->with('error', $errMessage);
         }
-
 
         // Validate pickup disclaimer checkbox (only for pickup orders)
         if ($deliveryMethod === 'pickup') {
@@ -188,41 +223,6 @@ class CheckoutController extends Controller
         
         $discountAmount = $promoResult['discount_amount'];
         $freeQtyApplied = $promoResult['free_qty'];
-        
-        // Shipping & Location calculation logic
-        $shippingCost = 0;
-        $distanceKm = null;
-        $deliveryLat = null;
-        $deliveryLng = null;
-
-        if ($deliveryMethod === 'delivery') {
-            $request->validate([
-                'delivery_address' => 'required|string',
-                'delivery_lat'     => 'required|numeric',
-                'delivery_lng'     => 'required|numeric',
-            ], [
-                'delivery_address.required' => 'Alamat pengiriman wajib diisi.',
-                'delivery_lat.required'     => 'Titik lokasi pengiriman pada peta wajib ditentukan.',
-                'delivery_lng.required'     => 'Titik lokasi pengiriman pada peta wajib ditentukan.',
-            ]);
-
-            $deliveryLat = (float) $request->delivery_lat;
-            $deliveryLng = (float) $request->delivery_lng;
-
-            $shippingService = app(\App\Services\ShippingCalculatorService::class);
-            $distanceKm = $shippingService->calculateDistance($deliveryLat, $deliveryLng);
-
-            if (!$shippingService->isWithinRadius($distanceKm)) {
-                $maxRadius = config('store.max_delivery_radius_km', 25.0);
-                $msg = "Lokasi pengiriman ({$distanceKm} km) di luar batas jangkauan pengantaran toko (maksimal {$maxRadius} km). Silakan pilih metode Ambil di Toko.";
-                if ($request->ajax()) {
-                    return response()->json(['status' => 'error', 'message' => $msg], 422);
-                }
-                return redirect()->back()->with('error', $msg);
-            }
-
-            $shippingCost = $shippingService->calculateCost($distanceKm);
-        }
 
         // Voucher logic
         $voucherCode = $request->input('voucher_code');
@@ -279,6 +279,10 @@ class CheckoutController extends Controller
             'discount_amount'    => $discountAmount,
             'free_qty_applied'   => $freeQtyApplied,
         ]);
+
+        if (!empty($appliedVoucherCode) && isset($voucher) && $voucher) {
+            $voucher->increment('used_count');
+        }
 
         // Create Order Items
         foreach ($carts as $cart) {

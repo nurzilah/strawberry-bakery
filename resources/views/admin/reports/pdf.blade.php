@@ -19,12 +19,7 @@
     <div class="header">
         <h2>Laporan Penjualan Strawberry Bakery</h2>
         <p>
-            Periode: 
-            @if($period == 'today') Hari Ini ({{ $startDate->format('d M Y') }})
-            @elseif($period == 'week') Minggu Ini ({{ $startDate->format('d M Y') }} - {{ $endDate->format('d M Y') }})
-            @elseif($period == 'month') Bulan Ini ({{ $startDate->format('M Y') }})
-            @else {{ $startDate->format('d M Y') }} - {{ $endDate->format('d M Y') }}
-            @endif
+            Periode: {{ $startDate->format('d M Y') }} s/d {{ $endDate->format('d M Y') }}
         </p>
     </div>
 

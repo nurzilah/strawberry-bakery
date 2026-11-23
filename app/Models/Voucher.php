@@ -19,6 +19,8 @@ class Voucher extends Model
         'min_subtotal',
         'max_distance_km',
         'first_order_only',
+        'quota',
+        'used_count',
         'is_active',
     ];
 
@@ -28,8 +30,40 @@ class Voucher extends Model
         'min_subtotal'     => 'integer',
         'max_distance_km'  => 'float',
         'first_order_only' => 'boolean',
+        'quota'            => 'integer',
+        'used_count'       => 'integer',
         'is_active'        => 'boolean',
     ];
+
+    public function setCodeAttribute($value)
+    {
+        $this->attributes['code'] = strtoupper(trim((string) $value));
+    }
+
+    public function getFormattedBenefitAttribute(): string
+    {
+        if ($this->type === 'percentage') {
+            $text = 'Diskon ' . rtrim(rtrim(number_format($this->discount_value, 2, ',', '.'), '0'), ',') . '%';
+            if ($this->max_discount) {
+                $text .= ' (Maks. Rp ' . number_format($this->max_discount, 0, ',', '.') . ')';
+            }
+            return $text;
+        }
+
+        if ($this->type === 'free_shipping') {
+            $text = 'Gratis Ongkir 100%';
+            if ($this->max_distance_km) {
+                $text .= ' (Maks. ' . rtrim(rtrim(number_format($this->max_distance_km, 2, ',', '.'), '0'), ',') . ' KM)';
+            }
+            return $text;
+        }
+
+        if ($this->type === 'fixed') {
+            return 'Potongan Rp ' . number_format($this->discount_value, 0, ',', '.');
+        }
+
+        return '-';
+    }
 
     /**
      * Check if a voucher is eligible for the given user, subtotal, and delivery method.
@@ -47,6 +81,14 @@ class Voucher extends Model
             return [
                 'eligible' => false,
                 'message'  => 'Voucher sudah tidak aktif.',
+            ];
+        }
+
+        // Syarat Kuota Pemakaian
+        if (!is_null($this->quota) && $this->used_count >= $this->quota) {
+            return [
+                'eligible' => false,
+                'message'  => 'Kuota pemakaian voucher ' . $this->code . ' sudah habis.',
             ];
         }
 

@@ -15,125 +15,13 @@ class ReportController extends Controller
 {
     public function index(Request $request)
     {
-        $period = $request->get('period', 'today');
-
-        $startDate = Carbon::today();
-        $endDate = Carbon::today()->endOfDay();
-
-        if ($period === 'week') {
-            $startDate = Carbon::now()->startOfWeek();
-            $endDate = Carbon::now()->endOfWeek();
-        } elseif ($period === 'month') {
-            $startDate = Carbon::now()->startOfMonth();
-            $endDate = Carbon::now()->endOfMonth();
-        } elseif ($period === 'custom' && $request->filled(['start_date', 'end_date'])) {
-            $startDate = Carbon::parse($request->start_date)->startOfDay();
-            $endDate = Carbon::parse($request->end_date)->endOfDay();
-        }
-
-        $totalOnline = Order::where('payment_status', 'paid')
-            ->where('status', '!=', 'cancelled')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->sum('total_amount');
-
-        $totalPos = Transaction::where('status', 'completed')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->sum('grand_total');
-
-        $totalCombined = $totalOnline + $totalPos;
-
-        $dailyOnline = Order::where('payment_status', 'paid')
-            ->where('status', '!=', 'cancelled')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(total_amount) as total'))
-            ->groupBy('date')
-            ->get()->keyBy('date');
-
-        $dailyPos = Transaction::where('status', 'completed')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(grand_total) as total'))
-            ->groupBy('date')
-            ->get()->keyBy('date');
-
-        $dates = collect();
-        $currentDate = $startDate->copy();
-        while ($currentDate <= $endDate) {
-            $dateStr = $currentDate->format('Y-m-d');
-            $online = $dailyOnline->has($dateStr) ? $dailyOnline[$dateStr]->total : 0;
-            $pos = $dailyPos->has($dateStr) ? $dailyPos[$dateStr]->total : 0;
-
-            $dates->push([
-                'date'   => $dateStr,
-                'online' => $online,
-                'pos'    => $pos,
-                'total'  => $online + $pos
-            ]);
-            $currentDate->addDay();
-        }
-
-        return view('admin.reports.index', compact(
-            'period', 'startDate', 'endDate',
-            'totalOnline', 'totalPos', 'totalCombined', 'dates'
-        ));
-    }
-
-    private function buildDates(Request $request): array
-    {
-        $period = $request->get('period', 'today');
-
-        $startDate = Carbon::today();
-        $endDate   = Carbon::today()->endOfDay();
-
-        if ($period === 'week') {
-            $startDate = Carbon::now()->startOfWeek();
-            $endDate   = Carbon::now()->endOfWeek();
-        } elseif ($period === 'month') {
-            $startDate = Carbon::now()->startOfMonth();
-            $endDate   = Carbon::now()->endOfMonth();
-        } elseif ($period === 'custom' && $request->filled(['start_date', 'end_date'])) {
-            $startDate = Carbon::parse($request->start_date)->startOfDay();
-            $endDate   = Carbon::parse($request->end_date)->endOfDay();
-        }
-
-        $dailyOnline = Order::where('payment_status', 'paid')
-            ->where('status', '!=', 'cancelled')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(total_amount) as total'))
-            ->groupBy('date')->get()->keyBy('date');
-
-        $dailyPos = Transaction::where('status', 'completed')
-            ->whereBetween('created_at', [$startDate, $endDate])
-            ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(grand_total) as total'))
-            ->groupBy('date')->get()->keyBy('date');
-
-        $dates      = collect();
-        $totalOnline = 0;
-        $totalPos    = 0;
-        $current    = $startDate->copy();
-
-        while ($current <= $endDate) {
-            $dateStr = $current->format('Y-m-d');
-            $online  = $dailyOnline->has($dateStr) ? $dailyOnline[$dateStr]->total : 0;
-            $pos     = $dailyPos->has($dateStr)    ? $dailyPos[$dateStr]->total    : 0;
-
-            $totalOnline += $online;
-            $totalPos    += $pos;
-
-            $dates->push([
-                'date'   => $dateStr,
-                'online' => $online,
-                'pos'    => $pos,
-                'total'  => $online + $pos,
-            ]);
-            $current->addDay();
-        }
-
-        return compact('dates', 'period', 'startDate', 'endDate', 'totalOnline', 'totalPos');
+        $data = $this->buildReportData($request);
+        return view('admin.reports.index', $data);
     }
 
     public function exportPdf(Request $request)
     {
-        $data = $this->buildDates($request);
+        $data = $this->buildReportData($request);
 
         $pdf = Pdf::loadView('admin.reports.pdf', $data)
             ->setPaper('a4', 'portrait');
@@ -143,7 +31,7 @@ class ReportController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $data = $this->buildDates($request);
+        $data = $this->buildReportData($request);
 
         $rows = $data['dates']->map(fn($d) => [
             'Tanggal'           => $d['date'],
@@ -154,5 +42,109 @@ class ReportController extends Controller
 
         return (new FastExcel($rows))
             ->download('laporan-penjualan-' . now()->format('Y-m-d') . '.xlsx');
+    }
+
+    private function buildReportData(Request $request): array
+    {
+        $now = Carbon::now();
+        $today = Carbon::today();
+
+        // Cari rentang tahun yang tersedia dari database
+        $earliestOrderYear = Order::min(DB::raw('YEAR(created_at)')) ?? $now->year;
+        $earliestPosYear = Transaction::min(DB::raw('YEAR(created_at)')) ?? $now->year;
+        $minYear = min((int)$earliestOrderYear, (int)$earliestPosYear, $now->year - 1);
+        $availableYears = range($now->year, $minYear);
+
+        // Parameter input
+        $period = $request->get('period', 'month');
+        $selectedYear = (int) $request->get('year', $now->year);
+        $selectedMonth = $request->get('month', (string) $now->month);
+
+        if ($period === 'custom' && $request->filled(['start_date', 'end_date'])) {
+            $startDate = Carbon::parse($request->start_date)->startOfDay();
+            $endDate = Carbon::parse($request->end_date)->endOfDay();
+        } elseif ($period === 'today') {
+            $startDate = $today->copy()->startOfDay();
+            $endDate = $today->copy()->endOfDay();
+        } elseif ($period === 'week') {
+            $startDate = $now->copy()->startOfWeek()->startOfDay();
+            $endDate = $now->copy()->endOfWeek()->endOfDay();
+        } elseif ($period === 'year' || $selectedMonth === 'all' || $selectedMonth === '0') {
+            $startDate = Carbon::createFromDate($selectedYear, 1, 1)->startOfYear();
+            $endDate = Carbon::createFromDate($selectedYear, 12, 31)->endOfYear();
+            $period = 'year';
+            $selectedMonth = 'all';
+        } else {
+            // Default: month
+            $m = (int) $selectedMonth;
+            if ($m < 1 || $m > 12) {
+                $m = $now->month;
+                $selectedMonth = (string) $m;
+            }
+            $startDate = Carbon::createFromDate($selectedYear, $m, 1)->startOfMonth();
+            $endDate = Carbon::createFromDate($selectedYear, $m, 1)->endOfMonth();
+            $period = 'month';
+        }
+
+        // Helper filter order online yang sah (konsisten dengan AdminDashboardController)
+        $validOrders = function ($q) {
+            $q->whereNotIn('status', ['cancelled'])
+              ->where(function ($sub) {
+                  $sub->whereIn('payment_status', ['paid', 'success', 'settlement'])
+                      ->orWhereIn('status', ['completed', 'processing', 'waiting_verification']);
+              });
+        };
+
+        // Query Total
+        $totalOnline = (float) Order::whereBetween('created_at', [$startDate, $endDate])
+            ->where($validOrders)
+            ->sum('total_amount');
+
+        $totalPos = (float) Transaction::whereBetween('created_at', [$startDate, $endDate])
+            ->where('status', 'completed')
+            ->sum('grand_total');
+
+        $totalCombined = $totalOnline + $totalPos;
+
+        // Query Harian
+        $dailyOnline = Order::whereBetween('created_at', [$startDate, $endDate])
+            ->where($validOrders)
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(total_amount) as total'))
+            ->groupBy('date')
+            ->get()->keyBy('date');
+
+        $dailyPos = Transaction::whereBetween('created_at', [$startDate, $endDate])
+            ->where('status', 'completed')
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(grand_total) as total'))
+            ->groupBy('date')
+            ->get()->keyBy('date');
+
+        // Batasi rentang tanggal maksimal hingga hari ini (Carbon::today()) jika periode berada di bulan/tahun berjalan
+        $maxDate = $today->copy()->endOfDay();
+        $loopEndDate = $endDate->gt($maxDate) ? $maxDate : $endDate->copy();
+
+        $dates = collect();
+        if ($startDate->lte($loopEndDate)) {
+            $currentDate = $startDate->copy();
+            while ($currentDate <= $loopEndDate) {
+                $dateStr = $currentDate->format('Y-m-d');
+                $online = $dailyOnline->has($dateStr) ? (float) $dailyOnline[$dateStr]->total : 0.0;
+                $pos = $dailyPos->has($dateStr) ? (float) $dailyPos[$dateStr]->total : 0.0;
+
+                $dates->push([
+                    'date'   => $dateStr,
+                    'online' => $online,
+                    'pos'    => $pos,
+                    'total'  => $online + $pos
+                ]);
+                $currentDate->addDay();
+            }
+        }
+
+        return compact(
+            'period', 'selectedYear', 'selectedMonth', 'availableYears',
+            'startDate', 'endDate',
+            'totalOnline', 'totalPos', 'totalCombined', 'dates'
+        );
     }
 }

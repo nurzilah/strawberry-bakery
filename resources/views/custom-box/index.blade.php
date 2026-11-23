@@ -860,11 +860,12 @@
 
             isVoucherEligible(voucher) {
                 if (!voucher || !voucher.is_active) return false;
+                if (voucher.quota !== null && voucher.quota !== undefined && voucher.used_count !== undefined && voucher.used_count >= voucher.quota) return false;
                 if (voucher.first_order_only && !this.isFirstOrder) return false;
                 if (voucher.type === 'free_shipping') {
                     if (this.deliveryMethod !== 'delivery') return false;
                     if (this.distanceKm === null) return false;
-                    const maxDist = voucher.max_distance_km || 10.0;
+                    const maxDist = voucher.max_distance_km ? parseFloat(voucher.max_distance_km) : 10.0;
                     if (this.distanceKm > maxDist) return false;
                 }
                 if (voucher.min_subtotal > 0 && this.calculateGrandTotal() < voucher.min_subtotal) return false;
@@ -874,11 +875,12 @@
             voucherIneligibilityReason(voucher) {
                 if (!voucher) return '';
                 if (!voucher.is_active) return 'Voucher tidak aktif';
+                if (voucher.quota !== null && voucher.quota !== undefined && voucher.used_count !== undefined && voucher.used_count >= voucher.quota) return 'Kuota voucher sudah habis';
                 if (voucher.first_order_only && !this.isFirstOrder) return 'Khusus pesanan pertama Anda';
                 if (voucher.type === 'free_shipping') {
                     if (this.deliveryMethod !== 'delivery') return 'Hanya berlaku untuk metode Diantar (Delivery)';
                     if (this.distanceKm === null) return 'Tentukan titik lokasi pada peta';
-                    const maxDist = voucher.max_distance_km || 10.0;
+                    const maxDist = voucher.max_distance_km ? parseFloat(voucher.max_distance_km) : 10.0;
                     if (this.distanceKm > maxDist) return `Jarak ${this.distanceKm} km > maks ${maxDist} km`;
                 }
                 if (voucher.min_subtotal > 0 && this.calculateGrandTotal() < voucher.min_subtotal) {

@@ -38,14 +38,14 @@ class StoreHoursHelper
 
     /**
      * Dapatkan daftar slot waktu yang tersedia untuk tanggal tertentu.
-     * Jika tanggal = hari ini, hanya mengembalikan slot >= (jam sekarang + lead_time_hours).
-     * Jika tanggal > hari ini, mengembalikan semua slot operasional.
-     * Jika tanggal < hari ini, mengembalikan array kosong.
+     * Jika tanggal = hari ini, slot dihitung berdasarkan waktu persiapan & estimasi perjalanan kurir.
      *
      * @param string|null $date Format: YYYY-MM-DD
+     * @param string $deliveryMethod 'pickup' atau 'delivery'
+     * @param float|null $distanceKm Jarak dalam KM jika delivery
      * @return array<string>
      */
-    public static function getAvailableTimeSlots(?string $date = null): array
+    public static function getAvailableTimeSlots(?string $date = null, string $deliveryMethod = 'pickup', ?float $distanceKm = null): array
     {
         $allSlots = static::generateTimeSlots();
         if (!$date) {
@@ -64,8 +64,16 @@ class StoreHoursHelper
         }
 
         // Jika tanggal adalah HARI INI:
-        $leadTimeHours = (int) config('store.order_lead_time_hours', 1);
-        $minAllowedDateTime = $now->copy()->addHours($leadTimeHours);
+        if ($deliveryMethod === 'delivery') {
+            $travelMinutes = ($distanceKm && $distanceKm > 0) ? (int) ceil(($distanceKm / 30.0) * 60) : 15;
+            $prepMinutes = 15;
+            $bufferMinutes = $travelMinutes + $prepMinutes;
+        } else {
+            $leadTimeHours = (int) config('store.order_lead_time_hours', 1);
+            $bufferMinutes = $leadTimeHours * 60;
+        }
+
+        $minAllowedDateTime = $now->copy()->addMinutes($bufferMinutes);
 
         return array_values(array_filter($allSlots, function ($slot) use ($date, $minAllowedDateTime) {
             $slotDateTime = Carbon::parse("{$date} {$slot}", 'Asia/Jakarta');
@@ -76,9 +84,9 @@ class StoreHoursHelper
     /**
      * Memeriksa apakah slot waktu yang dipilih valid untuk tanggal tersebut.
      */
-    public static function isValidTimeSlot(string $date, string $time): bool
+    public static function isValidTimeSlot(string $date, string $time, string $deliveryMethod = 'pickup', ?float $distanceKm = null): bool
     {
-        $availableSlots = static::getAvailableTimeSlots($date);
+        $availableSlots = static::getAvailableTimeSlots($date, $deliveryMethod, $distanceKm);
         return in_array($time, $availableSlots, true);
     }
 }

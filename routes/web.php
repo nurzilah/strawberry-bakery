@@ -134,6 +134,8 @@ Route::middleware(['auth', 'role:owner,admin,superadmin'])->prefix('admin')->nam
     Route::resource('products', \App\Http\Controllers\Admin\ProductController::class)->except(['show']);
     Route::resource('categories', \App\Http\Controllers\Admin\CategoryController::class)->except(['show']);
     Route::resource('promos', \App\Http\Controllers\Admin\PromoRuleController::class)->except(['show']);
+    Route::resource('vouchers', \App\Http\Controllers\Admin\VoucherController::class)->except(['show']);
+    Route::patch('vouchers/{voucher}/toggle', [\App\Http\Controllers\Admin\VoucherController::class, 'toggle'])->name('vouchers.toggle');
     Route::resource('kurir', \App\Http\Controllers\Admin\CourierController::class)->except(['show']);
 
     // Stock Management
@@ -175,8 +177,8 @@ Route::middleware(['auth', 'role:owner,kasir,superadmin,admin'])->prefix('admin/
 
 // ['role:owner,superadmin,admin']
 Route::middleware(['auth', 'role:owner,superadmin,admin'])->prefix('admin/owner')->name('owner.')->group(function () {
-    Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->only(['index', 'update']);
-    Route::post('users/{user}/role', [\App\Http\Controllers\Admin\UserController::class, 'updateRole'])->name('users.role');
+    Route::resource('users', \App\Http\Controllers\Admin\UserController::class)->only(['index', 'update', 'destroy']);
+    Route::match(['post', 'patch'], 'users/{user}/role', [\App\Http\Controllers\Admin\UserController::class, 'updateRole'])->name('users.role');
 
     // Financial reports
     Route::get('reports', [\App\Http\Controllers\Owner\ReportController::class, 'index'])->name('reports.index');

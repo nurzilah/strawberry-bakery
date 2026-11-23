@@ -13,7 +13,7 @@ class NotificationController extends Controller
         // Get unread notifications
         $notifications = Notification::whereNull('read_at')
             ->latest()
-            ->take(5) // Limit to 5 for dropdown
+            ->take(10) // Ambil hingga 10 notifikasi terbaru
             ->get();
 
         $count = Notification::whereNull('read_at')->count();
